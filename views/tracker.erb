@@ -39,6 +39,12 @@
       strokeColor: "teal",
       pointColor: "teal",
       data: []
+    }, {
+      label: "My First dataset",
+      fillColor: "rgba(220,220,220,0)",
+      strokeColor: "orange",
+      pointColor: "orange",
+      data: []
     }]
   };
   var myLineChart = new Chart(ctx).Line(data, {animation: false, animationSteps: 4, pointDot : false});
@@ -52,7 +58,11 @@
     if (i > 20) {
       return
     }
-    myLineChart.addData([message.data.x, message.data.y, message.data.z], i);
+    x = message.data.x;
+    y = message.data.y;
+    z = message.data.z;
+    m = Math.sqrt(x*x + y*y + z*z);
+    myLineChart.addData([x, y, z, m], i);
     i = i + 0.25
   });
   </script>
