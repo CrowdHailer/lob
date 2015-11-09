@@ -6,5 +6,16 @@
 </head>
 <body>
   This page is tracking
+  <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" >
+  </script>
+  <script>
+  var apiKey = "1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_"
+  var realtime = new Ably.Realtime({ key: apiKey });
+  var channel = realtime.channels.get('lobChannel');
+
+  channel.subscribe(function(message) {
+    console.log(message.data);
+  });
+  </script>
 </body>
 </html>
