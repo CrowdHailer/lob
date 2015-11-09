@@ -40,16 +40,16 @@
       data: []
     }]
   };
-  var myLineChart = new Chart(ctx).Line(data, {animationSteps: 4});
+  var myLineChart = new Chart(ctx).Line(data, {animation: false, animationSteps: 4, pointDot : false});
 
-  var i = 0
+  var i = 0.0
   $("#add").on("click", function () {
 
   });
 
   channel.subscribe(function(message) {
     myLineChart.addData([message.data.x, message.data.y, message.data.z], i);
-    i = i + 1
+    i = i + 0.25
   });
   </script>
 </body>
