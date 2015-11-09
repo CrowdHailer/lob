@@ -14,7 +14,8 @@
   <script>
   var apiKey = "1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_"
   var realtime = new Ably.Realtime({ key: apiKey });
-  var channel = realtime.channels.get('lobChannel');
+  var channelName = "<%= channel_name %>"
+  var channel = realtime.channels.get(channelName);
 
   var ctx = $("#myChart").get(0).getContext("2d");
   var myNewChart = new Chart(ctx);
