@@ -6,18 +6,20 @@
 </head>
 <body>
   This page is flying
+  <button type="button" id="start">Start</button>
+  <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
   <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" >
   </script>
   <script>
   function throttle(fn, threshhold, scope) {
     threshhold || (threshhold = 250);
     var last,
-        deferTimer;
+    deferTimer;
     return function () {
       var context = scope || this;
 
       var now = +new Date,
-          args = arguments;
+      args = arguments;
       if (last && now < last + threshhold) {
         // hold on to it
         clearTimeout(deferTimer);
@@ -40,9 +42,9 @@
   function publish(vector){
     channel.publish("myEvent", vector, function(err) {
       if(err)
-        console.log('Unable to publish message; err = ' + err.message);
+      console.log('Unable to publish message; err = ' + err.message);
       else
-        console.log('Message successfully sent');
+      console.log('Message successfully sent');
     });
   }
 
@@ -68,10 +70,13 @@
     }
     limitedPublish(vector)
   }
-  alert(navigator.userAgent)
-  if (window.DeviceMotionEvent) {
-    window.addEventListener("devicemotion", deviceMotionHandler);
-  }
+
+  $("#start").click(function (event) {
+    $(this).remove()
+    if (window.DeviceMotionEvent) {
+      window.addEventListener("devicemotion", deviceMotionHandler);
+    }
+  });
   </script>
 </body>
 </html>
