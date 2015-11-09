@@ -4,10 +4,22 @@ get '/' do
   erb :index
 end
 
-get '/flyer' do
-  erb :flyer
+post '/join' do
+  channel = request.POST["channel"]
+  if channel == ""
+    channel = "default"
+  end
+  if request.POST["flyer"]
+    redirect "/#{channel}/flyer"
+  else
+    redirect "/#{channel}/tracker"
+  end
 end
 
-get '/tracker' do
-  erb :tracker
+get '/:channel_name/flyer' do
+  erb :flyer, locals: {channel_name: params["channel_name"]}
+end
+
+get '/:channel_name/tracker' do
+  erb :tracker, locals: {channel_name: params["channel_name"]}
 end

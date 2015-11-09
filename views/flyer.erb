@@ -33,9 +33,9 @@
   }
 
   var apiKey = "1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_"
+  var channelName = "<%= channel_name %>"
   var realtime = new Ably.Realtime({ key: apiKey });
-  var channel = realtime.channels.get('lobChannel');
-  console.log("hello")
+  var channel = realtime.channels.get(channelName);
 
   function publish(vector){
     channel.publish("myEvent", vector, function(err) {
