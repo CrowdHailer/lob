@@ -9,10 +9,44 @@
   <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" >
   </script>
   <script>
+  function throttle(fn, threshhold, scope) {
+    threshhold || (threshhold = 250);
+    var last,
+        deferTimer;
+    return function () {
+      var context = scope || this;
+
+      var now = +new Date,
+          args = arguments;
+      if (last && now < last + threshhold) {
+        // hold on to it
+        clearTimeout(deferTimer);
+        deferTimer = setTimeout(function () {
+          last = now;
+          fn.apply(context, args);
+        }, threshhold);
+      } else {
+        last = now;
+        fn.apply(context, args);
+      }
+    };
+  }
+
   var apiKey = "1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_"
   var realtime = new Ably.Realtime({ key: apiKey });
   var channel = realtime.channels.get('lobChannel');
   console.log("hello")
+
+  function publish(vector){
+    channel.publish("myEvent", vector, function(err) {
+      if(err)
+        console.log('Unable to publish message; err = ' + err.message);
+      else
+        console.log('Message successfully sent');
+    });
+  }
+
+  var limitedPublish = throttle(publish, 150)
 
   function deviceMotionHandler(deviceMotionEvent) {
     // Fix vector to handle the fact iOS and Windows define it backwards
@@ -32,12 +66,7 @@
         z: -1 * deviceMotionEvent.accelerationIncludingGravity.z
       };
     }
-    channel.publish("myEvent", vector, function(err) {
-      if(err)
-        console.log('Unable to publish message; err = ' + err.message);
-      else
-        console.log('Message successfully sent');
-    });
+    limitedPublish(vector)
   }
   alert(navigator.userAgent)
   if (window.DeviceMotionEvent) {

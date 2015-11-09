@@ -5,16 +5,51 @@
   <title>Lob</title>
 </head>
 <body>
-  This page is tracking
-  <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" >
-  </script>
+  This page is tracking <br>
+
+  <canvas id="myChart" width="1200" height="800" style="background-color:#EEE"></canvas>
+  <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" > </script>
+  <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
   <script>
   var apiKey = "1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_"
   var realtime = new Ably.Realtime({ key: apiKey });
   var channel = realtime.channels.get('lobChannel');
 
+  var ctx = $("#myChart").get(0).getContext("2d");
+  var myNewChart = new Chart(ctx);
+  var data = {
+    labels: [],
+    datasets: [{
+      label: "My First dataset",
+      fillColor: "rgba(220,220,220,0)",
+      strokeColor: "limegreen",
+      pointColor: "limegreen",
+      data: []
+    }, {
+      label: "My First dataset",
+      fillColor: "rgba(220,220,220,0)",
+      strokeColor: "green",
+      pointColor: "green",
+      data: []
+    }, {
+      label: "My First dataset",
+      fillColor: "rgba(220,220,220,0)",
+      strokeColor: "teal",
+      pointColor: "teal",
+      data: []
+    }]
+  };
+  var myLineChart = new Chart(ctx).Line(data, {animationSteps: 4});
+
+  var i = 0
+  $("#add").on("click", function () {
+
+  });
+
   channel.subscribe(function(message) {
-    console.log(message.data);
+    myLineChart.addData([message.data.x, message.data.y, message.data.z], i);
+    i = i + 1
   });
   </script>
 </body>
