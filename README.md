@@ -1,6 +1,8 @@
 # lob
 Demonstrating realtime connection between web browsers. Powered by ably.io
 
+You are given 20 seconds of recording on the device. A 10 second freefall has been thrown to [123m](http://www.physicsclassroom.com/class/1DKin/Lesson-5/How-Fast-and-How-Far).
+
 ## Plan
 
 These are the steps that make the current development plan for lob.
