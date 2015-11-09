@@ -48,6 +48,9 @@
   });
 
   channel.subscribe(function(message) {
+    if (i > 20) {
+      return
+    }
     myLineChart.addData([message.data.x, message.data.y, message.data.z], i);
     i = i + 0.25
   });
