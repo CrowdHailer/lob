@@ -38,3 +38,8 @@ The API for camera access will require work to achieve the same cross platform s
 
 - Record pictures along the way.
 - Save top picture along with chart data.
+
+### Development
+
+Run the local version by executing `heroku local`.
+The application will the be available on port 5000
