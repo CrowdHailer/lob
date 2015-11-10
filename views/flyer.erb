@@ -49,6 +49,7 @@
 
   var limitedPublish = throttle(publish, 250)
 
+  var startTime = 0;
   function deviceMotionHandler(deviceMotionEvent) {
     // Fix vector to handle the fact iOS and Windows define it backwards
     var vector;
@@ -67,11 +68,23 @@
         z: -1 * deviceMotionEvent.accelerationIncludingGravity.z
       };
     }
+    var t;
+    if (startTime == 0) {
+      startTime = Date.now()
+      t = 0
+    } else {
+      t = Date.now() - startTime
+    }
+    if (t > 20000) {
+      window.removeEventListener("devicemotion", deviceMotionHandler);
+    }
+    vector.t = t
     limitedPublish(vector)
   }
 
   document.querySelector("#start").addEventListener("click", function (event) {
     this.parentNode.removeChild(this);
+
     if (window.DeviceMotionEvent) {
       window.addEventListener("devicemotion", deviceMotionHandler);
     }

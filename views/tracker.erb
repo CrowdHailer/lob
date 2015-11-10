@@ -51,12 +51,10 @@
   var i = 0.0
 
   channel.subscribe(function(message) {
-    if (i > 20) {
-      return
-    }
     x = message.data.x;
     y = message.data.y;
     z = message.data.z;
+    console.log(message.data.t);
     m = Math.sqrt(x*x + y*y + z*z);
     myLineChart.addData([x, y, z, m], i);
     i = i + 0.25
