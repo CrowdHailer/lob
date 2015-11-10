@@ -50,14 +50,21 @@
 
   var i = 0.0
 
-  channel.subscribe(function(message) {
+  channel.subscribe("accelerationEvent", function(message) {
     x = message.data.x;
     y = message.data.y;
     z = message.data.z;
     console.log(message.data.t);
     m = Math.sqrt(x*x + y*y + z*z);
     myLineChart.addData([x, y, z, m], i);
-    i = i + 0.25
+    i = i + 0.25;
+  });
+  channel.subscribe("refresh", function(message) {
+    myLineChart.destroy();
+    i = 0.0;
+    data.labels = [];
+    // labels array is mutated by adding data.
+    myLineChart = new Chart(ctx).Line(data, {animation: false, animationSteps: 4, pointDot : false});
   });
   </script>
 </body>

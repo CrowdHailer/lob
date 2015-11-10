@@ -7,6 +7,8 @@
 <body>
   This page is flying
   <button type="button" id="start">Start</button>
+  <button type="button" id="stop">Stop</button>
+  <button type="button" id="refresh">Refresh</button>
   <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" >
   </script>
   <script>
@@ -39,7 +41,7 @@
   var channel = realtime.channels.get(channelName);
 
   function publish(vector){
-    channel.publish("myEvent", vector, function(err) {
+    channel.publish("accelerationEvent", vector, function(err) {
       if(err)
       console.log('Unable to publish message; err = ' + err.message);
       else
@@ -83,11 +85,25 @@
   }
 
   document.querySelector("#start").addEventListener("click", function (event) {
-    this.parentNode.removeChild(this);
+    // this.parentNode.removeChild(this);
 
     if (window.DeviceMotionEvent) {
       window.addEventListener("devicemotion", deviceMotionHandler);
     }
+  });
+  document.querySelector("#stop").addEventListener("click", function (event) {
+    if (window.DeviceMotionEvent) {
+      window.removeEventListener("devicemotion", deviceMotionHandler);
+    }
+  });
+  document.querySelector("#refresh").addEventListener("click", function (event) {
+    startTime = 0
+    channel.publish("refresh", "true", function(err) {
+      if(err)
+      console.log('Unable to publish message; err = ' + err.message);
+      else
+      console.log('Message successfully sent');
+    });
   });
   </script>
 </body>
