@@ -9,7 +9,6 @@
 
   <canvas id="myChart" width="1200" height="800" style="background-color:#EEE"></canvas>
   <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" > </script>
-  <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
   <script>
   var apiKey = "1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_"
@@ -17,7 +16,7 @@
   var channelName = "<%= channel_name %>"
   var channel = realtime.channels.get(channelName);
 
-  var ctx = $("#myChart").get(0).getContext("2d");
+  var ctx = document.querySelector("#myChart").getContext("2d");
   var myNewChart = new Chart(ctx);
   var data = {
     labels: [],
@@ -50,9 +49,6 @@
   var myLineChart = new Chart(ctx).Line(data, {animation: false, animationSteps: 4, pointDot : false});
 
   var i = 0.0
-  $("#add").on("click", function () {
-
-  });
 
   channel.subscribe(function(message) {
     if (i > 20) {

@@ -7,7 +7,6 @@
 <body>
   This page is flying
   <button type="button" id="start">Start</button>
-  <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
   <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" >
   </script>
   <script>
@@ -71,8 +70,8 @@
     limitedPublish(vector)
   }
 
-  $("#start").click(function (event) {
-    $(this).remove()
+  document.querySelector("#start").addEventListener("click", function (event) {
+    this.parentNode.removeChild(this);
     if (window.DeviceMotionEvent) {
       window.addEventListener("devicemotion", deviceMotionHandler);
     }
