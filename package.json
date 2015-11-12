@@ -1,0 +1,23 @@
+{
+  "name": "lob",
+  "version": "0.3.0",
+  "description": "Demonstrating realtime connection between web browsers. Powered by ably.io",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/CrowdHailer/lob.git"
+  },
+  "keywords": [
+    "realtime",
+    "device-api",
+    "hardware"
+  ],
+  "author": "Peter Saxton",
+  "license": "Apache V2.0",
+  "bugs": {
+    "url": "https://github.com/CrowdHailer/lob/issues"
+  }
+}
