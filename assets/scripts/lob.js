@@ -1,3 +1,5 @@
+/*jshint esnext: true */
+
 function deviceUsesInvertedAcceleration(userAgent) {
   if (userAgent.match(/Windows/i)) {
     return true;
@@ -29,12 +31,16 @@ function lookupAccelerationVectorRectifyForDevice(userAgent, console) {
 console.log("Starting Lob script");
 var rectifyAcceleration = lookupAccelerationVectorRectifyForDevice(navigator.userAgent, window.console);
 
+import { throttle } from "./lob/util";
+
 var deviceMotionHandler = (function (rectifier) {
   return function (deviceMotionEvent) {
     var vector = rectifier(deviceMotionEvent.accelerationIncludingGravity);
     console.log(vector);
   };
 })(rectifyAcceleration);
+
+deviceMotionHandler = throttle(deviceMotionHandler, 500);
 
 if (window.DeviceMotionEvent) {
   window.addEventListener("devicemotion", deviceMotionHandler);
