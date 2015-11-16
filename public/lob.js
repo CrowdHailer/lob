@@ -1,5 +1,13 @@
 (function () { 'use strict';
 
+  function publish(argument) {
+    console.log("Publishing");
+  }
+
+  var connection = {
+    publish: publish
+  };
+
   function deviceUsesInvertedAcceleration(userAgent) {
     if (userAgent.match(/Windows/i)) {
       return true;
@@ -48,5 +56,7 @@
   }
 
   window.stop = stopAccelerationHandler;
+
+  connection.publish("hello");
 
 })();

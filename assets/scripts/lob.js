@@ -26,7 +26,6 @@ function lookupAccelerationVectorRectifyForDevice(userAgent, console) {
   }
 }
 
-
 console.log("Starting Lob script");
 var rectifyAcceleration = lookupAccelerationVectorRectifyForDevice(navigator.userAgent, window.console);
 
@@ -46,3 +45,7 @@ function stopAccelerationHandler(argument) {
 }
 
 window.stop = stopAccelerationHandler;
+
+import connection from "./lob/connection";
+
+connection.publish("hello");
