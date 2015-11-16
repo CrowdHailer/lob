@@ -10,7 +10,6 @@ var rectifyAcceleration = lookupAccelerationVectorRectifyForDevice(navigator.use
 var deviceMotionHandler = (function (rectifier) {
   return function (deviceMotionEvent) {
     var vector = rectifier(deviceMotionEvent.accelerationIncludingGravity);
-    console.log(vector);
     // DEBT must be a simple JS object error if passed a deviceAcceleration object
     connection.publish("accelerationEvent", vector);
   };
@@ -28,6 +27,13 @@ function FlyerStartButton($element) {
   $element.addEventListener("click", function (event) {
     var startEvent = new CustomEvent('startReporting', {bubbles: true});
     $element.dispatchEvent(startEvent);
+  });
+}
+
+function FlyerPage1($element) {
+  document.addEventListener("startReporting", function (event) {
+    console.log("wassup");
+    $element.classList.add("finished");
   });
 }
 
@@ -66,5 +72,10 @@ ready(function () {
   var $flyerStartButtons = querySelectorAll("[data-feature~=flyer-start-button]", document);
   $flyerStartButtons.forEach(function ($button) {
     FlyerStartButton($button);
+  });
+
+  var $flyerPage1 = querySelectorAll("[data-feature~=flyer-page-1]", document);
+  $flyerPage1.forEach(function ($page) {
+    FlyerPage1($page);
   });
 });
