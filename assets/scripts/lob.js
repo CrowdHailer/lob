@@ -1,14 +1,18 @@
-function lookupAccelerationVectorRectifyForDevice(userAgent) {
-  var invert;
+function deviceUsesInvertedAcceleration(userAgent) {
   if (userAgent.match(/Windows/i)) {
-    invert = true;
+    return true;
   } else if (userAgent.match(/Android/i)) {
-    invert = false;
+    return false;
   } else {
-    invert = true;
+    return true;
   }
+}
+
+function lookupAccelerationVectorRectifyForDevice(userAgent, console) {
+  var invert = deviceUsesInvertedAcceleration(userAgent);
 
   if (invert) {
+    console.log("Device uses inverted acceleration. UserAgent: \"" + userAgent + "\"");
     return function invertVector(vector) {
       return {
         x: - 1 * vector.x,
@@ -17,8 +21,23 @@ function lookupAccelerationVectorRectifyForDevice(userAgent) {
       };
     };
   } else {
+    console.log("Device uses standard acceleration. UserAgent: \"" + userAgent + "\"");
     return function identity(vector) { return vector; };
   }
 }
 
-var rectifyAcceleration = lookupAccelerationVectorRectifyForDevice(navigator.userAgent);
+
+console.log("Starting Lob script");
+var rectifyAcceleration = lookupAccelerationVectorRectifyForDevice(navigator.userAgent, window.console);
+
+var deviceMotionHandler = (function (rectifier) {
+  return function (deviceMotionEvent) {
+    var vector = rectifier(deviceMotionEvent.accelerationIncludingGravity);
+    console.log(vector);
+    window.removeEventListener("devicemotion", deviceMotionHandler);
+  };
+})(rectifyAcceleration);
+
+if (window.DeviceMotionEvent) {
+  window.addEventListener("devicemotion", deviceMotionHandler);
+}
