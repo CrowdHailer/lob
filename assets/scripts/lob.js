@@ -24,16 +24,17 @@ ready(function () {
   var $flyer = querySelector("#orientation-generator", document);
   var flyer = Flyer($flyer);
 
-  // if (window.DeviceMotionEvent) {
-  //   window.addEventListener("devicemotion", deviceMotionHandler);
-  // }
-});
-
-
-function stopAccelerationHandler(argument) {
+  document.addEventListener("startReporting", function (event) {
+    if (window.DeviceMotionEvent) {
+      window.addEventListener("devicemotion", deviceMotionHandler);
+    }
+  });
+  document.addEventListener("stopReporting", function (event) {
     window.removeEventListener("devicemotion", deviceMotionHandler);
-}
-
-window.stop = stopAccelerationHandler;
+  });
+  document.addEventListener("refreshReporting", function (event) {
+    console.log("refresh");
+  });
+});
 
 import connection from "./lob/connection";
