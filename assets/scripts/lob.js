@@ -25,17 +25,21 @@ import Flyer from "./lob/features/flyer";
 ready(function () {
 
   var $flyer = querySelector("#orientation-generator", document);
-  var flyer = Flyer($flyer);
+  var $tracker = querySelector("#orientation-tracker", document);
 
-  document.addEventListener("startReporting", function (event) {
-    if (window.DeviceMotionEvent) {
-      window.addEventListener("devicemotion", deviceMotionHandler);
-    }
-  });
-  document.addEventListener("stopReporting", function (event) {
-    window.removeEventListener("devicemotion", deviceMotionHandler);
-  });
-  document.addEventListener("refreshReporting", function (event) {
-    console.log("refresh");
-  });
+  if ($flyer) {
+    var flyer = Flyer($flyer);
+
+    document.addEventListener("startReporting", function (event) {
+      if (window.DeviceMotionEvent) {
+        window.addEventListener("devicemotion", deviceMotionHandler);
+      }
+    });
+    document.addEventListener("stopReporting", function (event) {
+      window.removeEventListener("devicemotion", deviceMotionHandler);
+    });
+    document.addEventListener("refreshReporting", function (event) {
+      console.log("refresh");
+    });
+  }
 });
