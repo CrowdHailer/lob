@@ -66,6 +66,10 @@
     return element.querySelector(selector);
   }
 
+  function querySelectorAll(selector, element) {
+    return Array.prototype.slice.call(element.querySelectorAll(selector));
+  }
+
   function ready(fn) {
     if (document.readyState != 'loading'){
       fn();
@@ -177,7 +181,7 @@
     };
   }
 
-  console.log("Starting Lob script");
+  // Set up Acceleration External Service
   var rectifyAcceleration = lookupAccelerationVectorRectifyForDevice(navigator.userAgent, window.console);
 
   var deviceMotionHandler = (function (rectifier) {
@@ -191,9 +195,17 @@
 
   deviceMotionHandler = throttle(deviceMotionHandler, 500);
 
+
+  function FlyerStartButton($element) {
+    $element.addEventListener("click", function (event) {
+      var startEvent = new CustomEvent('startReporting', {bubbles: true});
+      $element.dispatchEvent(startEvent);
+    });
+  }
+
   ready(function () {
 
-    var $flyer = querySelector("#orientation-generator", document);
+    var $flyer = querySelector("#flyer", document);
     var $tracker = querySelector("#orientation-tracker", document);
 
     if ($flyer) {
@@ -222,6 +234,11 @@
         tracker.refreshEvent(evt);
       });
     }
+
+    var $flyerStartButtons = querySelectorAll("[data-feature~=flyer-start-button]", document);
+    $flyerStartButtons.forEach(function ($button) {
+      FlyerStartButton($button);
+    });
   });
 
 })();

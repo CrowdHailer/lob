@@ -9,13 +9,30 @@
 
   <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" ></script>
   <script src="/lob.js"></script>
+  <style media="screen">
+    html, body {
+      height: 100%;
+      border: 0;
+      margin: 0;
+    }
+    main: {
+      height: 100%;
+    }
+    section {
+      background-color: red;
+      width: 100%;
+      height: 50%;
+    }
+  </style>
 </head>
 <body>
-  This page is flying
-  <div id="orientation-generator">
+  <main id="flyer">
+    <section data-feature="flyer-page-1">
+      <button type="button" data-feature="flyer-start-button">Start</button>
+    </section>
     <button type="button" id="start">Start</button>
     <button type="button" id="stop">Stop</button>
     <button type="button" id="refresh">Refresh</button>
-  </div>
+  </main>
 </body>
 </html>

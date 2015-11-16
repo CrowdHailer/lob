@@ -20,13 +20,20 @@ deviceMotionHandler = throttle(deviceMotionHandler, 500);
 
 
 // Setup Dom features
-import { querySelector, ready } from "./lob/dom";
+import { querySelector, ready, querySelectorAll } from "./lob/dom";
 import Flyer from "./lob/features/flyer";
 import Tracker from "./lob/features/tracker";
 
+function FlyerStartButton($element) {
+  $element.addEventListener("click", function (event) {
+    var startEvent = new CustomEvent('startReporting', {bubbles: true});
+    $element.dispatchEvent(startEvent);
+  });
+}
+
 ready(function () {
 
-  var $flyer = querySelector("#orientation-generator", document);
+  var $flyer = querySelector("#flyer", document);
   var $tracker = querySelector("#orientation-tracker", document);
 
   if ($flyer) {
@@ -55,4 +62,9 @@ ready(function () {
       tracker.refreshEvent(evt);
     });
   }
+
+  var $flyerStartButtons = querySelectorAll("[data-feature~=flyer-start-button]", document);
+  $flyerStartButtons.forEach(function ($button) {
+    FlyerStartButton($button);
+  });
 });
