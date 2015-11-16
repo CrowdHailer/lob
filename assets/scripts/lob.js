@@ -21,6 +21,7 @@ deviceMotionHandler = throttle(deviceMotionHandler, 500);
 
 import { querySelector, ready } from "./lob/dom";
 import Flyer from "./lob/features/flyer";
+import Tracker from "./lob/features/tracker";
 
 ready(function () {
 
@@ -40,6 +41,14 @@ ready(function () {
     });
     document.addEventListener("refreshReporting", function (event) {
       console.log("refresh");
+    });
+  }
+
+  if ($tracker) {
+    var tracker = Tracker($tracker);
+
+    connection.subscribe("accelerationEvent", function (evt) {
+      tracker.accelerationEvent(evt);
     });
   }
 });

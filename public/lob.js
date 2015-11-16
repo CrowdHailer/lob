@@ -82,16 +82,22 @@
   var channel = realtime.channels.get(channelName);
 
   function publish(vector){
-      channel.publish("accelerationEvent", vector, function(err) {
-        if(err)
-        console.log('Unable to publish message; err = ' + err.message);
-        else
-        console.log('Message successfully sent');
-      });
-    }
+    channel.publish("accelerationEvent", vector, function(err) {
+      if(err)
+      console.log('Unable to publish message; err = ' + err.message);
+      else
+      console.log('Message successfully sent');
+    });
+  }
+
+  function subscribe(eventName, callback) {
+    console.log("subscribe");
+    channel.subscribe(eventName, callback);
+  }
 
   var connection = {
-    publish: publish
+    publish: publish,
+    subscribe: subscribe
   };
 
   function Flyer($root) {
@@ -114,6 +120,15 @@
     });
   }
 
+  function Flyer$1($root) {
+    console.log("Starting feature: \"Tracker\"");
+    return {
+      accelerationEvent: function (x) {
+        console.log(x);
+      }
+    };
+  }
+
   console.log("Starting Lob script");
   var rectifyAcceleration = lookupAccelerationVectorRectifyForDevice(navigator.userAgent, window.console);
 
@@ -121,6 +136,7 @@
     return function (deviceMotionEvent) {
       var vector = rectifier(deviceMotionEvent.accelerationIncludingGravity);
       console.log(vector);
+      // DEBT must be a simple JS object error if passed a deviceAcceleration object
       connection.publish(vector);
     };
   })(rectifyAcceleration);
@@ -130,19 +146,31 @@
   ready(function () {
 
     var $flyer = querySelector("#orientation-generator", document);
-    var flyer = Flyer($flyer);
+    var $tracker = querySelector("#orientation-tracker", document);
 
-    document.addEventListener("startReporting", function (event) {
-      if (window.DeviceMotionEvent) {
-        window.addEventListener("devicemotion", deviceMotionHandler);
-      }
-    });
-    document.addEventListener("stopReporting", function (event) {
-      window.removeEventListener("devicemotion", deviceMotionHandler);
-    });
-    document.addEventListener("refreshReporting", function (event) {
-      console.log("refresh");
-    });
+    if ($flyer) {
+      var flyer = Flyer($flyer);
+
+      document.addEventListener("startReporting", function (event) {
+        if (window.DeviceMotionEvent) {
+          window.addEventListener("devicemotion", deviceMotionHandler);
+        }
+      });
+      document.addEventListener("stopReporting", function (event) {
+        window.removeEventListener("devicemotion", deviceMotionHandler);
+      });
+      document.addEventListener("refreshReporting", function (event) {
+        console.log("refresh");
+      });
+    }
+
+    if ($tracker) {
+      var tracker = Flyer$1($tracker);
+
+      connection.subscribe("accelerationEvent", function (evt) {
+        tracker.accelerationEvent(evt);
+      });
+    }
   });
 
 })();
