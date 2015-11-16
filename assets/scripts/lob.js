@@ -32,7 +32,6 @@ function FlyerStartButton($element) {
 
 function FlyerPage1($element) {
   document.addEventListener("startReporting", function (event) {
-    console.log("wassup");
     $element.classList.add("finished");
   });
 }
