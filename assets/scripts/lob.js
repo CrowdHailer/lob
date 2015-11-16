@@ -1,13 +1,12 @@
 /*jshint esnext: true */
 
 import { lookupAccelerationVectorRectifyForDevice } from "./lob/acceleration";
+import { throttle } from "./lob/util";
+import connection from "./lob/connection";
 
-console.log("Starting Lob script");
+// Set up Acceleration External Service
 var rectifyAcceleration = lookupAccelerationVectorRectifyForDevice(navigator.userAgent, window.console);
 
-import { throttle } from "./lob/util";
-
-import connection from "./lob/connection";
 var deviceMotionHandler = (function (rectifier) {
   return function (deviceMotionEvent) {
     var vector = rectifier(deviceMotionEvent.accelerationIncludingGravity);
@@ -19,6 +18,8 @@ var deviceMotionHandler = (function (rectifier) {
 
 deviceMotionHandler = throttle(deviceMotionHandler, 500);
 
+
+// Setup Dom features
 import { querySelector, ready } from "./lob/dom";
 import Flyer from "./lob/features/flyer";
 import Tracker from "./lob/features/tracker";
