@@ -34,10 +34,15 @@ var deviceMotionHandler = (function (rectifier) {
   return function (deviceMotionEvent) {
     var vector = rectifier(deviceMotionEvent.accelerationIncludingGravity);
     console.log(vector);
-    window.removeEventListener("devicemotion", deviceMotionHandler);
   };
 })(rectifyAcceleration);
 
 if (window.DeviceMotionEvent) {
   window.addEventListener("devicemotion", deviceMotionHandler);
 }
+
+function stopAccelerationHandler(argument) {
+    window.removeEventListener("devicemotion", deviceMotionHandler);
+}
+
+window.stop = stopAccelerationHandler;
