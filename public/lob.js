@@ -24,6 +24,20 @@
       };
     }
 
+  /*jshint esnext: true */
+
+  function querySelector(selector, element) {
+    return element.querySelector(selector);
+  }
+
+  function ready(fn) {
+    if (document.readyState != 'loading'){
+      fn();
+    } else {
+      document.addEventListener('DOMContentLoaded', fn);
+    }
+  }
+
   function publish(argument) {
     console.log("Publishing");
   }
@@ -74,9 +88,16 @@
 
   deviceMotionHandler = throttle(deviceMotionHandler, 500);
 
-  if (window.DeviceMotionEvent) {
-    window.addEventListener("devicemotion", deviceMotionHandler);
-  }
+  ready(function () {
+
+    var $flyer = querySelector("#orientation-generator", document);
+    console.log($flyer);
+    
+    if (window.DeviceMotionEvent) {
+      $flyer.addEventListener("devicemotion", deviceMotionHandler);
+    }
+  });
+
 
   function stopAccelerationHandler(argument) {
       window.removeEventListener("devicemotion", deviceMotionHandler);

@@ -42,9 +42,17 @@ var deviceMotionHandler = (function (rectifier) {
 
 deviceMotionHandler = throttle(deviceMotionHandler, 500);
 
-if (window.DeviceMotionEvent) {
-  window.addEventListener("devicemotion", deviceMotionHandler);
-}
+import { querySelector, ready } from "./lob/dom";
+ready(function () {
+
+  var $flyer = querySelector("#orientation-generator", document);
+  console.log($flyer);
+  
+  if (window.DeviceMotionEvent) {
+    $flyer.addEventListener("devicemotion", deviceMotionHandler);
+  }
+});
+
 
 function stopAccelerationHandler(argument) {
     window.removeEventListener("devicemotion", deviceMotionHandler);
