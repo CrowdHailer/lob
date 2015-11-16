@@ -17,14 +17,16 @@ var deviceMotionHandler = (function (rectifier) {
 deviceMotionHandler = throttle(deviceMotionHandler, 500);
 
 import { querySelector, ready } from "./lob/dom";
+import Flyer from "./lob/features/flyer";
+
 ready(function () {
 
   var $flyer = querySelector("#orientation-generator", document);
-  console.log($flyer);
+  var flyer = Flyer($flyer);
 
-  if (window.DeviceMotionEvent) {
-    window.addEventListener("devicemotion", deviceMotionHandler);
-  }
+  // if (window.DeviceMotionEvent) {
+  //   window.addEventListener("devicemotion", deviceMotionHandler);
+  // }
 });
 
 
@@ -35,5 +37,3 @@ function stopAccelerationHandler(argument) {
 window.stop = stopAccelerationHandler;
 
 import connection from "./lob/connection";
-
-connection.publish("hello");

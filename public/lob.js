@@ -68,13 +68,14 @@
     }
   }
 
-  function publish(argument) {
-    console.log("Publishing");
-  }
+  function Flyer(root) {
+    console.log("Starting feature: \"Flyer\"");
 
-  var connection = {
-    publish: publish
-  };
+    var $startButton = querySelector("#start", root);
+    $startButton.addEventListener("click", function (event) {
+      console.log("clicked");
+    });
+  }
 
   console.log("Starting Lob script");
   var rectifyAcceleration = lookupAccelerationVectorRectifyForDevice(navigator.userAgent, window.console);
@@ -91,11 +92,11 @@
   ready(function () {
 
     var $flyer = querySelector("#orientation-generator", document);
-    console.log($flyer);
+    var flyer = Flyer($flyer);
 
-    if (window.DeviceMotionEvent) {
-      window.addEventListener("devicemotion", deviceMotionHandler);
-    }
+    // if (window.DeviceMotionEvent) {
+    //   window.addEventListener("devicemotion", deviceMotionHandler);
+    // }
   });
 
 
@@ -104,7 +105,5 @@
   }
 
   window.stop = stopAccelerationHandler;
-
-  connection.publish("hello");
 
 })();
