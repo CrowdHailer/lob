@@ -13,7 +13,7 @@ var deviceMotionHandler = (function (rectifier) {
     var vector = rectifier(deviceMotionEvent.accelerationIncludingGravity);
     console.log(vector);
     // DEBT must be a simple JS object error if passed a deviceAcceleration object
-    connection.publish(vector);
+    connection.publish("accelerationEvent", vector);
   };
 })(rectifyAcceleration);
 
@@ -40,7 +40,7 @@ ready(function () {
       window.removeEventListener("devicemotion", deviceMotionHandler);
     });
     document.addEventListener("refreshReporting", function (event) {
-      console.log("refresh");
+      connection.publish("refreshEvent", {});
     });
   }
 
@@ -49,6 +49,9 @@ ready(function () {
 
     connection.subscribe("accelerationEvent", function (evt) {
       tracker.accelerationEvent(evt);
+    });
+    connection.subscribe("refreshEvent", function (evt) {
+      tracker.refreshEvent(evt);
     });
   }
 });

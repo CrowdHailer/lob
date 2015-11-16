@@ -5,8 +5,8 @@ var channelName = "test";
 var realtime = new Ably.Realtime({ key: apiKey });
 var channel = realtime.channels.get(channelName);
 
-function publish(vector){
-  channel.publish("accelerationEvent", vector, function(err) {
+function publish(eventName, vector){
+  channel.publish(eventName, vector, function(err) {
     if(err)
     console.log('Unable to publish message; err = ' + err.message);
     else

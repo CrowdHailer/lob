@@ -48,6 +48,13 @@ export default function Flyer($root) {
       var m = Math.sqrt(x*x + y*y + z*z);
       myLineChart.addData([x, y, z, m], i);
       i = i + 0.25;
+    },
+    refreshEvent: function () {
+      myLineChart.destroy();
+      i = 0.0;
+      data.labels = [];
+      // labels array is mutated by adding data.
+      myLineChart = new Chart(ctx).Line(data, {animation: false, animationSteps: 4, pointDot : false});
     }
   };
 }

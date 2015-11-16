@@ -81,8 +81,8 @@
   var realtime = new Ably.Realtime({ key: apiKey });
   var channel = realtime.channels.get(channelName);
 
-  function publish(vector){
-    channel.publish("accelerationEvent", vector, function(err) {
+  function publish(eventName, vector){
+    channel.publish(eventName, vector, function(err) {
       if(err)
       console.log('Unable to publish message; err = ' + err.message);
       else
@@ -166,6 +166,13 @@
         var m = Math.sqrt(x*x + y*y + z*z);
         myLineChart.addData([x, y, z, m], i);
         i = i + 0.25;
+      },
+      refreshEvent: function () {
+        myLineChart.destroy();
+        i = 0.0;
+        data.labels = [];
+        // labels array is mutated by adding data.
+        myLineChart = new Chart(ctx).Line(data, {animation: false, animationSteps: 4, pointDot : false});
       }
     };
   }
@@ -178,7 +185,7 @@
       var vector = rectifier(deviceMotionEvent.accelerationIncludingGravity);
       console.log(vector);
       // DEBT must be a simple JS object error if passed a deviceAcceleration object
-      connection.publish(vector);
+      connection.publish("accelerationEvent", vector);
     };
   })(rectifyAcceleration);
 
@@ -201,7 +208,7 @@
         window.removeEventListener("devicemotion", deviceMotionHandler);
       });
       document.addEventListener("refreshReporting", function (event) {
-        console.log("refresh");
+        connection.publish("refreshEvent", {});
       });
     }
 
@@ -210,6 +217,9 @@
 
       connection.subscribe("accelerationEvent", function (evt) {
         tracker.accelerationEvent(evt);
+      });
+      connection.subscribe("refreshEvent", function (evt) {
+        tracker.refreshEvent(evt);
       });
     }
   });
