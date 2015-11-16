@@ -7,10 +7,13 @@ var rectifyAcceleration = lookupAccelerationVectorRectifyForDevice(navigator.use
 
 import { throttle } from "./lob/util";
 
+import connection from "./lob/connection";
 var deviceMotionHandler = (function (rectifier) {
   return function (deviceMotionEvent) {
     var vector = rectifier(deviceMotionEvent.accelerationIncludingGravity);
     console.log(vector);
+    // DEBT must be a simple JS object error if passed a deviceAcceleration object
+    connection.publish(vector);
   };
 })(rectifyAcceleration);
 
@@ -36,5 +39,3 @@ ready(function () {
     console.log("refresh");
   });
 });
-
-import connection from "./lob/connection";

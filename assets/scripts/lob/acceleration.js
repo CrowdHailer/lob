@@ -24,6 +24,12 @@ export function lookupAccelerationVectorRectifyForDevice(userAgent, console) {
     };
   } else {
     console.log("Device uses standard acceleration. UserAgent: \"" + userAgent + "\"");
-    return function identity(vector) { return vector; };
+    return function normalizeVector(vector) {
+      return {
+        x: 1 * vector.x,
+        y: 1 * vector.y,
+        z: 1 * vector.z,
+      };
+    };
   }
 }

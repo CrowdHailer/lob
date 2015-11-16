@@ -26,7 +26,13 @@
       };
     } else {
       console.log("Device uses standard acceleration. UserAgent: \"" + userAgent + "\"");
-      return function identity(vector) { return vector; };
+      return function normalizeVector(vector) {
+        return {
+          x: 1 * vector.x,
+          y: 1 * vector.y,
+          z: 1 * vector.z,
+        };
+      };
     }
   }
 
@@ -68,6 +74,26 @@
     }
   }
 
+  /*jshint esnext: true */
+
+  var apiKey = "1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_";
+  var channelName = "test";
+  var realtime = new Ably.Realtime({ key: apiKey });
+  var channel = realtime.channels.get(channelName);
+
+  function publish(vector){
+      channel.publish("accelerationEvent", vector, function(err) {
+        if(err)
+        console.log('Unable to publish message; err = ' + err.message);
+        else
+        console.log('Message successfully sent');
+      });
+    }
+
+  var connection = {
+    publish: publish
+  };
+
   function Flyer($root) {
     console.log("Starting feature: \"Flyer\"");
 
@@ -95,6 +121,7 @@
     return function (deviceMotionEvent) {
       var vector = rectifier(deviceMotionEvent.accelerationIncludingGravity);
       console.log(vector);
+      connection.publish(vector);
     };
   })(rectifyAcceleration);
 
