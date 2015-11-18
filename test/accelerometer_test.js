@@ -7,13 +7,13 @@ describe("Accelerometer", function() {
 
   var last_action;
   var actions = {
-    accelerometer_failed: function (error) {
+    accelerometerFailed: function (error) {
       last_action = {
         type: "ACCELEROMETER_FAILED",
         error: error
       };
     },
-    accelerometer_waiting: function () {
+    accelerometerWaiting: function () {
       last_action = {
         type: "ACCELEROMETER_WAITING"
       };

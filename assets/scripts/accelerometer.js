@@ -38,15 +38,20 @@ function Accelerometer(actions, context) {
     stop: function () {
 
     },
-    dispatch: function (action) {
-
+    dispatch: {
+      get: function () {
+        return function (action) {
+          console.log("accelerometer dispatching");
+          console.log(action);
+        };
+      }
     }
   });
 
   if(!context.DeviceMotionEvent) {
     // TODO report error
     error = new AccelerometerError("DeviceMotionEvent event is not supported");
-    actions.accelerometer_failed(error);
+    actions.accelerometerFailed(error);
     state = Accelerometer.FAILED;
     return accelerometer;
   }
@@ -55,11 +60,11 @@ function Accelerometer(actions, context) {
     var x = deviceMotionEvent.accelerationIncludingGravity.x;
     if (typeof x === "number") {
       state = Accelerometer.WAITING;
-      actions.accelerometer_waiting();
+      actions.accelerometerWaiting();
     } else {
       error = new AccelerometerError("Device accelerometer returns null data");
       state = Accelerometer.FAILED;
-      actions.accelerometer_failed(error);
+      actions.accelerometerFailed(error);
     }
   }
 
