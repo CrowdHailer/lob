@@ -23,8 +23,17 @@ function Accelerometer(actions, context) {
     error: {
       get: function () { return error; }
     },
-    start: function () {
-
+    start: {
+      get: function () {
+        return function () {
+          if (state == Accelerometer.PENDING) {
+            throw new AccelerometerError("Accelerometer is not yet available");
+          }
+          if (state == Accelerometer.FAILED) {
+            throw error;
+          }
+        };
+      }
     },
     stop: function () {
 
@@ -101,6 +110,19 @@ describe("Accelerometer", function() {
     var context = {};
     accelerometer = Accelerometer(actions, context);
     expect(last_action.type).toEqual("ACCELEROMETER_FAILED");
+  });
+
+  it("starting a pending accelerometer should raise an error", function () {
+    var context = {DeviceMotionEvent: function () { }};
+    accelerometer = Accelerometer(actions, context);
+    expect(accelerometer.start).toThrowError(AccelerometerError);
+  });
+
+  it("starting a failed accelerometer should throw the appropriate error", function () {
+    var context = {};
+    accelerometer = Accelerometer(actions, context);
+    var error = accelerometer.error;
+    expect(accelerometer.start).toThrow(error);
   });
 
 });
