@@ -1,38 +1,106 @@
 /*jshint esnext: true */
 
-import Accelerometer from "../assets/scripts/accelerometer.js";
+// import Accelerometer from "../assets/scripts/accelerometer.js";
+function AccelerometerError(message) {
+  this.name = 'AccelerometerError';
+  this.message = message || 'Unspecified error communicating with device accelerometer';
+  this.stack = (new Error()).stack;
+}
+AccelerometerError.prototype = Object.create(Error.prototype);
+AccelerometerError.prototype.constructor = AccelerometerError;
+
+function Accelerometer(actions, context) {
+  // Assume context is window TODO upgrade
+  var state = Accelerometer.PENDING;
+  var error;
+
+  // var userAgent = context.navigator.userAgent;
+
+  var accelerometer =  Object.create({}, {
+    state: {
+      get: function () { return state; }
+    },
+    error: {
+      get: function () { return error; }
+    },
+    start: function () {
+
+    },
+    stop: function () {
+
+    },
+    dispatch: function (action) {
+
+    }
+  });
+
+  if(!context.DeviceMotionEvent) {
+    error = new AccelerometerError("DeviceMotionEvent event is not supported");
+    actions.accelerometer_failed(error);
+    state = Accelerometer.FAILED;
+    return accelerometer;
+  }
+
+  function handleEvent(deviceMotionEvent) {
+
+  }
+
+  return accelerometer;
+}
+
+Accelerometer.PENDING = "PENDING";
+Accelerometer.FAILED = "FAILED";
+Accelerometer.WAITING = "WAITING";
 
 describe("Accelerometer", function() {
 
+  var last_action;
+  var actions = {
+    accelerometer_failed: function (error) {
+      last_action = {
+        type: "ACCELEROMETER_FAILED",
+        error: error
+      };
+    }
+  };
+
   it("should have a current state", function () {
-    var context = {
-      DeviceMotionEvent: function () { },
-      addEventListener: function () { }
-    };
-    accelerometer = Accelerometer(context);
+    // Assumes tests in modern browser
+    var context = window;
+    accelerometer = Accelerometer(actions, context);
     expect(accelerometer.state).toBeDefined();
   });
 
-  it("should start in a pending state", function () {
-    var context = {
-      DeviceMotionEvent: function () { },
-      addEventListener: function () { }
-    };
-    accelerometer = Accelerometer(context);
+  it("should start in a pending state if device motion event found", function () {
+    var context = {DeviceMotionEvent: function () { }};
+    accelerometer = Accelerometer(actions, context);
     expect(accelerometer.state).toBe(Accelerometer.PENDING);
   });
 
-  xit("should not be possible to set state value", function () {
-    accelerometer = Accelerometer();
+  it("should not be possible to set state value", function () {
+    var context = window;
+    accelerometer = Accelerometer(actions, context);
     expect(function () {
       accelerometer.state = "MUTATED";
     }).toThrowError(TypeError, "setting a property that has only a getter");
   });
 
-  xit("should be in a failed state if no DeviceMotionEvent defined", function () {
+  it("should be in a failed state if no DeviceMotionEvent defined", function () {
     var context = {};
-    accelerometer = Accelerometer(context);
+    accelerometer = Accelerometer(actions, context);
     expect(accelerometer.state).toBe(Accelerometer.FAILED);
+  });
+
+  it("should be have an error if no DeviceMotionEvent defined", function () {
+    var context = {};
+    accelerometer = Accelerometer(actions, context);
+    expect(accelerometer.error.constructor).toEqual(AccelerometerError);
+  });
+
+  it("should report failure as action if no DeviceMotionEvent defined", function () {
+    var context = {};
+    accelerometer = Accelerometer(actions, context);
+    expect(last_action.type).toEqual("ACCELEROMETER_FAILED");
   });
 
 });
