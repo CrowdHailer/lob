@@ -5,6 +5,7 @@ import * as actions_test from "./actions_test";
 import * as dispatcher_test from "./dispatcher_test";
 
 import * as accelerometer_test from "./accelerometer_test";
+import * as avionics_test from "./avionics_test";
 
 describe("Lob", function() {
 
