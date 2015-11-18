@@ -3,6 +3,9 @@
 import Actions from "./actions";
 import Dispatcher from "./dispatcher";
 
+import Accelerometer from "./accelerometer";
+var accelerometer = Accelerometer();
+
 var dummyStore = {
   dispatch: function (action) {
     console.log(action);
