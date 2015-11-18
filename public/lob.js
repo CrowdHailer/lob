@@ -112,6 +112,24 @@ var Lob = (function () { 'use strict';
 
   var Accelerometer$1 = Accelerometer;
 
+  /*jshint esnext: true */
+
+  function querySelector(selector, element) {
+    return element.querySelector(selector);
+  }
+
+  function component(componentName, element) {
+    return querySelector("[data-component~=" + componentName + "]", element);
+  }
+
+  function ready(fn) {
+    if (document.readyState != 'loading'){
+      fn();
+    } else {
+      document.addEventListener('DOMContentLoaded', fn);
+    }
+  }
+
   var dummyStore = {
     dispatch: function (action) {
       if (action.error) {
@@ -129,9 +147,22 @@ var Lob = (function () { 'use strict';
 
   var accelerometer = Accelerometer$1(app, window);
   stores.push(accelerometer);
-  console.log(stores);
 
   console.log("Finished Boot");
+
+  ready(function () {
+    console.log("starting dom");
+    // FLYER PAGE 1
+    var $flyerPage1 = component("flyer-page-1", window.document);
+    if ($flyerPage1) {
+      var $button = querySelector("button", $flyerPage1);
+      console.log($button);
+      $button.addEventListener("click", function (e) {
+        console.log("clicked");
+      });
+    }
+
+  });
 
   return app;
 

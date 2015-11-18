@@ -22,7 +22,23 @@ var app = Actions(dispatcher);
 
 var accelerometer = Accelerometer(app, window);
 stores.push(accelerometer);
-console.log(stores);
 
 console.log("Finished Boot");
+
+import * as $ from "./dom";
+
+$.ready(function () {
+  console.log("starting dom");
+  // FLYER PAGE 1
+  var $flyerPage1 = $.component("flyer-page-1", window.document);
+  if ($flyerPage1) {
+    var $button = $.querySelector("button", $flyerPage1);
+    console.log($button);
+    $button.addEventListener("click", function (e) {
+      console.log("clicked");
+    });
+  }
+
+});
+
 export default app;
