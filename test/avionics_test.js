@@ -5,21 +5,15 @@ import Avionics from "../assets/scripts/avionics.js";
 
 describe("Avionics", function() {
 
-  it("should start unavailable", function () {
+  it("should start pending", function () {
     var avionics = Avionics();
-    expect(avionics.isAvailable()).toBeFalsy();
+    expect(avionics.state).toBe(Avionics.PENDING);
   });
 
-  it("should be available after accelerometer waiting", function () {
+  it("should be ready after accelerometer waiting", function () {
     var avionics = Avionics();
-    // DEBT accelerometer ready or online
     avionics.accelerometerWaiting();
-    expect(avionics.isAvailable()).toBeTruthy();
-  });
-
-  it("should start not recording", function () {
-    var avionics = Avionics();
-    expect(avionics.isRecording()).toBeFalsy();
+    expect(avionics.state).toBe(Avionics.READY);
   });
 
   it("should be recording after start recording", function () {
@@ -27,7 +21,7 @@ describe("Avionics", function() {
     // DEBT accelerometer ready or online
     avionics.accelerometerWaiting();
     avionics.startRecording();
-    expect(avionics.isRecording()).toBeTruthy();
+    expect(avionics.state).toBe(Avionics.RECORDING);
   });
 
   // DEBT these tests are not part of the avionics and are generic store behaviour.

@@ -3,27 +3,21 @@
 import Actions from "./actions.js";
 
 function Avionics() {
-  var available = false;
-  var recording = false;
+  var state = "PENDING";
   var components = [];
 
-  return {
-    isAvailable: function () {
-      return available;
-    },
-    isRecording: function () {
-      return recording;
-    },
+  return Object.create({
     accelerometerWaiting: function () {
-      available = true;
+      state = "READY";
       var self = this;
       components.forEach(function (c) { c.update(self); });
     },
     startRecording: function () {
-      recording = true;
+      state = "RECORDING";
       var self = this;
       components.forEach(function (c) { c.update(self); });
     },
+
     mount: function (component) {
       component.update(this);
       components.push(component);
@@ -41,7 +35,17 @@ function Avionics() {
 
       }
     }
-  };
+  }, {
+    state: {
+      get: function () {
+        return state;
+      }
+    }
+  });
 }
+
+Avionics.PENDING = "PENDING";
+Avionics.READY = "READY";
+Avionics.RECORDING = "RECORDING";
 
 export default Avionics;
