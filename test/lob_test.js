@@ -1,7 +1,8 @@
 /*jshint esnext: true */
 
-import * as streak from "./streak_test";
-import * as action from "./actions_test";
+import * as streak_test from "./streak_test";
+import * as actions_test from "./actions_test";
+import * as dispatcher_test from "./dispatcher_test";
 
 describe("Lob", function() {
 
