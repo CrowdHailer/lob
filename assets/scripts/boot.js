@@ -1,9 +1,9 @@
 /*jshint esnext: true */
 
+// SETUP APPLICATION
+
 import Actions from "./actions";
 import Dispatcher from "./dispatcher";
-
-import Accelerometer from "./accelerometer";
 
 var dummyStore = {
   dispatch: function (action) {
@@ -20,10 +20,40 @@ var dispatcher = Dispatcher(stores);
 
 var app = Actions(dispatcher);
 
+// SETUP UTILITIES
+
+import Accelerometer from "./accelerometer";
+
 var accelerometer = Accelerometer(app, window);
 stores.push(accelerometer);
 
+// SETUP COMPONENTS
+
+import Avionics from "./avionics";
+var avionics = Avionics();
+// DEBT
+window.avionics = avionics;
+
 console.log("Finished Boot");
+
+function FlyerPage1($root) {
+  var $button = $.querySelector("button", $root);
+  console.log($button);
+  $button.addEventListener("click", function (e) {
+    console.log("clicked");
+  });
+
+  return {
+    update: function (avionics) {
+      if (avionics.isAvailable()) {
+        $button.disabled = false;
+      } else {
+        $button.disabled = true;
+      }
+    }
+  };
+
+}
 
 import * as $ from "./dom";
 
@@ -32,11 +62,8 @@ $.ready(function () {
   // FLYER PAGE 1
   var $flyerPage1 = $.component("flyer-page-1", window.document);
   if ($flyerPage1) {
-    var $button = $.querySelector("button", $flyerPage1);
-    console.log($button);
-    $button.addEventListener("click", function (e) {
-      console.log("clicked");
-    });
+    var flyerPage1 = FlyerPage1($flyerPage1);
+    avionics.mount(flyerPage1);
   }
 
 });

@@ -2,6 +2,7 @@
 
 function Avionics() {
   var available = false;
+  var components = [];
 
   return {
     isAvailable: function () {
@@ -9,6 +10,12 @@ function Avionics() {
     },
     accelerometerWaiting: function () {
       available = true;
+      var self = this;
+      components.forEach(function (c) { c.update(self); });
+    },
+    mount: function (component) {
+      component.update(this);
+      components.push(component);
     }
   };
 }

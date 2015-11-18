@@ -114,6 +114,28 @@ var Lob = (function () { 'use strict';
 
   /*jshint esnext: true */
 
+  function Avionics() {
+    var available = false;
+    var components = [];
+
+    return {
+      isAvailable: function () {
+        return available;
+      },
+      accelerometerWaiting: function () {
+        available = true;
+        var self = this;
+        components.forEach(function (c) { c.update(self); });
+      },
+      mount: function (component) {
+        component.update(this);
+        components.push(component);
+      }
+    };
+  }
+
+  /*jshint esnext: true */
+
   function querySelector(selector, element) {
     return element.querySelector(selector);
   }
@@ -148,18 +170,38 @@ var Lob = (function () { 'use strict';
   var accelerometer = Accelerometer$1(app, window);
   stores.push(accelerometer);
 
+  var avionics = Avionics();
+  // DEBT
+  window.avionics = avionics;
+
   console.log("Finished Boot");
+
+  function FlyerPage1($root) {
+    var $button = querySelector("button", $root);
+    console.log($button);
+    $button.addEventListener("click", function (e) {
+      console.log("clicked");
+    });
+
+    return {
+      update: function (avionics) {
+        if (avionics.isAvailable()) {
+          $button.disabled = false;
+        } else {
+          $button.disabled = true;
+        }
+      }
+    };
+
+  }
 
   ready(function () {
     console.log("starting dom");
     // FLYER PAGE 1
     var $flyerPage1 = component("flyer-page-1", window.document);
     if ($flyerPage1) {
-      var $button = querySelector("button", $flyerPage1);
-      console.log($button);
-      $button.addEventListener("click", function (e) {
-        console.log("clicked");
-      });
+      var flyerPage1 = FlyerPage1($flyerPage1);
+      avionics.mount(flyerPage1);
     }
 
   });
