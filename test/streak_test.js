@@ -1,6 +1,6 @@
 /*jshint esnext: true */
 
-import { streak } from "../assets/scripts/lob/util.js";
+import { streak } from "../assets/scripts/utils.js";
 
 describe("Collection streak function", function() {
 

@@ -2,6 +2,7 @@
 "use strict";
 
 import Actions from "./actions.js";
+import { throttle } from "./utils";
 
 function AccelerometerError(message) {
   this.name = 'AccelerometerError';
@@ -17,6 +18,10 @@ function Accelerometer(actions, context) {
   var error;
 
   // var userAgent = context.navigator.userAgent;
+  function handleReading(deviceMotionEvent) {
+    actions.accelerometerReading(deviceMotionEvent.accelerationIncludingGravity.x);
+  }
+  var throttledHandleReading = throttle(handleReading, 5000);
 
   var accelerometer =  Object.create({}, {
     state: {
@@ -33,6 +38,11 @@ function Accelerometer(actions, context) {
           }
           if (state == Accelerometer.FAILED) {
             throw error;
+          }
+          if (state == Accelerometer.WAITING) {
+            // Untested case
+            state = Accelerometer.RECORDING;
+            context.addEventListener("devicemotion", throttledHandleReading);
           }
         };
       }
@@ -86,6 +96,7 @@ function Accelerometer(actions, context) {
 Accelerometer.PENDING = "PENDING";
 Accelerometer.FAILED = "FAILED";
 Accelerometer.WAITING = "WAITING";
+Accelerometer.RECORDING = "RECORDING";
 
 export { AccelerometerError };
 export default Accelerometer;

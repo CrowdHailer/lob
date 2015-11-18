@@ -61,7 +61,8 @@ describe("Accelerometer", function() {
     var last_callback;
     var context = {
       DeviceMotionEvent: function () { },
-      addEventListener: function (event, cb) { last_callback = cb; }
+      addEventListener: function (event, cb) { last_callback = cb; },
+      removeEventListener: function (event, cb) { }
     };
 
     beforeEach(function () {

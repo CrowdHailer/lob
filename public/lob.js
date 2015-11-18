@@ -47,6 +47,31 @@ var Lob = (function () { 'use strict';
   Actions.ACCELEROMETER_WAITING = "ACCELEROMETER_WAITING";
   Actions.START_RECORDING = "START_RECORDING";
 
+  /*jshint esnext: true */
+
+  // TODO currently untested
+  function throttle(fn, threshhold, scope) {
+    threshhold = threshhold || 250;
+    var last,
+    deferTimer;
+    return function () {
+      var context = scope || this;
+      var now = Date.now(), args = arguments;
+
+      if (last && now < last + threshhold) {
+        // hold on to it
+        clearTimeout(deferTimer);
+        deferTimer = setTimeout(function () {
+          last = now;
+          fn.apply(context, args);
+        }, threshhold);
+      } else {
+        last = now;
+        fn.apply(context, args);
+      }
+    };
+  }
+
   function AccelerometerError(message) {
     this.name = 'AccelerometerError';
     this.message = message || 'Unspecified error communicating with device accelerometer';
@@ -61,6 +86,10 @@ var Lob = (function () { 'use strict';
     var error;
 
     // var userAgent = context.navigator.userAgent;
+    function handleReading(deviceMotionEvent) {
+      actions.accelerometerReading(deviceMotionEvent.accelerationIncludingGravity.x);
+    }
+    var throttledHandleReading = throttle(handleReading, 5000);
 
     var accelerometer =  Object.create({}, {
       state: {
@@ -77,6 +106,11 @@ var Lob = (function () { 'use strict';
             }
             if (state == Accelerometer.FAILED) {
               throw error;
+            }
+            if (state == Accelerometer.WAITING) {
+              // Untested case
+              state = Accelerometer.RECORDING;
+              context.addEventListener("devicemotion", throttledHandleReading);
             }
           };
         }
@@ -107,7 +141,7 @@ var Lob = (function () { 'use strict';
       return accelerometer;
     }
 
-    function handleEvent(deviceMotionEvent) {
+    function handleTestReading(deviceMotionEvent) {
       var x = deviceMotionEvent.accelerationIncludingGravity.x;
       if (typeof x === "number") {
         state = Accelerometer.WAITING;
@@ -118,11 +152,11 @@ var Lob = (function () { 'use strict';
         actions.accelerometerFailed(error);
       }
       // TODO test calls once
-      context.removeEventListener("devicemotion", handleEvent);
+      context.removeEventListener("devicemotion", handleTestReading);
     }
 
     // TODO handle event once
-    context.addEventListener("devicemotion", handleEvent);
+    context.addEventListener("devicemotion", handleTestReading);
 
     return accelerometer;
   }
@@ -130,6 +164,7 @@ var Lob = (function () { 'use strict';
   Accelerometer.PENDING = "PENDING";
   Accelerometer.FAILED = "FAILED";
   Accelerometer.WAITING = "WAITING";
+  Accelerometer.RECORDING = "RECORDING";
 
   var Accelerometer$1 = Accelerometer;
 
@@ -160,6 +195,7 @@ var Lob = (function () { 'use strict';
         components.push(component);
       },
       dispatch: function (action) {
+        // TODO test dispatch
         switch (action.type) {
           case Actions.START_RECORDING:
             this.startRecording();
