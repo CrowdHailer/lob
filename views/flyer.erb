@@ -10,44 +10,21 @@
   <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" ></script>
   <script src="/lob.js"></script>
   <link rel="stylesheet" href="/lob.css" media="screen" title="no title" charset="utf-8">
-  <style media="screen">
-    html, body {
-      height: 100%;
-      border: 0;
-      margin: 0;
-    }
-    main: {
-      height: 100%;
-    }
-    section {
-      background-color: red;
-      width: 100%;
-      height: 50%;
-    }
-  </style>
 </head>
 <body>
-  <main id="flyer">
-    <section data-component="flyer-page-1">
-      <h1>Ready for Launch</h1>
-      <button type="button" data-hook="flyer-start-button" disabled>Start</button>
-    </section>
-    <section data-feature="flyer-page-1">
-      <h1>Throw now!</h1>
-      <button type="button" data-feature="flyer-start-button">Stop: 20s</button>
-    </section>
-    <section data-feature="flyer-page-1">
-      <h1>Flight Time 1.3s</h1>
-      <button type="button" data-feature="flyer-start-button">Stop: 20s</button>
-    </section>
-    <section data-feature="flyer-page-1">
-      <h1>Stats</h1>
-      <button type="button" data-feature="flyer-start-button">Submit</button>
-      <button type="button" data-feature="flyer-start-button">Reset</button>
-    </section>
+  <main data-component="avionics-console">
+    <h1>Lob</h1>
+    <p>
+      <span class="right">Time:</span><span></span>
+    </p>
+    <p>
+      <span class="right">Height:</span><span></span>
+    </p>
+  </main>
+  <footer>
     <button type="button" id="start">Start</button>
     <button type="button" id="stop">Stop</button>
     <button type="button" id="refresh">Refresh</button>
-  </main>
+  </footer>
 </body>
 </html>

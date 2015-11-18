@@ -117,7 +117,7 @@ var Lob = (function () { 'use strict';
               throw error;
             }
             if (state == Accelerometer.WAITING) {
-              // Untested case
+              // TODO Untested case
               state = Accelerometer.RECORDING;
               context.addEventListener("devicemotion", throttledHandleReading);
             }
@@ -126,6 +126,7 @@ var Lob = (function () { 'use strict';
       },
       stop: {
         get: function () {
+          // TODO untested function
           return function () {
             console.log(random);
             context.removeEventListener("devicemotion", throttledHandleReading);
