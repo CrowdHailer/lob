@@ -8,7 +8,7 @@
     "test:watch": "chokidar '**/*.js' -i '**/bundle.js' -c 'npm -s test'",
     "test:bundle": "rollup ./test/lob_test.js > test/bundle.js",
     "test:run": "karma start",
-    "build": "rollup --format iife --name Lob ./assets/scripts/lob.js > public/lob.js",
+    "build": "rollup --format iife --name Lob ./assets/scripts/boot.js > public/lob.js",
     "build:styles": "node-sass assets/styles/lob.scss > public/lob.css"
   },
   "repository": {
