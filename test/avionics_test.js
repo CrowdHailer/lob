@@ -17,6 +17,19 @@ describe("Avionics", function() {
     expect(avionics.isAvailable()).toBeTruthy();
   });
 
+  it("should start not recording", function () {
+    var avionics = Avionics();
+    expect(avionics.isRecording()).toBeFalsy();
+  });
+
+  it("should be recording after start recording", function () {
+    var avionics = Avionics();
+    // DEBT accelerometer ready or online
+    avionics.accelerometerWaiting();
+    avionics.startRecording();
+    expect(avionics.isRecording()).toBeTruthy();
+  });
+
   // DEBT these tests are not part of the avionics and are generic store behaviour.
   it("should pass itself to a mounted component", function () {
     var avionics = Avionics();

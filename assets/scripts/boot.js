@@ -50,6 +50,11 @@ function FlyerPage1($root) {
       } else {
         $button.disabled = true;
       }
+
+      if (avionics.isRecording()) {
+        $root.classList.add("hidden");
+      } else {
+      }
     }
   };
 
