@@ -54,10 +54,12 @@ function Accelerometer(actions, context) {
   function handleEvent(deviceMotionEvent) {
     var x = deviceMotionEvent.accelerationIncludingGravity.x;
     if (typeof x === "number") {
+      state = Accelerometer.WAITING;
+      actions.accelerometer_waiting();
     } else {
       error = new AccelerometerError("Device accelerometer returns null data");
-      actions.accelerometer_failed(error);
       state = Accelerometer.FAILED;
+      actions.accelerometer_failed(error);
     }
   }
 
@@ -79,6 +81,11 @@ describe("Accelerometer", function() {
       last_action = {
         type: "ACCELEROMETER_FAILED",
         error: error
+      };
+    },
+    accelerometer_waiting: function () {
+      last_action = {
+        type: "ACCELEROMETER_WAITING"
       };
     }
   };
@@ -159,6 +166,20 @@ describe("Accelerometer", function() {
     // DEBT separate assertion
     expect(accelerometer.error.constructor).toEqual(AccelerometerError);
     expect(last_action.type).toEqual("ACCELEROMETER_FAILED");
+  });
+
+  it("should be in a waiting state if first event has data", function () {
+    var callback;
+    var context = {
+      DeviceMotionEvent: function () { },
+      addEventListener: function (event, cb) { callback = cb; }
+    };
+    accelerometer = Accelerometer(actions, context);
+    callback({accelerationIncludingGravity: {x: 1, y: 2, z: 5}});
+    expect(accelerometer.state).toBe(Accelerometer.WAITING);
+    // DEBT separate assertion
+    expect(accelerometer.error).toBeUndefined();
+    expect(last_action.type).toEqual("ACCELEROMETER_WAITING");
   });
 
 });
