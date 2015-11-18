@@ -26,6 +26,12 @@ function Actions(dispatcher) {
       return dispatcher.dispatch({
         type: Actions.START_RECORDING,
       });
+    },
+    // DEBT untested
+    stopRecording: function () {
+      return dispatcher.dispatch({
+        type: Actions.STOP_RECORDING,
+      });
     }
   };
 }
@@ -34,5 +40,6 @@ Actions.ACCELEROMETER_READING = "ACCELEROMETER_READING";
 Actions.ACCELEROMETER_FAILED = "ACCELEROMETER_FAILED";
 Actions.ACCELEROMETER_WAITING = "ACCELEROMETER_WAITING";
 Actions.START_RECORDING = "START_RECORDING";
+Actions.STOP_RECORDING = "STOP_RECORDING";
 
 export default Actions;

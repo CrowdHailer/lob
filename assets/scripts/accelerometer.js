@@ -16,10 +16,12 @@ function Accelerometer(actions, context) {
   // Assume context is window TODO upgrade
   var state = Accelerometer.PENDING;
   var error;
+  var random = "RANDOM"; // Use to filter overrun events
 
   // var userAgent = context.navigator.userAgent;
   function handleReading(deviceMotionEvent) {
     actions.accelerometerReading(deviceMotionEvent.accelerationIncludingGravity.x);
+    console.log(random);
   }
   var throttledHandleReading = throttle(handleReading, 5000);
 
@@ -40,15 +42,21 @@ function Accelerometer(actions, context) {
             throw error;
           }
           if (state == Accelerometer.WAITING) {
-            // Untested case
+            // TODO Untested case
             state = Accelerometer.RECORDING;
             context.addEventListener("devicemotion", throttledHandleReading);
           }
         };
       }
     },
-    stop: function () {
-
+    stop: {
+      get: function () {
+        // TODO untested function
+        return function () {
+          console.log(random);
+          context.removeEventListener("devicemotion", throttledHandleReading);
+        };
+      }
     },
     dispatch: {
       get: function () {
@@ -56,6 +64,9 @@ function Accelerometer(actions, context) {
           switch (action.type) {
             case Actions.START_RECORDING:
               this.start();
+              break;
+            case Actions.STOP_RECORDING:
+              this.stop();
               break;
             default:
 

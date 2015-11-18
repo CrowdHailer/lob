@@ -38,6 +38,12 @@ var Lob = (function () { 'use strict';
         return dispatcher.dispatch({
           type: Actions.START_RECORDING,
         });
+      },
+      // DEBT untested
+      stopRecording: function () {
+        return dispatcher.dispatch({
+          type: Actions.STOP_RECORDING,
+        });
       }
     };
   }
@@ -46,6 +52,7 @@ var Lob = (function () { 'use strict';
   Actions.ACCELEROMETER_FAILED = "ACCELEROMETER_FAILED";
   Actions.ACCELEROMETER_WAITING = "ACCELEROMETER_WAITING";
   Actions.START_RECORDING = "START_RECORDING";
+  Actions.STOP_RECORDING = "STOP_RECORDING";
 
   /*jshint esnext: true */
 
@@ -84,10 +91,12 @@ var Lob = (function () { 'use strict';
     // Assume context is window TODO upgrade
     var state = Accelerometer.PENDING;
     var error;
+    var random = "RANDOM"; // Use to filter overrun events
 
     // var userAgent = context.navigator.userAgent;
     function handleReading(deviceMotionEvent) {
       actions.accelerometerReading(deviceMotionEvent.accelerationIncludingGravity.x);
+      console.log(random);
     }
     var throttledHandleReading = throttle(handleReading, 5000);
 
@@ -115,8 +124,13 @@ var Lob = (function () { 'use strict';
           };
         }
       },
-      stop: function () {
-
+      stop: {
+        get: function () {
+          return function () {
+            console.log(random);
+            context.removeEventListener("devicemotion", throttledHandleReading);
+          };
+        }
       },
       dispatch: {
         get: function () {
@@ -124,6 +138,9 @@ var Lob = (function () { 'use strict';
             switch (action.type) {
               case Actions.START_RECORDING:
                 this.start();
+                break;
+              case Actions.STOP_RECORDING:
+                this.stop();
                 break;
               default:
 
