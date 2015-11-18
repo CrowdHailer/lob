@@ -44,6 +44,7 @@ function Accelerometer(actions, context) {
   });
 
   if(!context.DeviceMotionEvent) {
+    // TODO report error
     error = new AccelerometerError("DeviceMotionEvent event is not supported");
     actions.accelerometer_failed(error);
     state = Accelerometer.FAILED;
@@ -51,8 +52,17 @@ function Accelerometer(actions, context) {
   }
 
   function handleEvent(deviceMotionEvent) {
-
+    var x = deviceMotionEvent.accelerationIncludingGravity.x;
+    if (typeof x === "number") {
+    } else {
+      error = new AccelerometerError("Device accelerometer returns null data");
+      actions.accelerometer_failed(error);
+      state = Accelerometer.FAILED;
+    }
   }
+
+  // TODO handle event once
+  context.addEventListener("devicemotion", handleEvent);
 
   return accelerometer;
 }
@@ -73,6 +83,10 @@ describe("Accelerometer", function() {
     }
   };
 
+  beforeEach(function () {
+    last_action = undefined;
+  });
+
   it("should have a current state", function () {
     // Assumes tests in modern browser
     var context = window;
@@ -81,7 +95,11 @@ describe("Accelerometer", function() {
   });
 
   it("should start in a pending state if device motion event found", function () {
-    var context = {DeviceMotionEvent: function () { }};
+    var callback;
+    var context = {
+      DeviceMotionEvent: function () { },
+      addEventListener: function (cb) { callback = cb; }
+    };
     accelerometer = Accelerometer(actions, context);
     expect(accelerometer.state).toBe(Accelerometer.PENDING);
   });
@@ -113,7 +131,11 @@ describe("Accelerometer", function() {
   });
 
   it("starting a pending accelerometer should raise an error", function () {
-    var context = {DeviceMotionEvent: function () { }};
+    var callback;
+    var context = {
+      DeviceMotionEvent: function () { },
+      addEventListener: function (cb) { callback = cb; }
+    };
     accelerometer = Accelerometer(actions, context);
     expect(accelerometer.start).toThrowError(AccelerometerError);
   });
@@ -123,6 +145,20 @@ describe("Accelerometer", function() {
     accelerometer = Accelerometer(actions, context);
     var error = accelerometer.error;
     expect(accelerometer.start).toThrow(error);
+  });
+
+  it("should be in a failed state if first event has null data", function () {
+    var callback;
+    var context = {
+      DeviceMotionEvent: function () { },
+      addEventListener: function (event, cb) { callback = cb; }
+    };
+    accelerometer = Accelerometer(actions, context);
+    callback({accelerationIncludingGravity: {}});
+    expect(accelerometer.state).toBe(Accelerometer.FAILED);
+    // DEBT separate assertion
+    expect(accelerometer.error.constructor).toEqual(AccelerometerError);
+    expect(last_action.type).toEqual("ACCELEROMETER_FAILED");
   });
 
 });
