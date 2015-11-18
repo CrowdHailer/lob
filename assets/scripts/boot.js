@@ -4,7 +4,7 @@ import Actions from "./actions";
 import Dispatcher from "./dispatcher";
 
 import Accelerometer from "./accelerometer";
-var accelerometer = Accelerometer();
+var accelerometer = Accelerometer({}, window);
 
 var dummyStore = {
   dispatch: function (action) {
@@ -14,5 +14,6 @@ var dummyStore = {
 
 var dispatcher = Dispatcher([dummyStore]);
 
+var app = Actions(dispatcher);
 console.log("Finished Boot");
-export default Actions(dispatcher);
+export default app;
