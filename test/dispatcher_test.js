@@ -5,6 +5,7 @@ import Dispatcher from "../assets/scripts/dispatcher.js";
 // catch errors in store dispatch
 // Prevent circular dispatch
 // Dispatch to all stores
+// Named stores in stores collection
 describe("Dispatcher", function() {
 
   // Log to fake console rather than have last dispatch method
