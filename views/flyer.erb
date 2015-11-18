@@ -11,8 +11,8 @@
   <script src="/lob.js"></script>
   <link rel="stylesheet" href="/lob.css" media="screen" title="no title" charset="utf-8">
 </head>
-<body>
-  <main data-component="avionics-console">
+<body data-component="avionics-console">
+  <main>
     <h1>Lob</h1>
     <p>
       <span class="right">Time:</span><span></span>
@@ -22,9 +22,9 @@
     </p>
   </main>
   <footer>
-    <button type="button" id="start">Start</button>
-    <button type="button" id="stop">Stop</button>
-    <button type="button" id="refresh">Refresh</button>
+    <button type="button" data-hook="start">Start</button>
+    <button type="button" data-hook="stop">Stop</button>
+    <button type="button" data-hook="reset">Reset</button>
   </footer>
 </body>
 </html>

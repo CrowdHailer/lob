@@ -187,27 +187,21 @@ var Lob = (function () { 'use strict';
   var Accelerometer$1 = Accelerometer;
 
   function Avionics() {
-    var available = false;
-    var recording = false;
+    var state = "PENDING";
     var components = [];
 
-    return {
-      isAvailable: function () {
-        return available;
-      },
-      isRecording: function () {
-        return recording;
-      },
+    return Object.create({
       accelerometerWaiting: function () {
-        available = true;
+        state = "READY";
         var self = this;
         components.forEach(function (c) { c.update(self); });
       },
       startRecording: function () {
-        recording = true;
+        state = "RECORDING";
         var self = this;
         components.forEach(function (c) { c.update(self); });
       },
+
       mount: function (component) {
         component.update(this);
         components.push(component);
@@ -225,8 +219,18 @@ var Lob = (function () { 'use strict';
 
         }
       }
-    };
+    }, {
+      state: {
+        get: function () {
+          return state;
+        }
+      }
+    });
   }
+
+  Avionics.PENDING = "PENDING";
+  Avionics.READY = "READY";
+  Avionics.RECORDING = "RECORDING";
 
   /*jshint esnext: true */
 
@@ -244,6 +248,43 @@ var Lob = (function () { 'use strict';
     } else {
       document.addEventListener('DOMContentLoaded', fn);
     }
+  }
+
+  function AvionicsConsole($root) {
+    var $startButton = querySelector("[data-hook~=start]", $root);
+    var $stopButton = querySelector("[data-hook~=stop]", $root);
+    var $resetButton = querySelector("[data-hook~=reset]", $root);
+    $startButton.addEventListener("click", function (e) {
+      var startEvent = new CustomEvent('startRecording', {bubbles: true});
+      $root.dispatchEvent(startEvent);
+    });
+
+    console.log($startButton, $stopButton, $resetButton);
+
+    return Object.create({
+      update: function (avionics) {
+        console.log(avionics);
+        if (avionics.state == "PENDING") {
+          $startButton.disabled = true;
+        } else {
+          $startButton.disabled = false;
+        }
+
+        if (avionics.state == "RECORDING") {
+          $stopButton.hidden = false;
+        } else {
+          $stopButton.hidden = true;
+        }
+
+        if (avionics.state == "COMPLETED") {
+          $resetButton.hidden = false;
+        } else {
+          $resetButton.hidden = true;
+        }
+      }
+    }, {
+
+    });
   }
 
   var dummyStore = {
@@ -304,6 +345,9 @@ var Lob = (function () { 'use strict';
       var flyerPage1 = FlyerPage1($flyerPage1);
       avionics.mount(flyerPage1);
     }
+    var $avionicsConsole = component("avionics-console", window.document);
+    var avionicsConsole = AvionicsConsole($avionicsConsole);
+    avionics.mount(avionicsConsole);
 
     document.addEventListener("startRecording", function (event) {
       app.startRecording();

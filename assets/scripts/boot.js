@@ -63,6 +63,7 @@ function FlyerPage1($root) {
 }
 
 import * as $ from "./dom";
+import AvionicsConsole from "./avionics_console";
 
 $.ready(function () {
   console.log("starting dom");
@@ -72,6 +73,9 @@ $.ready(function () {
     var flyerPage1 = FlyerPage1($flyerPage1);
     avionics.mount(flyerPage1);
   }
+  var $avionicsConsole = $.component("avionics-console", window.document);
+  var avionicsConsole = AvionicsConsole($avionicsConsole);
+  avionics.mount(avionicsConsole);
 
   document.addEventListener("startRecording", function (event) {
     app.startRecording();
