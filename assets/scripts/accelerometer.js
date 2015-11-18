@@ -1,6 +1,8 @@
 /*jshint esnext: true */
 "use strict";
 
+import Actions from "./actions.js";
+
 function AccelerometerError(message) {
   this.name = 'AccelerometerError';
   this.message = message || 'Unspecified error communicating with device accelerometer';
@@ -41,8 +43,13 @@ function Accelerometer(actions, context) {
     dispatch: {
       get: function () {
         return function (action) {
-          console.log("accelerometer dispatching");
-          console.log(action);
+          switch (action.type) {
+            case Actions.START_RECORDING:
+              this.start();
+              break;
+            default:
+
+          }
         };
       }
     }
@@ -56,7 +63,7 @@ function Accelerometer(actions, context) {
     return accelerometer;
   }
 
-  function handleEvent(deviceMotionEvent) {
+  function handleTestReading(deviceMotionEvent) {
     var x = deviceMotionEvent.accelerationIncludingGravity.x;
     if (typeof x === "number") {
       state = Accelerometer.WAITING;
@@ -66,10 +73,12 @@ function Accelerometer(actions, context) {
       state = Accelerometer.FAILED;
       actions.accelerometerFailed(error);
     }
+    // TODO test calls once
+    context.removeEventListener("devicemotion", handleTestReading);
   }
 
   // TODO handle event once
-  context.addEventListener("devicemotion", handleEvent);
+  context.addEventListener("devicemotion", handleTestReading);
 
   return accelerometer;
 }

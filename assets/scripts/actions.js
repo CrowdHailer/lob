@@ -14,11 +14,25 @@ function Actions(dispatcher) {
         type: Actions.ACCELEROMETER_FAILED,
         error: error
       });
+    },
+    // DEBT untested
+    accelerometerWaiting: function () {
+      return dispatcher.dispatch({
+        type: Actions.ACCELEROMETER_WAITING,
+      });
+    },
+    // DEBT untested
+    startRecording: function () {
+      return dispatcher.dispatch({
+        type: Actions.START_RECORDING,
+      });
     }
   };
 }
 
 Actions.ACCELEROMETER_READING = "ACCELEROMETER_READING";
 Actions.ACCELEROMETER_FAILED = "ACCELEROMETER_FAILED";
+Actions.ACCELEROMETER_WAITING = "ACCELEROMETER_WAITING";
+Actions.START_RECORDING = "START_RECORDING";
 
 export default Actions;

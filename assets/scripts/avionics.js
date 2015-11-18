@@ -1,5 +1,7 @@
 /*jshint esnext: true */
 
+import Actions from "./actions.js";
+
 function Avionics() {
   var available = false;
   var recording = false;
@@ -25,6 +27,19 @@ function Avionics() {
     mount: function (component) {
       component.update(this);
       components.push(component);
+    },
+    dispatch: function (action) {
+      // TODO test dispatch
+      switch (action.type) {
+        case Actions.START_RECORDING:
+          this.startRecording();
+          break;
+        case Actions.ACCELEROMETER_WAITING:
+          this.accelerometerWaiting();
+          break;
+        default:
+
+      }
     }
   };
 }

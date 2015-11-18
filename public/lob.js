@@ -26,12 +26,26 @@ var Lob = (function () { 'use strict';
           type: Actions.ACCELEROMETER_FAILED,
           error: error
         });
+      },
+      // DEBT untested
+      accelerometerWaiting: function () {
+        return dispatcher.dispatch({
+          type: Actions.ACCELEROMETER_WAITING,
+        });
+      },
+      // DEBT untested
+      startRecording: function () {
+        return dispatcher.dispatch({
+          type: Actions.START_RECORDING,
+        });
       }
     };
   }
 
   Actions.ACCELEROMETER_READING = "ACCELEROMETER_READING";
   Actions.ACCELEROMETER_FAILED = "ACCELEROMETER_FAILED";
+  Actions.ACCELEROMETER_WAITING = "ACCELEROMETER_WAITING";
+  Actions.START_RECORDING = "START_RECORDING";
 
   function AccelerometerError(message) {
     this.name = 'AccelerometerError';
@@ -73,8 +87,13 @@ var Lob = (function () { 'use strict';
       dispatch: {
         get: function () {
           return function (action) {
-            console.log("accelerometer dispatching");
-            console.log(action);
+            switch (action.type) {
+              case Actions.START_RECORDING:
+                this.start();
+                break;
+              default:
+
+            }
           };
         }
       }
@@ -98,6 +117,8 @@ var Lob = (function () { 'use strict';
         state = Accelerometer.FAILED;
         actions.accelerometerFailed(error);
       }
+      // TODO test calls once
+      context.removeEventListener("devicemotion", handleEvent);
     }
 
     // TODO handle event once
@@ -111,8 +132,6 @@ var Lob = (function () { 'use strict';
   Accelerometer.WAITING = "WAITING";
 
   var Accelerometer$1 = Accelerometer;
-
-  /*jshint esnext: true */
 
   function Avionics() {
     var available = false;
@@ -139,6 +158,18 @@ var Lob = (function () { 'use strict';
       mount: function (component) {
         component.update(this);
         components.push(component);
+      },
+      dispatch: function (action) {
+        switch (action.type) {
+          case Actions.START_RECORDING:
+            this.startRecording();
+            break;
+          case Actions.ACCELEROMETER_WAITING:
+            this.accelerometerWaiting();
+            break;
+          default:
+
+        }
       }
     };
   }
@@ -181,6 +212,7 @@ var Lob = (function () { 'use strict';
 
   var avionics = Avionics();
   // DEBT
+  stores.push(avionics);
   window.avionics = avionics;
 
   console.log("Finished Boot");
@@ -189,7 +221,8 @@ var Lob = (function () { 'use strict';
     var $button = querySelector("button", $root);
     console.log($button);
     $button.addEventListener("click", function (e) {
-      console.log("clicked");
+      var startEvent = new CustomEvent('startRecording', {bubbles: true});
+      $root.dispatchEvent(startEvent);
     });
 
     return {
@@ -201,7 +234,7 @@ var Lob = (function () { 'use strict';
         }
 
         if (avionics.isRecording()) {
-          $root.classList.add("hidden");
+          $root.hidden = true;
         } else {
         }
       }
@@ -217,6 +250,10 @@ var Lob = (function () { 'use strict';
       var flyerPage1 = FlyerPage1($flyerPage1);
       avionics.mount(flyerPage1);
     }
+
+    document.addEventListener("startRecording", function (event) {
+      app.startRecording();
+    });
 
   });
 

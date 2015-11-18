@@ -32,6 +32,7 @@ stores.push(accelerometer);
 import Avionics from "./avionics";
 var avionics = Avionics();
 // DEBT
+stores.push(avionics);
 window.avionics = avionics;
 
 console.log("Finished Boot");
@@ -40,7 +41,8 @@ function FlyerPage1($root) {
   var $button = $.querySelector("button", $root);
   console.log($button);
   $button.addEventListener("click", function (e) {
-    console.log("clicked");
+    var startEvent = new CustomEvent('startRecording', {bubbles: true});
+    $root.dispatchEvent(startEvent);
   });
 
   return {
@@ -52,7 +54,7 @@ function FlyerPage1($root) {
       }
 
       if (avionics.isRecording()) {
-        $root.classList.add("hidden");
+        $root.hidden = true;
       } else {
       }
     }
@@ -70,6 +72,10 @@ $.ready(function () {
     var flyerPage1 = FlyerPage1($flyerPage1);
     avionics.mount(flyerPage1);
   }
+
+  document.addEventListener("startRecording", function (event) {
+    app.startRecording();
+  });
 
 });
 
