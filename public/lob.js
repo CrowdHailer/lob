@@ -95,7 +95,14 @@ var Lob = (function () { 'use strict';
 
     // var userAgent = context.navigator.userAgent;
     function handleReading(deviceMotionEvent) {
-      actions.accelerometerReading(deviceMotionEvent.accelerationIncludingGravity.x);
+      var acceleration = {
+        x: deviceMotionEvent.accelerationIncludingGravity.x,
+        y: deviceMotionEvent.accelerationIncludingGravity.y,
+        z: deviceMotionEvent.accelerationIncludingGravity.z
+      };
+      var timestamp = Date.now();
+
+      actions.accelerometerReading({timestamp: timestamp, acceleration: acceleration});
       console.log(random);
     }
     var throttledHandleReading = throttle(handleReading, 5000);
@@ -189,19 +196,32 @@ var Lob = (function () { 'use strict';
   function Avionics() {
     var state = "PENDING";
     var components = [];
+    var initialTimestamp;
 
-    return Object.create({
+    return {
       accelerometerWaiting: function () {
-        state = "READY";
+        this.state = "READY";
         var self = this;
         components.forEach(function (c) { c.update(self); });
       },
       startRecording: function () {
-        state = "RECORDING";
+        this.state = "RECORDING";
         var self = this;
         components.forEach(function (c) { c.update(self); });
       },
-
+      accelerometerReading: function (reading) {
+        if (!initialTimestamp) {
+          initialTimestamp = reading.timestamp;
+          this.remainingTime = 20;
+        } else {
+          var duration = (reading.timestamp - initialTimestamp) / 1000;
+          this.remainingTime = 20 - duration;
+        }
+        // TODO test updates
+        var self = this;
+        components.forEach(function (c) { c.update(self); });
+      },
+      remainingTime: null,
       mount: function (component) {
         component.update(this);
         components.push(component);
@@ -215,17 +235,15 @@ var Lob = (function () { 'use strict';
           case Actions.ACCELEROMETER_WAITING:
             this.accelerometerWaiting();
             break;
+          case Actions.ACCELEROMETER_READING:
+            this.accelerometerReading(action.reading);
+            break;
           default:
 
         }
-      }
-    }, {
-      state: {
-        get: function () {
-          return state;
-        }
-      }
-    });
+      },
+      state: "PENDING"
+    };
   }
 
   Avionics.PENDING = "PENDING";
@@ -254,6 +272,8 @@ var Lob = (function () { 'use strict';
     var $startButton = querySelector("[data-hook~=start]", $root);
     var $stopButton = querySelector("[data-hook~=stop]", $root);
     var $resetButton = querySelector("[data-hook~=reset]", $root);
+    var $countdown = querySelector("[data-hook~=countdown]", $stopButton);
+
     $startButton.addEventListener("click", function (e) {
       var startEvent = new CustomEvent('startRecording', {bubbles: true});
       $root.dispatchEvent(startEvent);
@@ -268,6 +288,11 @@ var Lob = (function () { 'use strict';
         }
 
         if (avionics.state == "RECORDING") {
+          $startButton.hidden = true;
+        } else {
+        }
+
+        if (avionics.state == "RECORDING") {
           $stopButton.hidden = false;
         } else {
           $stopButton.hidden = true;
@@ -277,6 +302,10 @@ var Lob = (function () { 'use strict';
           $resetButton.hidden = false;
         } else {
           $resetButton.hidden = true;
+        }
+
+        if (avionics.remainingTime) {
+          $countdown.innerHTML = avionics.remainingTime + "s";
         }
       }
     }, {

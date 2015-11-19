@@ -20,7 +20,14 @@ function Accelerometer(actions, context) {
 
   // var userAgent = context.navigator.userAgent;
   function handleReading(deviceMotionEvent) {
-    actions.accelerometerReading(deviceMotionEvent.accelerationIncludingGravity.x);
+    var acceleration = {
+      x: deviceMotionEvent.accelerationIncludingGravity.x,
+      y: deviceMotionEvent.accelerationIncludingGravity.y,
+      z: deviceMotionEvent.accelerationIncludingGravity.z
+    };
+    var timestamp = Date.now();
+
+    actions.accelerometerReading({timestamp: timestamp, acceleration: acceleration});
     console.log(random);
   }
   var throttledHandleReading = throttle(handleReading, 5000);

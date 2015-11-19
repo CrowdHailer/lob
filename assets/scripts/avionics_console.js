@@ -6,6 +6,8 @@ function AvionicsConsole($root) {
   var $startButton = $.querySelector("[data-hook~=start]", $root);
   var $stopButton = $.querySelector("[data-hook~=stop]", $root);
   var $resetButton = $.querySelector("[data-hook~=reset]", $root);
+  var $countdown = $.querySelector("[data-hook~=countdown]", $stopButton);
+
   $startButton.addEventListener("click", function (e) {
     var startEvent = new CustomEvent('startRecording', {bubbles: true});
     $root.dispatchEvent(startEvent);
@@ -20,6 +22,11 @@ function AvionicsConsole($root) {
       }
 
       if (avionics.state == "RECORDING") {
+        $startButton.hidden = true;
+      } else {
+      }
+
+      if (avionics.state == "RECORDING") {
         $stopButton.hidden = false;
       } else {
         $stopButton.hidden = true;
@@ -29,6 +36,10 @@ function AvionicsConsole($root) {
         $resetButton.hidden = false;
       } else {
         $resetButton.hidden = true;
+      }
+
+      if (avionics.remainingTime) {
+        $countdown.innerHTML = avionics.remainingTime + "s";
       }
     }
   }, {

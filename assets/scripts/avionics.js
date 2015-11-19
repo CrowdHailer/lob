@@ -7,14 +7,14 @@ function Avionics() {
   var components = [];
   var initialTimestamp;
 
-  return Object.create({
+  return {
     accelerometerWaiting: function () {
-      state = "READY";
+      this.state = "READY";
       var self = this;
       components.forEach(function (c) { c.update(self); });
     },
     startRecording: function () {
-      state = "RECORDING";
+      this.state = "RECORDING";
       var self = this;
       components.forEach(function (c) { c.update(self); });
     },
@@ -26,6 +26,9 @@ function Avionics() {
         var duration = (reading.timestamp - initialTimestamp) / 1000;
         this.remainingTime = 20 - duration;
       }
+      // TODO test updates
+      var self = this;
+      components.forEach(function (c) { c.update(self); });
     },
     remainingTime: null,
     mount: function (component) {
@@ -41,17 +44,15 @@ function Avionics() {
         case Actions.ACCELEROMETER_WAITING:
           this.accelerometerWaiting();
           break;
+        case Actions.ACCELEROMETER_READING:
+          this.accelerometerReading(action.reading);
+          break;
         default:
 
       }
-    }
-  }, {
-    state: {
-      get: function () {
-        return state;
-      }
-    }
-  });
+    },
+    state: "PENDING"
+  };
 }
 
 Avionics.PENDING = "PENDING";
