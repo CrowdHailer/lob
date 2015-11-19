@@ -11,11 +11,8 @@ function AvionicsConsole($root) {
     $root.dispatchEvent(startEvent);
   });
 
-  console.log($startButton, $stopButton, $resetButton);
-
   return Object.create({
     update: function (avionics) {
-      console.log(avionics);
       if (avionics.state == "PENDING") {
         $startButton.disabled = true;
       } else {
