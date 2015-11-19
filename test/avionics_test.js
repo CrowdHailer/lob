@@ -24,6 +24,27 @@ describe("Avionics", function() {
     expect(avionics.state).toBe(Avionics.RECORDING);
   });
 
+  describe("when active", function () {
+    var avionics;
+    beforeEach(function () {
+      avionics = Avionics();
+      // DEBT accelerometer ready or online
+      avionics.accelerometerWaiting();
+      avionics.startRecording();
+    });
+
+    it("should have a remaining time of 20s after first accelerometer reading", function () {
+      avionics.accelerometerReading({timestamp: 10000, acceleration: {x: 1, y: 1, z: 1}});
+      expect(avionics.remainingTime).toEqual(20.0);
+    });
+
+    it("should have a diminished remaining time after second accelerometer reading", function () {
+      avionics.accelerometerReading({timestamp: 10000, acceleration: {x: 1, y: 1, z: 1}});
+      avionics.accelerometerReading({timestamp: 10500, acceleration: {x: 1, y: 1, z: 1}});
+      expect(avionics.remainingTime).toEqual(19.5);
+    });
+  });
+
   // DEBT these tests are not part of the avionics and are generic store behaviour.
   it("should pass itself to a mounted component", function () {
     var avionics = Avionics();

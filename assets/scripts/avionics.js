@@ -5,6 +5,7 @@ import Actions from "./actions.js";
 function Avionics() {
   var state = "PENDING";
   var components = [];
+  var initialTimestamp;
 
   return Object.create({
     accelerometerWaiting: function () {
@@ -17,7 +18,16 @@ function Avionics() {
       var self = this;
       components.forEach(function (c) { c.update(self); });
     },
-
+    accelerometerReading: function (reading) {
+      if (!initialTimestamp) {
+        initialTimestamp = reading.timestamp;
+        this.remainingTime = 20;
+      } else {
+        var duration = (reading.timestamp - initialTimestamp) / 1000;
+        this.remainingTime = 20 - duration;
+      }
+    },
+    remainingTime: null,
     mount: function (component) {
       component.update(this);
       components.push(component);
