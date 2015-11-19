@@ -215,7 +215,12 @@ var Lob = (function () { 'use strict';
           this.remainingTime = 20;
         } else {
           var duration = (reading.timestamp - initialTimestamp) / 1000;
-          this.remainingTime = 20 - duration;
+          if (duration > 20) {
+            this.remainingTime = 0;
+            this.state = Avionics.COMPLETED;
+          } else {
+            this.remainingTime = 20 - duration;
+          }
         }
         // TODO test updates
         var self = this;
@@ -249,6 +254,7 @@ var Lob = (function () { 'use strict';
   Avionics.PENDING = "PENDING";
   Avionics.READY = "READY";
   Avionics.RECORDING = "RECORDING";
+  Avionics.COMPLETED = "COMPLETED";
 
   /*jshint esnext: true */
 

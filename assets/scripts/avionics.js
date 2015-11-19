@@ -24,7 +24,12 @@ function Avionics() {
         this.remainingTime = 20;
       } else {
         var duration = (reading.timestamp - initialTimestamp) / 1000;
-        this.remainingTime = 20 - duration;
+        if (duration > 20) {
+          this.remainingTime = 0;
+          this.state = Avionics.COMPLETED;
+        } else {
+          this.remainingTime = 20 - duration;
+        }
       }
       // TODO test updates
       var self = this;
@@ -58,5 +63,6 @@ function Avionics() {
 Avionics.PENDING = "PENDING";
 Avionics.READY = "READY";
 Avionics.RECORDING = "RECORDING";
+Avionics.COMPLETED = "COMPLETED";
 
 export default Avionics;

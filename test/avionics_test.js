@@ -39,13 +39,19 @@ describe("Avionics", function() {
     });
 
     it("should have a diminished remaining time after second accelerometer reading", function () {
-      avionics.mount({update: function (view) {
-        console.log(view.remainingTime)
-      }})
       avionics.accelerometerReading({timestamp: 10000, acceleration: {x: 1, y: 1, z: 1}});
       avionics.accelerometerReading({timestamp: 10500, acceleration: {x: 1, y: 1, z: 1}});
       expect(avionics.remainingTime).toEqual(19.5);
     });
+
+    it("should stop recording after 20s", function () {
+      avionics.accelerometerReading({timestamp: 10000, acceleration: {x: 1, y: 1, z: 1}});
+      avionics.accelerometerReading({timestamp: 10500, acceleration: {x: 1, y: 1, z: 1}});
+      avionics.accelerometerReading({timestamp: 30500, acceleration: {x: 1, y: 1, z: 1}});
+      expect(avionics.remainingTime).toEqual(0);
+      expect(avionics.state).toBe(Avionics.COMPLETED);
+    });
+
   });
 
   // DEBT these tests are not part of the avionics and are generic store behaviour.
