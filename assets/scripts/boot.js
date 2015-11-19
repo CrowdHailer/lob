@@ -48,6 +48,9 @@ $.ready(function () {
   document.addEventListener("startRecording", function (event) {
     app.startRecording();
   });
+  document.addEventListener("resetAvionics", function (event) {
+    app.resetAvionics();
+  });
 
 });
 

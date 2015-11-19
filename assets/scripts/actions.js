@@ -32,6 +32,12 @@ function Actions(dispatcher) {
       return dispatcher.dispatch({
         type: Actions.STOP_RECORDING,
       });
+    },
+    // DEBT untested
+    resetAvionics: function () {
+      return dispatcher.dispatch({
+        type: Actions.RESET_AVIONICS,
+      });
     }
   };
 }
@@ -41,5 +47,6 @@ Actions.ACCELEROMETER_FAILED = "ACCELEROMETER_FAILED";
 Actions.ACCELEROMETER_WAITING = "ACCELEROMETER_WAITING";
 Actions.START_RECORDING = "START_RECORDING";
 Actions.STOP_RECORDING = "STOP_RECORDING";
+Actions.RESET_AVIONICS = "RESET_AVIONICS";
 
 export default Actions;

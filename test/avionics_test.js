@@ -52,6 +52,15 @@ describe("Avionics", function() {
       expect(avionics.state).toBe(Avionics.COMPLETED);
     });
 
+    it("should be possible to reset the avionics", function () {
+      avionics.accelerometerReading({timestamp: 10000, acceleration: {x: 1, y: 1, z: 1}});
+      avionics.accelerometerReading({timestamp: 10500, acceleration: {x: 1, y: 1, z: 1}});
+      avionics.accelerometerReading({timestamp: 30500, acceleration: {x: 1, y: 1, z: 1}});
+      avionics.resetAvionics();
+      expect(avionics.remainingTime).toEqual(null);
+      expect(avionics.state).toBe(Avionics.READY);
+    });
+
   });
 
   // DEBT these tests are not part of the avionics and are generic store behaviour.

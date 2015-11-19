@@ -35,6 +35,12 @@ function Avionics() {
       var self = this;
       components.forEach(function (c) { c.update(self); });
     },
+    resetAvionics: function () {
+      this.remainingTime = null;
+      this.state = Avionics.READY;
+      var self = this;
+      components.forEach(function (c) { c.update(self); });
+    },
     remainingTime: null,
     mount: function (component) {
       component.update(this);
@@ -51,6 +57,9 @@ function Avionics() {
           break;
         case Actions.ACCELEROMETER_READING:
           this.accelerometerReading(action.reading);
+          break;
+        case Actions.RESET_AVIONICS:
+          this.resetAvionics();
           break;
         default:
 

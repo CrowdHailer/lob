@@ -44,6 +44,12 @@ var Lob = (function () { 'use strict';
         return dispatcher.dispatch({
           type: Actions.STOP_RECORDING,
         });
+      },
+      // DEBT untested
+      resetAvionics: function () {
+        return dispatcher.dispatch({
+          type: Actions.RESET_AVIONICS,
+        });
       }
     };
   }
@@ -53,6 +59,7 @@ var Lob = (function () { 'use strict';
   Actions.ACCELEROMETER_WAITING = "ACCELEROMETER_WAITING";
   Actions.START_RECORDING = "START_RECORDING";
   Actions.STOP_RECORDING = "STOP_RECORDING";
+  Actions.RESET_AVIONICS = "RESET_AVIONICS";
 
   /*jshint esnext: true */
 
@@ -226,6 +233,13 @@ var Lob = (function () { 'use strict';
         var self = this;
         components.forEach(function (c) { c.update(self); });
       },
+      resetAvionics: function () {
+        this.remainingTime = null;
+        this.state = Avionics.READY;
+        this.initialTimestamp = null;
+        var self = this;
+        components.forEach(function (c) { c.update(self); });
+      },
       remainingTime: null,
       mount: function (component) {
         component.update(this);
@@ -242,6 +256,9 @@ var Lob = (function () { 'use strict';
             break;
           case Actions.ACCELEROMETER_READING:
             this.accelerometerReading(action.reading);
+            break;
+          case Actions.RESET_AVIONICS:
+            this.resetAvionics();
             break;
           default:
 
@@ -284,6 +301,10 @@ var Lob = (function () { 'use strict';
       var startEvent = new CustomEvent('startRecording', {bubbles: true});
       $root.dispatchEvent(startEvent);
     });
+    $resetButton.addEventListener("click", function (e) {
+      var resetEvent = new CustomEvent('resetAvionics', {bubbles: true});
+      $root.dispatchEvent(resetEvent);
+    });
 
     return Object.create({
       update: function (avionics) {
@@ -293,9 +314,10 @@ var Lob = (function () { 'use strict';
           $startButton.disabled = false;
         }
 
-        if (avionics.state == "RECORDING") {
+        if (avionics.state == "RECORDING" || avionics.state == "COMPLETED") {
           $startButton.hidden = true;
         } else {
+          $startButton.hidden = false;
         }
 
         if (avionics.state == "RECORDING") {
@@ -351,6 +373,9 @@ var Lob = (function () { 'use strict';
 
     document.addEventListener("startRecording", function (event) {
       app.startRecording();
+    });
+    document.addEventListener("resetAvionics", function (event) {
+      app.resetAvionics();
     });
 
   });

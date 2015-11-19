@@ -12,6 +12,10 @@ function AvionicsConsole($root) {
     var startEvent = new CustomEvent('startRecording', {bubbles: true});
     $root.dispatchEvent(startEvent);
   });
+  $resetButton.addEventListener("click", function (e) {
+    var resetEvent = new CustomEvent('resetAvionics', {bubbles: true});
+    $root.dispatchEvent(resetEvent);
+  });
 
   return Object.create({
     update: function (avionics) {
@@ -21,9 +25,10 @@ function AvionicsConsole($root) {
         $startButton.disabled = false;
       }
 
-      if (avionics.state == "RECORDING") {
+      if (avionics.state == "RECORDING" || avionics.state == "COMPLETED") {
         $startButton.hidden = true;
       } else {
+        $startButton.hidden = false;
       }
 
       if (avionics.state == "RECORDING") {
