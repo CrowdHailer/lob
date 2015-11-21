@@ -1,5 +1,6 @@
 /// <reference path="./jasmine.d.ts" />
 import "./data-log-test.ts";
+import "./streak-test.ts";
 
 describe("Lob", function() {
 
