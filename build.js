@@ -14,4 +14,6 @@ rollup.rollup({
     moduleName: "Lob",
     dest: "public/lob.js"
   });
+}).catch(function(x){
+  console.error(x);
 });
