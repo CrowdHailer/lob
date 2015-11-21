@@ -37,10 +37,13 @@ class Actions {
 var actions = new Actions();
 
 class DataLogger {
-  state = {status: "READY"}; // RECORDING, COMPLETED
+  state = {status: "READY", readings: []}; // RECORDING, COMPLETED
   displays = [];
   start () {
     console.info("hello from datalogger");
+    this.updateDisplays();
+  }
+  updateDisplays () {
     var state = this.state;
     this.displays.forEach(function (view) {
       view.update(state);

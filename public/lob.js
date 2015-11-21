@@ -356,6 +356,9 @@ var Lob = (function () { 'use strict';
         }
         DataLogger.prototype.start = function () {
             console.info("hello from datalogger");
+            this.updateDisplays();
+        };
+        DataLogger.prototype.updateDisplays = function () {
             var state = this.state;
             this.displays.forEach(function (view) {
                 view.update(state);
