@@ -23,6 +23,7 @@
     "files": [
         "assets/scripts/boot.ts",
         "assets/scripts/dom.ts",
+        "test/data-log-test.ts",
         "test/jasmine.d.ts",
         "test/lob_test.ts"
     ],
