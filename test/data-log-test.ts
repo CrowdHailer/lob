@@ -1,5 +1,6 @@
 import { streak } from "../assets/scripts/utils.ts";
 
+// TODO call data log state dont need to separate if from concept of collection of records.
 class DataLog {
   readings;
   constructor(readings: {acceleration: any, timestamp: any}[] = []) {
