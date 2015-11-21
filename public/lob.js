@@ -321,23 +321,37 @@ var Lob = (function () { 'use strict';
         function AvionicsInterface($root, actions) {
             this.$root = $root;
             this.actions = actions;
-            // DEBT this should be initialize with $root not document.
             var events = Events($root, null);
             events.on("click", "[data-command~=start]", function (evt) {
-                console.log(evt.target);
+                actions.startRecording();
             });
             events.on("click", "[data-command~=stop]", function (evt) {
-                console.log(evt.target);
+                actions.stopRecording();
             });
             events.on("click", "[data-command~=reset]", function (evt) {
-                console.log(evt.target);
+                actions.clearRecording();
             });
         }
         return AvionicsInterface;
     })();
+    var Actions = (function () {
+        function Actions() {
+        }
+        Actions.prototype.startRecording = function () {
+            console.info("startRecording");
+        };
+        Actions.prototype.stopRecording = function () {
+            console.info("stopRecording");
+        };
+        Actions.prototype.clearRecording = function () {
+            console.info("clearRecording");
+        };
+        return Actions;
+    })();
+    var actions = new Actions();
     ready(function () {
         var $avionics = document.querySelector("[data-interface~=avionics]");
-        var avionicsInterface = new AvionicsInterface($avionics, {});
+        var avionicsInterface = new AvionicsInterface($avionics, actions);
     });
     var boot = {};
 
