@@ -1,5 +1,15 @@
 var Lob = (function () { 'use strict';
 
+    // DEBT untested
+    function ready(fn) {
+        if (document.readyState !== "loading") {
+            fn();
+        }
+        else {
+            document.addEventListener("DOMContentLoaded", fn);
+        }
+    }
+
     /**
      * Copyright 2014 Craig Campbell
      *
@@ -312,7 +322,7 @@ var Lob = (function () { 'use strict';
             this.$root = $root;
             this.actions = actions;
             // DEBT this should be initialize with $root not document.
-            var events = Events(document, null);
+            var events = Events($root, null);
             events.on("click", "[data-command~=start]", function (evt) {
                 console.log(evt.target);
             });
@@ -325,8 +335,10 @@ var Lob = (function () { 'use strict';
         }
         return AvionicsInterface;
     })();
-    var $avionics = document.querySelector("[data-interface~=avionics]");
-    var avionicsInterface = new AvionicsInterface($avionics, {});
+    ready(function () {
+        var $avionics = document.querySelector("[data-interface~=avionics]");
+        var avionicsInterface = new AvionicsInterface($avionics, {});
+    });
     var boot = {};
 
     return boot;

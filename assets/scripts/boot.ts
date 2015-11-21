@@ -8,8 +8,7 @@ class AvionicsInterface {
   constructor ($root, actions) {
     this.$root = $root;
     this.actions = actions;
-    // DEBT this should be initialize with $root not document.
-    var events = Events(document, null);
+    var events = Events($root, null);
     events.on("click", "[data-command~=start]", function (evt: Event) {
       console.log(evt.target);
     });
@@ -22,7 +21,10 @@ class AvionicsInterface {
   }
 }
 
-var $avionics = document.querySelector("[data-interface~=avionics]");
-var avionicsInterface = new AvionicsInterface($avionics, {});
+import { ready } from "./dom.ts";
+ready(function () {
+  var $avionics = document.querySelector("[data-interface~=avionics]");
+  var avionicsInterface = new AvionicsInterface($avionics, {});
+});
 
 export default {};
