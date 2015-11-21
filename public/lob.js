@@ -323,13 +323,13 @@ var Lob = (function () { 'use strict';
             this.actions = actions;
             var events = Events($root, null);
             events.on("click", "[data-command~=start]", function (evt) {
-                actions.startRecording();
+                actions.startLogging();
             });
             events.on("click", "[data-command~=stop]", function (evt) {
-                actions.stopRecording();
+                actions.stopLogging();
             });
             events.on("click", "[data-command~=reset]", function (evt) {
-                actions.clearRecording();
+                actions.clearDataLog();
             });
         }
         return AvionicsInterface;
@@ -337,18 +337,44 @@ var Lob = (function () { 'use strict';
     var Actions = (function () {
         function Actions() {
         }
-        Actions.prototype.startRecording = function () {
-            console.info("startRecording");
+        Actions.prototype.startLogging = function () {
+            this.dataLogger.start();
         };
-        Actions.prototype.stopRecording = function () {
-            console.info("stopRecording");
+        Actions.prototype.stopLogging = function () {
+            console.info("stopLogging");
         };
-        Actions.prototype.clearRecording = function () {
-            console.info("clearRecording");
+        Actions.prototype.clearDataLog = function () {
+            console.info("clearDataLog");
         };
         return Actions;
     })();
     var actions = new Actions();
+    var DataLogger = (function () {
+        function DataLogger() {
+            this.state = { status: "READY" }; // RECORDING, COMPLETED
+            this.displays = [];
+        }
+        DataLogger.prototype.start = function () {
+            console.info("hello from datalogger");
+            var state = this.state;
+            this.displays.forEach(function (view) {
+                view.update(state);
+            });
+        };
+        return DataLogger;
+    })();
+    var dataLogger = new DataLogger();
+    actions.dataLogger = dataLogger;
+    var DataLoggerDisplay = (function () {
+        function DataLoggerDisplay() {
+        }
+        DataLoggerDisplay.prototype.update = function (state) {
+            console.log(state);
+        };
+        return DataLoggerDisplay;
+    })();
+    var dataLoggerDisplay = new DataLoggerDisplay();
+    dataLogger.displays.push(dataLoggerDisplay);
     ready(function () {
         var $avionics = document.querySelector("[data-interface~=avionics]");
         var avionicsInterface = new AvionicsInterface($avionics, actions);

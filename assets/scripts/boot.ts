@@ -10,30 +10,56 @@ class AvionicsInterface {
     this.actions = actions;
     var events = Events($root, null);
     events.on("click", "[data-command~=start]", function (evt: Event) {
-      actions.startRecording();
+      actions.startLogging();
     });
     events.on("click", "[data-command~=stop]", function (evt: Event) {
-      actions.stopRecording();
+      actions.stopLogging();
     });
     events.on("click", "[data-command~=reset]", function (evt: Event) {
-      actions.clearRecording();
+      actions.clearDataLog();
     });
   }
 }
 
 class Actions {
-  startRecording(){
-    console.info("startRecording");
+  dataLogger;
+  startLogging(){
+    this.dataLogger.start();
   }
-  stopRecording(){
-    console.info("stopRecording");
+  stopLogging(){
+    console.info("stopLogging");
   }
-  clearRecording(){
-    console.info("clearRecording");
+  clearDataLog(){
+    console.info("clearDataLog");
   }
 }
 
 var actions = new Actions();
+
+class DataLogger {
+  state = {status: "READY"}; // RECORDING, COMPLETED
+  displays = [];
+  start () {
+    console.info("hello from datalogger");
+    var state = this.state;
+    this.displays.forEach(function (view) {
+      view.update(state);
+    });
+  }
+}
+
+var dataLogger = new DataLogger();
+
+actions.dataLogger = dataLogger;
+
+class DataLoggerDisplay {
+  update (state) {
+    console.log(state);
+  }
+}
+
+var dataLoggerDisplay = new DataLoggerDisplay();
+dataLogger.displays.push(dataLoggerDisplay);
 
 import { ready } from "./dom.ts";
 ready(function () {
