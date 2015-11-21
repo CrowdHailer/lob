@@ -21,6 +21,7 @@
         "!node_modules/**"
     ],
     "files": [
+        "assets/scripts/boot.ts",
         "test/jasmine.d.ts",
         "test/lob_test.ts"
     ],

@@ -1,0 +1,3 @@
+[submodule "assets/scripts/gator"]
+	path = assets/scripts/gator
+	url = git@github.com:CrowdHailer/gator.git

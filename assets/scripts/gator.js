@@ -1,54 +1,56 @@
-var Lob = (function () { 'use strict';
+/**
+ * Copyright 2014 Craig Campbell
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * GATOR.JS
+ * Simple Event Delegation
+ *
+ * @version 1.2.4
+ *
+ * Compatible with IE 9+, FF 3.6+, Safari 5+, Chrome
+ *
+ * Include legacy.js for compatibility with older browsers
+ *
+ *             .-._   _ _ _ _ _ _ _ _
+ *  .-''-.__.-'00  '-' ' ' ' ' ' ' ' '-.
+ * '.___ '    .   .--_'-' '-' '-' _'-' '._
+ *  V: V 'vv-'   '_   '.       .'  _..' '.'.
+ *    '=.____.=_.--'   :_.__.__:_   '.   : :
+ *            (((____.-'        '-.  /   : :
+ *                              (((-'\ .' /
+ *                            _____..'  .'
+ *                           '-._____.-'
+ */
+    var _matcher,
+        _level = 0,
+        _id = 0,
+        _handlers = {},
+        _gatorInstances = {};
 
-    /**
-     * Copyright 2014 Craig Campbell
-     *
-     * Licensed under the Apache License, Version 2.0 (the "License");
-     * you may not use this file except in compliance with the License.
-     * You may obtain a copy of the License at
-     *
-     * http://www.apache.org/licenses/LICENSE-2.0
-     *
-     * Unless required by applicable law or agreed to in writing, software
-     * distributed under the License is distributed on an "AS IS" BASIS,
-     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     * See the License for the specific language governing permissions and
-     * limitations under the License.
-     *
-     * GATOR.JS
-     * Simple Event Delegation
-     *
-     * @version 1.2.4
-     *
-     * Compatible with IE 9+, FF 3.6+, Safari 5+, Chrome
-     *
-     * Include legacy.js for compatibility with older browsers
-     *
-     *             .-._   _ _ _ _ _ _ _ _
-     *  .-''-.__.-'00  '-' ' ' ' ' ' ' ' '-.
-     * '.___ '    .   .--_'-' '-' '-' _'-' '._
-     *  V: V 'vv-'   '_   '.       .'  _..' '.'.
-     *    '=.____.=_.--'   :_.__.__:_   '.   : :
-     *            (((____.-'        '-.  /   : :
-     *                              (((-'\ .' /
-     *                            _____..'  .'
-     *                           '-._____.-'
-     */
-    var _matcher;
-    var _level = 0;
-    var _id = 0;
-    var _handlers = {};
-    var _gatorInstances = {};
     function _addEvent(gator, type, callback) {
+
         // blur and focus do not bubble up but if you use event capturing
         // then you will get them
         var useCapture = type == 'blur' || type == 'focus';
         gator.element.addEventListener(type, callback, useCapture);
     }
+
     function _cancel(e) {
         e.preventDefault();
         e.stopPropagation();
     }
+
     /**
      * returns function to use for determining if an element
      * matches a query selector
@@ -59,31 +61,38 @@ var Lob = (function () { 'use strict';
         if (_matcher) {
             return _matcher;
         }
+
         if (element.matches) {
             _matcher = element.matches;
             return _matcher;
         }
+
         if (element.webkitMatchesSelector) {
             _matcher = element.webkitMatchesSelector;
             return _matcher;
         }
+
         if (element.mozMatchesSelector) {
             _matcher = element.mozMatchesSelector;
             return _matcher;
         }
+
         if (element.msMatchesSelector) {
             _matcher = element.msMatchesSelector;
             return _matcher;
         }
+
         if (element.oMatchesSelector) {
             _matcher = element.oMatchesSelector;
             return _matcher;
         }
+
         // if it doesn't match a native browser method
         // fall back to the gator function
         _matcher = Gator.matchesSelector;
         return _matcher;
     }
+
     /**
      * determines if the specified element matches a given selector
      *
@@ -93,19 +102,23 @@ var Lob = (function () { 'use strict';
      * @returns {void|Node}
      */
     function _matchesSelector(element, selector, boundElement) {
+
         // no selector means this event was bound directly to this element
         if (selector == '_root') {
             return boundElement;
         }
+
         // if we have moved up to the element you bound the event to
         // then we have come too far
         if (element === boundElement) {
             return;
         }
+
         // if this is a match then we are done!
         if (_getMatcher(element).call(element, selector)) {
             return element;
         }
+
         // if this element did not match but has a parent we should try
         // going up the tree to see if any of the parent elements match
         // for example if you are looking for a click on an <a> tag but there
@@ -116,24 +129,31 @@ var Lob = (function () { 'use strict';
             return _matchesSelector(element.parentNode, selector, boundElement);
         }
     }
+
     function _addHandler(gator, event, selector, callback) {
         if (!_handlers[gator.id]) {
             _handlers[gator.id] = {};
         }
+
         if (!_handlers[gator.id][event]) {
             _handlers[gator.id][event] = {};
         }
+
         if (!_handlers[gator.id][event][selector]) {
             _handlers[gator.id][event][selector] = [];
         }
+
         _handlers[gator.id][event][selector].push(callback);
     }
+
     function _removeHandler(gator, event, selector, callback) {
+
         // if there are no events tied to this element at all
         // then don't do anything
         if (!_handlers[gator.id]) {
             return;
         }
+
         // if there is no event type specified then remove all events
         // example: Gator(element).off()
         if (!event) {
@@ -144,12 +164,14 @@ var Lob = (function () { 'use strict';
             }
             return;
         }
+
         // if no callback or selector is specified remove all events of this type
         // example: Gator(element).off('click')
         if (!callback && !selector) {
             _handlers[gator.id][event] = {};
             return;
         }
+
         // if a selector is specified but no callback remove all events
         // for this selector
         // example: Gator(element).off('click', '.sub-element')
@@ -157,12 +179,14 @@ var Lob = (function () { 'use strict';
             delete _handlers[gator.id][event][selector];
             return;
         }
+
         // if we have specified an event type, selector, and callback then we
         // need to make sure there are callbacks tied to this selector to
         // begin with.  if there aren't then we can stop here
         if (!_handlers[gator.id][event][selector]) {
             return;
         }
+
         // if there are then loop through all the callbacks and if we find
         // one that matches remove it from the array
         for (var i = 0; i < _handlers[gator.id][event][selector].length; i++) {
@@ -172,16 +196,25 @@ var Lob = (function () { 'use strict';
             }
         }
     }
+
     function _handleEvent(id, e, type) {
         if (!_handlers[id][type]) {
             return;
         }
-        var target = e.target || e.srcElement, selector, match, matches = {}, i = 0, j = 0;
+
+        var target = e.target || e.srcElement,
+            selector,
+            match,
+            matches = {},
+            i = 0,
+            j = 0;
+
         // find all events that match
         _level = 0;
         for (selector in _handlers[id][type]) {
             if (_handlers[id][type].hasOwnProperty(selector)) {
                 match = _matchesSelector(target, selector, _gatorInstances[id].element);
+
                 if (match && Gator.matchesEvent(type, _gatorInstances[id].element, match, selector == '_root', e)) {
                     _level++;
                     _handlers[id][type][selector].match = match;
@@ -189,11 +222,13 @@ var Lob = (function () { 'use strict';
                 }
             }
         }
+
         // stopPropagation() fails to set cancelBubble to true in Webkit
         // @see http://code.google.com/p/chromium/issues/detail?id=162270
-        e.stopPropagation = function () {
+        e.stopPropagation = function() {
             e.cancelBubble = true;
         };
+
         for (i = 0; i <= _level; i++) {
             if (matches[i]) {
                 for (j = 0; j < matches[i].length; j++) {
@@ -201,6 +236,7 @@ var Lob = (function () { 'use strict';
                         Gator.cancel(e);
                         return;
                     }
+
                     if (e.cancelBubble) {
                         return;
                     }
@@ -208,6 +244,7 @@ var Lob = (function () { 'use strict';
             }
         }
     }
+
     /**
      * binds the specified events to the element
      *
@@ -218,42 +255,54 @@ var Lob = (function () { 'use strict';
      * @returns {Object}
      */
     function _bind(events, selector, callback, remove) {
+
         // fail silently if you pass null or undefined as an alement
         // in the Gator constructor
         if (!this.element) {
             return;
         }
+
         if (!(events instanceof Array)) {
             events = [events];
         }
-        if (!callback && typeof (selector) == 'function') {
+
+        if (!callback && typeof(selector) == 'function') {
             callback = selector;
             selector = '_root';
         }
-        var id = this.id, i;
+
+        var id = this.id,
+            i;
+
         function _getGlobalCallback(type) {
-            return function (e) {
+            return function(e) {
                 _handleEvent(id, e, type);
             };
         }
+
         for (i = 0; i < events.length; i++) {
             if (remove) {
                 _removeHandler(this, events[i], selector, callback);
                 continue;
             }
+
             if (!_handlers[id] || !_handlers[id][events[i]]) {
                 Gator.addEvent(this, events[i], _getGlobalCallback(events[i]));
             }
+
             _addHandler(this, events[i], selector, callback);
         }
+
         return this;
     }
+
     /**
      * Gator object constructor
      *
      * @param {Node} element
      */
     function Gator(element, id) {
+
         // called as function
         if (!(this instanceof Gator)) {
             // only keep one Gator instance per node to make sure that
@@ -266,13 +315,17 @@ var Lob = (function () { 'use strict';
                     return _gatorInstances[key];
                 }
             }
+
             _id++;
             _gatorInstances[_id] = new Gator(element, _id);
+
             return _gatorInstances[_id];
         }
+
         this.element = element;
         this.id = id;
     }
+
     /**
      * adds an event
      *
@@ -281,9 +334,10 @@ var Lob = (function () { 'use strict';
      * @param {Function} callback
      * @returns {Object}
      */
-    Gator.prototype.on = function (events, selector, callback) {
+    Gator.prototype.on = function(events, selector, callback) {
         return _bind.call(this, events, selector, callback);
     };
+
     /**
      * removes an event
      *
@@ -292,27 +346,19 @@ var Lob = (function () { 'use strict';
      * @param {Function} callback
      * @returns {Object}
      */
-    Gator.prototype.off = function (events, selector, callback) {
+    Gator.prototype.off = function(events, selector, callback) {
         return _bind.call(this, events, selector, callback, true);
     };
-    Gator.matchesSelector = function () { };
+
+    Gator.matchesSelector = function() {};
     Gator.cancel = _cancel;
     Gator.addEvent = _addEvent;
-    Gator.matchesEvent = function () {
+    Gator.matchesEvent = function() {
         return true;
     };
+
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = Gator;
     }
-    var Events = Gator;
 
-    console.log("Starting boot ...");
-    var events = Events(document, null);
-    events.on("click", function (evt) {
-        console.log(evt);
-    });
-    var boot = {};
-
-    return boot;
-
-})();
+export default Gator;
