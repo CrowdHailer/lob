@@ -307,10 +307,26 @@ var Lob = (function () { 'use strict';
     var Events = Gator;
 
     console.log("Starting boot ...");
-    var events = Events(document, null);
-    events.on("click", function (evt) {
-        console.log(evt);
-    });
+    var AvionicsInterface = (function () {
+        function AvionicsInterface($root, actions) {
+            this.$root = $root;
+            this.actions = actions;
+            // DEBT this should be initialize with $root not document.
+            var events = Events(document, null);
+            events.on("click", "[data-command~=start]", function (evt) {
+                console.log(evt.target);
+            });
+            events.on("click", "[data-command~=stop]", function (evt) {
+                console.log(evt.target);
+            });
+            events.on("click", "[data-command~=reset]", function (evt) {
+                console.log(evt.target);
+            });
+        }
+        return AvionicsInterface;
+    })();
+    var $avionics = document.querySelector("[data-interface~=avionics]");
+    var avionicsInterface = new AvionicsInterface($avionics, {});
     var boot = {};
 
     return boot;

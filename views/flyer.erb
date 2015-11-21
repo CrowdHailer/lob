@@ -11,7 +11,7 @@
   <script src="/lob.js"></script>
   <link rel="stylesheet" href="/lob.css" media="screen" title="no title" charset="utf-8">
 </head>
-<body data-component="avionics-console">
+<body data-interface="avionics">
   <main>
     <h1>Lob</h1>
     <p>
@@ -22,9 +22,9 @@
     </p>
   </main>
   <footer>
-    <button type="button" data-hook="start">Start</button>
-    <button type="button" data-hook="stop">Stop <span data-hook="countdown">20s</span></button>
-    <button type="button" data-hook="reset">Reset</button>
+    <button type="button" data-command="start">Start</button>
+    <button type="button" data-command="stop">Stop <span data-hook="countdown">20s</span></button>
+    <button type="button" data-command="reset">Reset</button>
   </footer>
 </body>
 </html>
