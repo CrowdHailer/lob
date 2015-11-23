@@ -4,6 +4,10 @@ get '/' do
   erb :index
 end
 
+post '/new-flight' do
+  redirect "/test/flyer\#230"
+end
+
 post '/join' do
   channel = request.POST["channel"]
   if channel == ""
