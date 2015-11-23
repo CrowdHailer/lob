@@ -24,11 +24,12 @@
         "assets/scripts/boot.ts",
         "assets/scripts/data-logger.ts",
         "assets/scripts/dom.ts",
+        "assets/scripts/readings.ts",
         "assets/scripts/utils.ts",
-        "test/data-log-test.ts",
         "test/data-logger-test.ts",
         "test/jasmine.d.ts",
         "test/lob-test.ts",
+        "test/readings-test.ts",
         "test/streak-test.ts"
     ],
     "atom": {
