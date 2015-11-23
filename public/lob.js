@@ -461,6 +461,15 @@ var Lob = (function () { 'use strict';
         };
         return DataLoggerDisplay;
     })();
+    window.addEventListener("devicemotion", function (deviceMotionEvent) {
+        var raw = deviceMotionEvent.accelerationIncludingGravity;
+        if (typeof raw.x === "number") {
+            actions.newReading({ acceleration: { x: raw.x, y: raw.y, z: raw.z }, timestamp: Date.now() });
+        }
+        else {
+            console.warn("Device accelerometer returns null data");
+        }
+    });
     ready(function () {
         var $dataLoggerDisplay = document.querySelector("[data-display~=data-logger]");
         var dataLoggerDisplay = new DataLoggerDisplay($dataLoggerDisplay);

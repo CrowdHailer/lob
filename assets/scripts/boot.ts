@@ -58,7 +58,15 @@ class DataLoggerDisplay {
   }
 }
 
-
+window.addEventListener("devicemotion", function (deviceMotionEvent) {
+  var raw = deviceMotionEvent.accelerationIncludingGravity;
+  if (typeof raw.x === "number") {
+    actions.newReading({acceleration: {x: raw.x, y: raw.y, z: raw.z}, timestamp: Date.now()});
+  }
+  else {
+    console.warn("Device accelerometer returns null data");
+  }
+});
 import { ready } from "./dom.ts";
 ready(function () {
   var $dataLoggerDisplay = document.querySelector("[data-display~=data-logger]");
