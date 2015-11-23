@@ -28,7 +28,7 @@ class Actions {
     this.dataLogger.start();
   }
   stopLogging(){
-    console.info("stopLogging");
+    this.dataLogger.stop();
   }
   newReading(reading) {
     this.dataLogger.newReading(reading);
@@ -47,18 +47,22 @@ actions.dataLogger = dataLogger;
 class DataLoggerDisplay {
   $root: Element;
   $flightTime: any;
+  $maxAltitude;
   $startButton;
   $stopButton;
   $resetButton;
   constructor($root){
     this.$root = $root;
     this.$flightTime = $root.querySelector("[data-hook~=flight-time]");
+    this.$maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
     this.$startButton = $root.querySelector("[data-command~=start]");
     this.$stopButton = $root.querySelector("[data-command~=stop]");
     this.$resetButton = $root.querySelector("[data-command~=reset]");
   }
   update (state) {
-    this.$flightTime.innerHTML = state.readings.flightTime;
+    this.$flightTime.innerHTML = state.readings.flightTime + "s";
+    console.log(state);
+    this.$maxAltitude.innerHTML = state.maxAltitude + "m";
 
     if (state.status == DataLogger.READY) {
       this.$startButton.hidden = false;
@@ -69,6 +73,11 @@ class DataLoggerDisplay {
       this.$stopButton.hidden = false;
     } else {
       this.$stopButton.hidden = true;
+    }
+    if (state.status == DataLogger.COMPLETED) {
+      this.$resetButton.hidden = false;
+    } else {
+      this.$resetButton.hidden = true;
     }
   }
 }

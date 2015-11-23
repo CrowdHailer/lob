@@ -40,6 +40,12 @@ var Lob = (function () { 'use strict';
             }
         };
     }
+    // TODO currently untested
+    function round(precision) {
+        return function (value) {
+            return parseFloat(value.toPrecision(precision));
+        };
+    }
 
     var Readings = (function () {
         function Readings(readings) {
@@ -111,6 +117,10 @@ var Lob = (function () { 'use strict';
                 this.updateDisplays();
             }
         };
+        DataLogger.prototype.stop = function () {
+            this.status = "COMPLETED";
+            this.updateDisplays();
+        };
         DataLogger.prototype.reset = function () {
             this.status = "READY";
             this.readings = new Readings();
@@ -122,8 +132,32 @@ var Lob = (function () { 'use strict';
                 view.update(self);
             });
         };
+        Object.defineProperty(DataLogger.prototype, "maxAltitude", {
+            get: function () {
+                // Altitude Calculation
+                // SUVAT
+                // s = vt - 0.5 * a * t^2
+                // input
+                // s = s <- desired result
+                // u = ? <- not needed
+                // v = 0 <- stationary at top
+                // a = - 9.81 <- local g
+                // t = flightTime/2 time to top of arc
+                // s = 9.81 * 1/8 t^2
+                if (this.status == "COMPLETED") {
+                    var t = this.readings.flightTime;
+                    return round(2)(9.81 / 8 * t * t);
+                }
+                else {
+                    return 0;
+                }
+            },
+            enumerable: true,
+            configurable: true
+        });
         DataLogger.READY = "READY";
         DataLogger.READING = "READING";
+        DataLogger.COMPLETED = "COMPLETED";
         return DataLogger;
     })();
 
@@ -468,7 +502,7 @@ var Lob = (function () { 'use strict';
             this.dataLogger.start();
         };
         Actions.prototype.stopLogging = function () {
-            console.info("stopLogging");
+            this.dataLogger.stop();
         };
         Actions.prototype.newReading = function (reading) {
             this.dataLogger.newReading(reading);
@@ -485,12 +519,15 @@ var Lob = (function () { 'use strict';
         function DataLoggerDisplay($root) {
             this.$root = $root;
             this.$flightTime = $root.querySelector("[data-hook~=flight-time]");
+            this.$maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
             this.$startButton = $root.querySelector("[data-command~=start]");
             this.$stopButton = $root.querySelector("[data-command~=stop]");
             this.$resetButton = $root.querySelector("[data-command~=reset]");
         }
         DataLoggerDisplay.prototype.update = function (state) {
-            this.$flightTime.innerHTML = state.readings.flightTime;
+            this.$flightTime.innerHTML = state.readings.flightTime + "s";
+            console.log(state);
+            this.$maxAltitude.innerHTML = state.maxAltitude + "m";
             if (state.status == DataLogger.READY) {
                 this.$startButton.hidden = false;
             }
@@ -502,6 +539,12 @@ var Lob = (function () { 'use strict';
             }
             else {
                 this.$stopButton.hidden = true;
+            }
+            if (state.status == DataLogger.COMPLETED) {
+                this.$resetButton.hidden = false;
+            }
+            else {
+                this.$resetButton.hidden = true;
             }
         };
         return DataLoggerDisplay;
