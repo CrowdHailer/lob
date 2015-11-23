@@ -1,8 +1,13 @@
 import { streak } from "./utils.ts";
 
+export interface Reading {
+  acceleration: any;
+  timestamp: number;
+}
+
 class Readings {
-  readings;
-  constructor(readings: {acceleration: any, timestamp: any}[] = []) {
+  readings: Reading[];
+  constructor(readings: Reading[] = []) {
     this.readings = readings;
   }
   get duration(){
@@ -27,7 +32,10 @@ class Readings {
     var flightDuration = Math.max.apply(null, flightDurations);
     return Math.max(0, flightDuration);
   }
-  addReading (newReading) {
+  get length() {
+    return this.readings.length;
+  }
+  addReading (newReading: Reading) {
     return new Readings(this.readings.concat(newReading));
   }
 }

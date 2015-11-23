@@ -3,6 +3,7 @@ import DataLogger from "../assets/scripts/data-logger.ts";
 describe("Data Logger", function () {
   var lastUpdate;
   var dataLogger: DataLogger;
+  var reading = {timestamp: 100, acceleration: "acceleration"};
 
   beforeEach(function () {
     lastUpdate = undefined;
@@ -20,17 +21,17 @@ describe("Data Logger", function () {
 
   it("should pass updates to registered display", function () {
     lastUpdate = undefined;
-    dataLogger.newReading(5);
+    dataLogger.newReading(reading);
     expect(lastUpdate).toBe(dataLogger);
   });
 
   it("should add reading to readings collection", function () {
-    dataLogger.newReading(5);
+    dataLogger.newReading(reading);
     expect(dataLogger.readings.length).toBe(1);
   });
 
   it("should have no readings after reset", function () {
-    dataLogger.newReading(5);
+    dataLogger.newReading(reading);
     dataLogger.reset();
     expect(dataLogger.readings.length).toBe(0);
   });

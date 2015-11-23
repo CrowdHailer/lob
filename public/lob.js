@@ -1,20 +1,88 @@
 var Lob = (function () { 'use strict';
 
+    function streak(predicate, collection) {
+        var current_streak = [];
+        var output = [];
+        collection.forEach(function (item) {
+            if (predicate(item)) {
+                current_streak.push(item);
+            }
+            else {
+                if (current_streak.length !== 0) {
+                    output.push(current_streak);
+                }
+                current_streak = [];
+            }
+        });
+        if (current_streak.length !== 0) {
+            output.push(current_streak);
+        }
+        return output;
+    }
+
+    var Readings = (function () {
+        function Readings(readings) {
+            if (readings === void 0) { readings = []; }
+            this.readings = readings;
+        }
+        Object.defineProperty(Readings.prototype, "duration", {
+            get: function () {
+                if (this.readings.length === 0) {
+                    return 0;
+                }
+                var last = this.readings.length;
+                var t0 = this.readings[0].timestamp;
+                var t1 = this.readings[last - 1].timestamp;
+                return (t1 - t0) / 1000;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Readings.prototype, "flightTime", {
+            get: function () {
+                var streaks = streak(function (reading) {
+                    return reading.acceleration.magnitude < 2;
+                }, this.readings);
+                var flightDurations = streaks.map(function (list) {
+                    var last = list.length;
+                    var t0 = list[0].timestamp;
+                    var t1 = list[last - 1].timestamp;
+                    return (t1 - t0) / 1000;
+                });
+                var flightDuration = Math.max.apply(null, flightDurations);
+                return Math.max(0, flightDuration);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Readings.prototype, "length", {
+            get: function () {
+                return this.readings.length;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Readings.prototype.addReading = function (newReading) {
+            return new Readings(this.readings.concat(newReading));
+        };
+        return Readings;
+    })();
+
     var DataLogger = (function () {
         function DataLogger() {
             this.displays = [];
-            this.readings = [];
+            this.readings = new Readings();
         }
         DataLogger.prototype.registerDisplay = function (display) {
             this.displays.push(display);
             display.update(this);
         };
         DataLogger.prototype.newReading = function (reading) {
-            this.readings.push(reading);
+            this.readings = this.readings.addReading(reading);
             this.updateDisplays();
         };
         DataLogger.prototype.reset = function () {
-            this.readings = [];
+            this.readings = new Readings();
         };
         DataLogger.prototype.updateDisplays = function () {
             var self = this;
@@ -372,7 +440,7 @@ var Lob = (function () { 'use strict';
             this.dataLogger.newReading(reading);
         };
         Actions.prototype.clearDataLog = function () {
-            console.info("clearDataLog");
+            this.dataLogger.reset();
         };
         return Actions;
     })();
@@ -383,7 +451,8 @@ var Lob = (function () { 'use strict';
         function DataLoggerDisplay() {
         }
         DataLoggerDisplay.prototype.update = function (state) {
-            console.log(state);
+            console.log(state.readings.duration);
+            console.log(state.readings.length);
         };
         return DataLoggerDisplay;
     })();

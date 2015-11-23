@@ -34,7 +34,7 @@ class Actions {
     this.dataLogger.newReading(reading);
   }
   clearDataLog(){
-    console.info("clearDataLog");
+    this.dataLogger.reset();
   }
 }
 
@@ -46,7 +46,8 @@ actions.dataLogger = dataLogger;
 
 class DataLoggerDisplay {
   update (state) {
-    console.log(state);
+    console.log(state.readings.duration);
+    console.log(state.readings.length);
   }
 }
 
