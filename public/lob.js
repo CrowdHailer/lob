@@ -507,7 +507,7 @@ var Lob = (function () { 'use strict';
         Actions.prototype.newReading = function (reading) {
             this.dataLogger.newReading(reading);
             if (this.dataLogger.status == "READING") {
-                this.uplink.publish("reading", reading);
+                this.uplink.publish("accelerometerReading", reading);
             }
         };
         Actions.prototype.clearDataLog = function () {
@@ -562,12 +562,14 @@ var Lob = (function () { 'use strict';
             console.warn("Device accelerometer returns null data");
         }
     }
-    var throttledReport = throttle(reportDeviceMotionEvent, 100, {});
+    var throttledReport = throttle(reportDeviceMotionEvent, 250, {});
     window.addEventListener("devicemotion", throttledReport);
     ready(function () {
         var $dataLoggerDisplay = document.querySelector("[data-display~=data-logger]");
-        var dataLoggerDisplay = new DataLoggerDisplay($dataLoggerDisplay);
-        dataLogger.registerDisplay(dataLoggerDisplay);
+        if ($dataLoggerDisplay) {
+            var dataLoggerDisplay = new DataLoggerDisplay($dataLoggerDisplay);
+            dataLogger.registerDisplay(dataLoggerDisplay);
+        }
         var $avionics = document.querySelector("[data-interface~=avionics]");
         var avionicsInterface = new AvionicsInterface($avionics, actions);
     });
@@ -593,10 +595,68 @@ var Lob = (function () { 'use strict';
                 }
             });
         };
+        Uplink.prototype.subscribe = function (eventName, callback) {
+            this.channel.subscribe(eventName, callback);
+        };
         return Uplink;
     })();
     var uplink = new Uplink({ key: key, channelName: channel });
     actions.uplink = uplink;
+    ready(function () {
+        var $tracker = document.querySelector("[data-display~=tracker]");
+        if ($tracker) {
+            var canvas = document.querySelector("#myChart");
+            var ctx = canvas.getContext("2d");
+            var myNewChart = new Chart(ctx);
+            var data = {
+                labels: [],
+                datasets: [{
+                        label: "My First dataset",
+                        fillColor: "rgba(220,220,220,0)",
+                        strokeColor: "limegreen",
+                        pointColor: "limegreen",
+                        data: []
+                    }, {
+                        label: "My First dataset",
+                        fillColor: "rgba(220,220,220,0)",
+                        strokeColor: "green",
+                        pointColor: "green",
+                        data: []
+                    }, {
+                        label: "My First dataset",
+                        fillColor: "rgba(220,220,220,0)",
+                        strokeColor: "teal",
+                        pointColor: "teal",
+                        data: []
+                    }, {
+                        label: "My First dataset",
+                        fillColor: "rgba(220,220,220,0)",
+                        strokeColor: "orange",
+                        pointColor: "orange",
+                        data: []
+                    }]
+            };
+            var myLineChart = new Chart(ctx).Line(data, { animation: false, animationSteps: 4, pointDot: false });
+            var i = 0.0;
+            uplink.subscribe("accelerometerReading", function (message) {
+                var x = message.data.acceleration.x;
+                var y = message.data.acceleration.y;
+                var z = message.data.acceleration.z;
+                console.log(message.data);
+                var m = Math.sqrt(x * x + y * y + z * z);
+                myLineChart.addData([x, y, z, m], i);
+                i = i + 0.25;
+            });
+            uplink.subscribe("reset", function (message) {
+                console.log("bananas");
+                myLineChart.destroy();
+                i = 0.0;
+                data.labels = [];
+                // labels array is mutated by adding data.
+                myLineChart = new Chart(ctx).Line(data, { animation: false, animationSteps: 4, pointDot: false });
+            });
+        }
+    });
 
     return actions;
 
