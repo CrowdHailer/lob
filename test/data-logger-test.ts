@@ -72,6 +72,12 @@ describe("Data Logger", function () {
       dataLogger.reset();
       expect(dataLogger.status).toBe(DataLogger.READY);
     });
+
+    it("should pass reset update to registered display", function () {
+      lastUpdate = undefined;
+      dataLogger.reset();
+      expect(lastUpdate).toBe(dataLogger);
+    });
   });
 
 });

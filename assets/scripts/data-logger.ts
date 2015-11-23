@@ -22,6 +22,7 @@ class DataLogger {
   reset() {
     this.status = "READY";
     this.readings = new Readings();
+    this.updateDisplays();
   }
   updateDisplays() {
     var self = this;

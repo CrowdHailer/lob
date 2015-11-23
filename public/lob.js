@@ -95,17 +95,26 @@ var Lob = (function () { 'use strict';
         function DataLogger() {
             this.displays = [];
             this.readings = new Readings();
+            this.status = "READY";
         }
         DataLogger.prototype.registerDisplay = function (display) {
             this.displays.push(display);
             display.update(this);
         };
-        DataLogger.prototype.newReading = function (reading) {
-            this.readings = this.readings.addReading(reading);
+        DataLogger.prototype.start = function () {
+            this.status = "READING";
             this.updateDisplays();
         };
+        DataLogger.prototype.newReading = function (reading) {
+            if (this.status == "READING") {
+                this.readings = this.readings.addReading(reading);
+                this.updateDisplays();
+            }
+        };
         DataLogger.prototype.reset = function () {
+            this.status = "READY";
             this.readings = new Readings();
+            this.updateDisplays();
         };
         DataLogger.prototype.updateDisplays = function () {
             var self = this;
@@ -113,6 +122,8 @@ var Lob = (function () { 'use strict';
                 view.update(self);
             });
         };
+        DataLogger.READY = "READY";
+        DataLogger.READING = "READING";
         return DataLogger;
     })();
 
@@ -454,7 +465,7 @@ var Lob = (function () { 'use strict';
         function Actions() {
         }
         Actions.prototype.startLogging = function () {
-            // this.dataLogger.start();
+            this.dataLogger.start();
         };
         Actions.prototype.stopLogging = function () {
             console.info("stopLogging");
@@ -474,11 +485,24 @@ var Lob = (function () { 'use strict';
         function DataLoggerDisplay($root) {
             this.$root = $root;
             this.$flightTime = $root.querySelector("[data-hook~=flight-time]");
+            this.$startButton = $root.querySelector("[data-command~=start]");
+            this.$stopButton = $root.querySelector("[data-command~=stop]");
+            this.$resetButton = $root.querySelector("[data-command~=reset]");
         }
         DataLoggerDisplay.prototype.update = function (state) {
             this.$flightTime.innerHTML = state.readings.flightTime;
-            console.log(state.readings.duration);
-            console.log(state.readings.length);
+            if (state.status == DataLogger.READY) {
+                this.$startButton.hidden = false;
+            }
+            else {
+                this.$startButton.hidden = true;
+            }
+            if (state.status == DataLogger.READING) {
+                this.$stopButton.hidden = false;
+            }
+            else {
+                this.$stopButton.hidden = true;
+            }
         };
         return DataLoggerDisplay;
     })();

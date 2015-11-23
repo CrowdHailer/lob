@@ -25,7 +25,7 @@ import DataLogger from "./data-logger.ts";
 class Actions {
   dataLogger: DataLogger;
   startLogging(){
-    // this.dataLogger.start();
+    this.dataLogger.start();
   }
   stopLogging(){
     console.info("stopLogging");
@@ -47,14 +47,29 @@ actions.dataLogger = dataLogger;
 class DataLoggerDisplay {
   $root: Element;
   $flightTime: any;
+  $startButton;
+  $stopButton;
+  $resetButton;
   constructor($root){
     this.$root = $root;
     this.$flightTime = $root.querySelector("[data-hook~=flight-time]");
+    this.$startButton = $root.querySelector("[data-command~=start]");
+    this.$stopButton = $root.querySelector("[data-command~=stop]");
+    this.$resetButton = $root.querySelector("[data-command~=reset]");
   }
   update (state) {
     this.$flightTime.innerHTML = state.readings.flightTime;
-    console.log(state.readings.duration);
-    console.log(state.readings.length);
+
+    if (state.status == DataLogger.READY) {
+      this.$startButton.hidden = false;
+    } else {
+      this.$startButton.hidden = true;
+    }
+    if (state.status == DataLogger.READING) {
+      this.$stopButton.hidden = false;
+    } else {
+      this.$stopButton.hidden = true;
+    }
   }
 }
 
