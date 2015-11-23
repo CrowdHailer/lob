@@ -3,10 +3,10 @@
 import typescript from 'rollup-plugin-typescript';
 
 export default {
-  entry: 'test/lob_test.ts',
+  entry: 'test/lob-test.ts',
   format: "iife",
   moduleName: "test",
-  dest: "tmp/test_bundle.js",
+  dest: "tmp/test-bundle.js",
   // sourceMap: true,
   // sourceMapFile: 'public/lob.js.map',
 

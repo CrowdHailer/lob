@@ -42,7 +42,7 @@ class DataLogger {
   start () {
     console.info("hello from datalogger");
     this.updateDisplays();
-  }
+  };
   updateDisplays () {
     var state = this.state;
     this.displays.forEach(function (view) {
