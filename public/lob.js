@@ -19,6 +19,27 @@ var Lob = (function () { 'use strict';
         }
         return output;
     }
+    // TODO currently untested
+    function throttle(fn, threshhold, scope) {
+        threshhold = threshhold || 250;
+        var last, deferTimer;
+        return function () {
+            var context = scope || this;
+            var now = Date.now(), args = arguments;
+            if (last && now < last + threshhold) {
+                // hold on to it
+                clearTimeout(deferTimer);
+                deferTimer = setTimeout(function () {
+                    last = now;
+                    fn.apply(context, args);
+                }, threshhold);
+            }
+            else {
+                last = now;
+                fn.apply(context, args);
+            }
+        };
+    }
 
     var Readings = (function () {
         function Readings(readings) {
@@ -461,7 +482,7 @@ var Lob = (function () { 'use strict';
         };
         return DataLoggerDisplay;
     })();
-    window.addEventListener("devicemotion", function (deviceMotionEvent) {
+    function reportDeviceMotionEvent(deviceMotionEvent) {
         var raw = deviceMotionEvent.accelerationIncludingGravity;
         if (typeof raw.x === "number") {
             actions.newReading({ acceleration: { x: raw.x, y: raw.y, z: raw.z }, timestamp: Date.now() });
@@ -469,7 +490,9 @@ var Lob = (function () { 'use strict';
         else {
             console.warn("Device accelerometer returns null data");
         }
-    });
+    }
+    var throttledReport = throttle(reportDeviceMotionEvent, 100, {});
+    window.addEventListener("devicemotion", throttledReport);
     ready(function () {
         var $dataLoggerDisplay = document.querySelector("[data-display~=data-logger]");
         var dataLoggerDisplay = new DataLoggerDisplay($dataLoggerDisplay);
