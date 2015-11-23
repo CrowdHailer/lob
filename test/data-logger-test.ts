@@ -11,7 +11,7 @@ describe("Data Logger", function () {
     dataLogger.registerDisplay({update: function(update){ lastUpdate = update; }});
   });
 
-  it("should pass state to a newly registered display", function () {
+  it("should pass self to a newly registered display", function () {
     expect(lastUpdate).toBe(dataLogger);
   });
 
@@ -19,20 +19,59 @@ describe("Data Logger", function () {
     expect(dataLogger.readings.length).toBe(0);
   });
 
-  it("should pass updates to registered display", function () {
+  it("should start Ready", function () {
+    expect(dataLogger.status).toBe(DataLogger.READY);
+  });
+
+  it("should not pass updates to displays", function () {
     lastUpdate = undefined;
     dataLogger.newReading(reading);
+    expect(lastUpdate).toBeUndefined();
+  });
+
+  it("should not add reading to readings collection", function () {
+    dataLogger.newReading(reading);
+    expect(dataLogger.readings.length).toBe(0);
+  });
+
+  it("should be Reading after start", function () {
+    dataLogger.start();
+    expect(dataLogger.status).toBe(DataLogger.READING);
+  });
+
+  it("should pass start update to registered display", function () {
+    lastUpdate = undefined;
+    dataLogger.start();
     expect(lastUpdate).toBe(dataLogger);
   });
 
-  it("should add reading to readings collection", function () {
-    dataLogger.newReading(reading);
-    expect(dataLogger.readings.length).toBe(1);
+  describe("started datalogger", function() {
+    beforeEach(function () {
+      dataLogger.start();
+    });
+
+    it("should pass updates to displays", function () {
+      lastUpdate = undefined;
+      dataLogger.newReading(reading);
+      expect(lastUpdate).toBe(dataLogger);
+    });
+
+    it("should add reading to readings collection", function () {
+      dataLogger.newReading(reading);
+      expect(dataLogger.readings.length).toBe(1);
+    });
+
+    it("should have no readings after reset", function () {
+      dataLogger.newReading(reading);
+      dataLogger.reset();
+      expect(dataLogger.readings.length).toBe(0);
+    });
+
+    it("should be ready after reset", function () {
+      dataLogger.newReading(reading);
+      dataLogger.reset();
+      expect(dataLogger.status).toBe(DataLogger.READY);
+    });
   });
 
-  it("should have no readings after reset", function () {
-    dataLogger.newReading(reading);
-    dataLogger.reset();
-    expect(dataLogger.readings.length).toBe(0);
-  });
 });

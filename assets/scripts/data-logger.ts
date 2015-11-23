@@ -4,23 +4,33 @@ import { Reading } from "./readings.ts";
 class DataLogger {
   private displays = [];
   readings = new Readings();
-  registerDisplay (display) {
+  status = "READY";
+  registerDisplay(display) {
     this.displays.push(display);
     display.update(this);
   }
-  newReading (reading: Reading) {
-    this.readings = this.readings.addReading(reading);
+  start(){
+    this.status = "READING";
     this.updateDisplays();
   }
-  reset () {
+  newReading(reading: Reading) {
+    if (this.status == "READING") {
+      this.readings = this.readings.addReading(reading);
+      this.updateDisplays();
+    }
+  }
+  reset() {
+    this.status = "READY";
     this.readings = new Readings();
   }
-  updateDisplays () {
+  updateDisplays() {
     var self = this;
     this.displays.forEach(function (view) {
       view.update(self);
     });
   }
+  static READY = "READY";
+  static READING = "READING";
 }
 
 export default DataLogger;
