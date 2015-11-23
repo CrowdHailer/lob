@@ -452,6 +452,7 @@ var Lob = (function () { 'use strict';
         }
         DataLoggerDisplay.prototype.update = function (state) {
             console.log(state.readings.duration);
+            console.log(state.readings.flightTime);
             console.log(state.readings.length);
         };
         return DataLoggerDisplay;

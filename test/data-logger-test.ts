@@ -3,7 +3,7 @@ import DataLogger from "../assets/scripts/data-logger.ts";
 describe("Data Logger", function () {
   var lastUpdate;
   var dataLogger: DataLogger;
-  var reading = {timestamp: 100, acceleration: "acceleration"};
+  var reading = {timestamp: 100, acceleration: {x: 0, y: 0, z: 10}};
 
   beforeEach(function () {
     lastUpdate = undefined;

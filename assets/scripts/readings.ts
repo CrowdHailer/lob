@@ -1,7 +1,13 @@
 import { streak } from "./utils.ts";
 
+export interface Vector {
+  x: number;
+  y: number;
+  z: number;
+}
+
 export interface Reading {
-  acceleration: any;
+  acceleration: Vector;
   timestamp: number;
 }
 
@@ -20,8 +26,10 @@ class Readings {
     return (t1 - t0) / 1000;
   }
   get flightTime(){
-    var streaks = streak(function (reading) {
-      return reading.acceleration.magnitude < 2;
+    var streaks = streak(function (reading: Reading) {
+      var a = reading.acceleration;
+      var magnitude = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+      return magnitude < 2;
     }, this.readings);
     var flightDurations = streaks.map(function (list) {
       var last = list.length;

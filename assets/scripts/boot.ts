@@ -47,6 +47,7 @@ actions.dataLogger = dataLogger;
 class DataLoggerDisplay {
   update (state) {
     console.log(state.readings.duration);
+    console.log(state.readings.flightTime);
     console.log(state.readings.length);
   }
 }
