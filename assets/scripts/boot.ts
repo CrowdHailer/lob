@@ -24,6 +24,7 @@ class AvionicsInterface {
 import DataLogger from "./data-logger.ts";
 class Actions {
   dataLogger: DataLogger;
+  uplink: Uplink;
   startLogging(){
     this.dataLogger.start();
   }
@@ -32,9 +33,13 @@ class Actions {
   }
   newReading(reading) {
     this.dataLogger.newReading(reading);
+    if (this.dataLogger.status == "READING") {
+      this.uplink.publish("reading", reading);
+    }
   }
   clearDataLog(){
     this.dataLogger.reset();
+    this.uplink.publish("reset", null);
   }
 }
 
@@ -116,3 +121,26 @@ var channel = window.location.pathname.match(regex)[1];
 var key = window.location.hash.match(/#(.+)/)[1];
 console.info(channel);
 console.info(key);
+
+declare var Ably: any;
+class Uplink {
+  channel: any;
+  constructor(options) {
+    var key = options["key"];
+    var channelName = options["channelName"];
+    var realtime = new Ably.Realtime({ key: key });
+    this.channel = realtime.channels.get(channelName);
+  }
+  publish(eventName, vector){
+    this.channel.publish(eventName, vector, function(err) {
+      if(err) {
+        console.log("Unable to publish message; err = " + err.message);
+      } else {
+        console.log("Message successfully sent");
+      }
+    });
+  }
+}
+
+var uplink = new Uplink({key: key, channelName: channel});
+actions.uplink = uplink;

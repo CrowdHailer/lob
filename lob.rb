@@ -5,7 +5,7 @@ get '/' do
 end
 
 post '/new-flight' do
-  redirect "/test/flyer\#230"
+  redirect "/test/flyer\#1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_"
 end
 
 post '/join' do

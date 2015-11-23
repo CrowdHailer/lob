@@ -506,9 +506,13 @@ var Lob = (function () { 'use strict';
         };
         Actions.prototype.newReading = function (reading) {
             this.dataLogger.newReading(reading);
+            if (this.dataLogger.status == "READING") {
+                this.uplink.publish("reading", reading);
+            }
         };
         Actions.prototype.clearDataLog = function () {
             this.dataLogger.reset();
+            this.uplink.publish("reset", null);
         };
         return Actions;
     })();
@@ -572,6 +576,27 @@ var Lob = (function () { 'use strict';
     var key = window.location.hash.match(/#(.+)/)[1];
     console.info(channel);
     console.info(key);
+    var Uplink = (function () {
+        function Uplink(options) {
+            var key = options["key"];
+            var channelName = options["channelName"];
+            var realtime = new Ably.Realtime({ key: key });
+            this.channel = realtime.channels.get(channelName);
+        }
+        Uplink.prototype.publish = function (eventName, vector) {
+            this.channel.publish(eventName, vector, function (err) {
+                if (err) {
+                    console.log("Unable to publish message; err = " + err.message);
+                }
+                else {
+                    console.log("Message successfully sent");
+                }
+            });
+        };
+        return Uplink;
+    })();
+    var uplink = new Uplink({ key: key, channelName: channel });
+    actions.uplink = uplink;
 
     return actions;
 
