@@ -21,13 +21,17 @@ class AvionicsInterface {
   }
 }
 
+import DataLogger from "./data-logger.ts";
 class Actions {
-  dataLogger;
+  dataLogger: DataLogger;
   startLogging(){
-    this.dataLogger.start();
+    // this.dataLogger.start();
   }
   stopLogging(){
     console.info("stopLogging");
+  }
+  newReading(reading) {
+    this.dataLogger.newReading(reading);
   }
   clearDataLog(){
     console.info("clearDataLog");
@@ -35,21 +39,6 @@ class Actions {
 }
 
 var actions = new Actions();
-
-class DataLogger {
-  state = {status: "READY", readings: []}; // RECORDING, COMPLETED
-  displays = [];
-  start () {
-    console.info("hello from datalogger");
-    this.updateDisplays();
-  };
-  updateDisplays () {
-    var state = this.state;
-    this.displays.forEach(function (view) {
-      view.update(state);
-    });
-  }
-}
 
 var dataLogger = new DataLogger();
 
@@ -62,7 +51,7 @@ class DataLoggerDisplay {
 }
 
 var dataLoggerDisplay = new DataLoggerDisplay();
-dataLogger.displays.push(dataLoggerDisplay);
+dataLogger.registerDisplay(dataLoggerDisplay);
 
 import { ready } from "./dom.ts";
 ready(function () {
@@ -70,4 +59,4 @@ ready(function () {
   var avionicsInterface = new AvionicsInterface($avionics, actions);
 });
 
-export default {};
+export default actions;

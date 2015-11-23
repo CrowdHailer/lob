@@ -1,5 +1,30 @@
 var Lob = (function () { 'use strict';
 
+    var DataLogger = (function () {
+        function DataLogger() {
+            this.displays = [];
+            this.readings = [];
+        }
+        DataLogger.prototype.registerDisplay = function (display) {
+            this.displays.push(display);
+            display.update(this);
+        };
+        DataLogger.prototype.newReading = function (reading) {
+            this.readings.push(reading);
+            this.updateDisplays();
+        };
+        DataLogger.prototype.reset = function () {
+            this.readings = [];
+        };
+        DataLogger.prototype.updateDisplays = function () {
+            var self = this;
+            this.displays.forEach(function (view) {
+                view.update(self);
+            });
+        };
+        return DataLogger;
+    })();
+
     // DEBT untested
     function ready(fn) {
         if (document.readyState !== "loading") {
@@ -338,10 +363,13 @@ var Lob = (function () { 'use strict';
         function Actions() {
         }
         Actions.prototype.startLogging = function () {
-            this.dataLogger.start();
+            // this.dataLogger.start();
         };
         Actions.prototype.stopLogging = function () {
             console.info("stopLogging");
+        };
+        Actions.prototype.newReading = function (reading) {
+            this.dataLogger.newReading(reading);
         };
         Actions.prototype.clearDataLog = function () {
             console.info("clearDataLog");
@@ -349,23 +377,6 @@ var Lob = (function () { 'use strict';
         return Actions;
     })();
     var actions = new Actions();
-    var DataLogger = (function () {
-        function DataLogger() {
-            this.state = { status: "READY" }; // RECORDING, COMPLETED
-            this.displays = [];
-        }
-        DataLogger.prototype.start = function () {
-            console.info("hello from datalogger");
-            this.updateDisplays();
-        };
-        DataLogger.prototype.updateDisplays = function () {
-            var state = this.state;
-            this.displays.forEach(function (view) {
-                view.update(state);
-            });
-        };
-        return DataLogger;
-    })();
     var dataLogger = new DataLogger();
     actions.dataLogger = dataLogger;
     var DataLoggerDisplay = (function () {
@@ -377,13 +388,12 @@ var Lob = (function () { 'use strict';
         return DataLoggerDisplay;
     })();
     var dataLoggerDisplay = new DataLoggerDisplay();
-    dataLogger.displays.push(dataLoggerDisplay);
+    dataLogger.registerDisplay(dataLoggerDisplay);
     ready(function () {
         var $avionics = document.querySelector("[data-interface~=avionics]");
         var avionicsInterface = new AvionicsInterface($avionics, actions);
     });
-    var boot = {};
 
-    return boot;
+    return actions;
 
 })();
