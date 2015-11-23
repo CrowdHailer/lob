@@ -110,3 +110,9 @@ ready(function () {
 });
 
 export default actions;
+
+var regex = /^\/([^\/]+)/;
+var channel = window.location.pathname.match(regex)[1];
+var key = window.location.hash.match(/#(.+)/)[1];
+console.info(channel);
+console.info(key);

@@ -492,7 +492,6 @@ var Lob = (function () { 'use strict';
             events.on("click", "[data-command~=reset]", function (evt) {
                 actions.clearDataLog();
             });
-            throw 4;
         }
         return AvionicsInterface;
     })();
@@ -568,6 +567,11 @@ var Lob = (function () { 'use strict';
         var $avionics = document.querySelector("[data-interface~=avionics]");
         var avionicsInterface = new AvionicsInterface($avionics, actions);
     });
+    var regex = /^\/([^\/]+)/;
+    var channel = window.location.pathname.match(regex)[1];
+    var key = window.location.hash.match(/#(.+)/)[1];
+    console.info(channel);
+    console.info(key);
 
     return actions;
 
