@@ -492,6 +492,7 @@ var Lob = (function () { 'use strict';
             events.on("click", "[data-command~=reset]", function (evt) {
                 actions.clearDataLog();
             });
+            throw 4;
         }
         return AvionicsInterface;
     })();
@@ -571,3 +572,4 @@ var Lob = (function () { 'use strict';
     return actions;
 
 })();
+//# sourceMappingURL=lob.js.map

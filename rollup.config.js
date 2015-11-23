@@ -7,8 +7,7 @@ export default {
   format: "iife",
   moduleName: "Lob",
   dest: "public/lob.js",
-  // sourceMap: true,
-  // sourceMapFile: 'public/lob.js.map',
+  sourceMap: true,
 
   plugins: [
     typescript({
