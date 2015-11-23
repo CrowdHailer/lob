@@ -45,18 +45,27 @@ var dataLogger = new DataLogger();
 actions.dataLogger = dataLogger;
 
 class DataLoggerDisplay {
+  $root: Element;
+  $flightTime: any;
+  constructor($root){
+    this.$root = $root;
+    this.$flightTime = $root.querySelector("[data-hook~=flight-time]");
+  }
   update (state) {
+    this.$flightTime.innerHTML = state.readings.flightTime;
     console.log(state.readings.duration);
-    console.log(state.readings.flightTime);
     console.log(state.readings.length);
   }
 }
 
-var dataLoggerDisplay = new DataLoggerDisplay();
-dataLogger.registerDisplay(dataLoggerDisplay);
 
 import { ready } from "./dom.ts";
 ready(function () {
+  var $dataLoggerDisplay = document.querySelector("[data-display~=data-logger]");
+  var dataLoggerDisplay = new DataLoggerDisplay($dataLoggerDisplay);
+
+  dataLogger.registerDisplay(dataLoggerDisplay);
+
   var $avionics = document.querySelector("[data-interface~=avionics]");
   var avionicsInterface = new AvionicsInterface($avionics, actions);
 });

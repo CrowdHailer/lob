@@ -41,7 +41,9 @@ var Lob = (function () { 'use strict';
         Object.defineProperty(Readings.prototype, "flightTime", {
             get: function () {
                 var streaks = streak(function (reading) {
-                    return reading.acceleration.magnitude < 2;
+                    var a = reading.acceleration;
+                    var magnitude = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+                    return magnitude < 2;
                 }, this.readings);
                 var flightDurations = streaks.map(function (list) {
                     var last = list.length;
@@ -448,18 +450,21 @@ var Lob = (function () { 'use strict';
     var dataLogger = new DataLogger();
     actions.dataLogger = dataLogger;
     var DataLoggerDisplay = (function () {
-        function DataLoggerDisplay() {
+        function DataLoggerDisplay($root) {
+            this.$root = $root;
+            this.$flightTime = $root.querySelector("[data-hook~=flight-time]");
         }
         DataLoggerDisplay.prototype.update = function (state) {
+            this.$flightTime.innerHTML = state.readings.flightTime;
             console.log(state.readings.duration);
-            console.log(state.readings.flightTime);
             console.log(state.readings.length);
         };
         return DataLoggerDisplay;
     })();
-    var dataLoggerDisplay = new DataLoggerDisplay();
-    dataLogger.registerDisplay(dataLoggerDisplay);
     ready(function () {
+        var $dataLoggerDisplay = document.querySelector("[data-display~=data-logger]");
+        var dataLoggerDisplay = new DataLoggerDisplay($dataLoggerDisplay);
+        dataLogger.registerDisplay(dataLoggerDisplay);
         var $avionics = document.querySelector("[data-interface~=avionics]");
         var avionicsInterface = new AvionicsInterface($avionics, actions);
     });
