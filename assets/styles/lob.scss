@@ -23,7 +23,7 @@ body {
 h1 {
   font-size: 400%;
   text-align: center;
-  padding: 1rem 0;
+  margin: 1rem 0;
 }
 
 main {
@@ -31,6 +31,24 @@ main {
   border-radius: 6px;
   min-height: 100%;
   position: relative;
+}
+
+p {
+  margin: 1rem 0;
+  padding: 0 1rem;
+  font-size: 140%;
+}
+span {
+  width: 50%;
+  display: inline-block;
+  &.right {
+    padding-right: 0.4em;
+    text-align: right;
+  }
+  &.left {
+    padding-left: 0.4em;
+    text-align: left;
+  }
 }
 
 footer {
@@ -51,19 +69,19 @@ form {
 }
 
 ::-webkit-input-placeholder {
-   color: #111;
+  color: #111;
 }
 
 :-moz-placeholder { /* Firefox 18- */
-   color: #111;
+  color: #111;
 }
 
 ::-moz-placeholder {  /* Firefox 19+ */
-   color: #111;
+  color: #111;
 }
 
 :-ms-input-placeholder {
-   color: #111;
+  color: #111;
 }
 
 input {

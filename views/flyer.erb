@@ -15,16 +15,18 @@
   <main>
     <h1>Lob</h1>
     <p>
-      <span class="right">Time:</span><span data-hook="flight-time"></span>
+      <span class="right">Time:</span><span class="left" data-hook="flight-time"></span>
     </p>
     <p>
-      <span class="right">Height:</span><span data-hook="max-altitude"></span>
+      <span class="right">Height:</span><span class="left" data-hook="max-altitude"></span>
     </p>
+    <footer>
+      <form class="" action="index.html" method="post">
+        <button type="button" data-command="start">Start</button>
+        <button type="button" data-command="stop">Stop</button>
+        <button type="button" data-command="reset">Reset</button>
+      </form>
+    </footer>
   </main>
-  <footer>
-    <button type="button" data-command="start">Start</button>
-    <button type="button" data-command="stop">Stop</button>
-    <button type="button" data-command="reset">Reset</button>
-  </footer>
 </body>
 </html>

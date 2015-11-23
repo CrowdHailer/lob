@@ -61,13 +61,28 @@ body {
 h1 {
   font-size: 400%;
   text-align: center;
-  padding: 1rem 0; }
+  margin: 1rem 0; }
 
 main {
   border: 3px solid black;
   border-radius: 6px;
   min-height: 100%;
   position: relative; }
+
+p {
+  margin: 1rem 0;
+  padding: 0 1rem;
+  font-size: 140%; }
+
+span {
+  width: 50%;
+  display: inline-block; }
+  span.right {
+    padding-right: 0.4em;
+    text-align: right; }
+  span.left {
+    padding-left: 0.4em;
+    text-align: left; }
 
 footer {
   position: absolute;
