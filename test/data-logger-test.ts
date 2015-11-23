@@ -34,6 +34,11 @@ describe("Data Logger", function () {
     expect(dataLogger.readings.length).toBe(0);
   });
 
+  it("should have a max altitude of 0", function () {
+    dataLogger.newReading(reading);
+    expect(dataLogger.maxAltitude).toBe(0);
+  });
+
   it("should be Reading after start", function () {
     dataLogger.start();
     expect(dataLogger.status).toBe(DataLogger.READING);
@@ -77,6 +82,27 @@ describe("Data Logger", function () {
       lastUpdate = undefined;
       dataLogger.reset();
       expect(lastUpdate).toBe(dataLogger);
+    });
+
+    it("should be completed after a stop", function () {
+      dataLogger.stop();
+      expect(dataLogger.status).toBe(DataLogger.COMPLETED);
+    });
+
+    it("should pass stop update to registered display", function () {
+      lastUpdate = undefined;
+      dataLogger.stop();
+      expect(lastUpdate).toBe(dataLogger);
+    });
+
+    it("should have a max altitude after being stoped", function () {
+      var reading1 = {timestamp: 1000, acceleration: {x: 0, y: 0, z: 1}};
+      var reading2 = {timestamp: 2000, acceleration: {x: 0, y: 0, z: 1}};
+      dataLogger.newReading(reading1);
+      dataLogger.newReading(reading2);
+      expect(dataLogger.maxAltitude).toBe(0);
+      dataLogger.stop();
+      expect(dataLogger.maxAltitude).toBe(1.2);
     });
   });
 
