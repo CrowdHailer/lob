@@ -1,0 +1,103 @@
+@import url(https://fonts.googleapis.com/css?family=Raleway);
+
+@import 'vendor/scut';
+
+// RESETS
+// Preferred behaviour
+@include scut-reset-border-box;
+@include scut-reset-button;
+@include scut-reset-semanticize;
+
+html, body {
+  height: 100%;
+  border: 0;
+  margin: 0;
+}
+
+body {
+  font-family: 'Raleway', sans-serif;
+  background-color: #FFCC00;
+  padding: 1.2rem;
+}
+
+h1 {
+  font-size: 400%;
+  text-align: center;
+  margin: 1rem 0;
+  color: black;
+}
+a {
+  text-decoration: none;
+}
+
+main {
+  border: 3px solid black;
+  border-radius: 6px;
+  min-height: 100%;
+  position: relative;
+  overflow: hidden;
+  max-width: 966px;
+  margin: 0 auto;
+}
+
+#orientation-tracker {
+  max-width: 960px;
+}
+p {
+  margin: 1rem 0;
+  padding: 0 1rem;
+  font-size: 140%;
+}
+span {
+  width: 50%;
+  display: inline-block;
+  &.right {
+    padding-right: 0.4em;
+    text-align: right;
+  }
+  &.left {
+    padding-left: 0.4em;
+    text-align: left;
+  }
+}
+
+footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+form {
+  border: 2px solid;
+  display: block;
+  padding: 0.5em;
+  font-size: 160%;
+  text-align: right;
+  border-radius: 4px;
+  margin: 1rem;
+}
+
+::-webkit-input-placeholder {
+  color: #777;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+  color: #777;
+}
+
+::-moz-placeholder {  /* Firefox 19+ */
+  color: #777;
+}
+
+:-ms-input-placeholder {
+  color: #777;
+}
+
+input {
+  font-size: 100%;
+  width: 50%;
+  margin-right: 0.4em;
+  background-color: rgba(0,0,0,0);
+  font-family: raleway;
+}

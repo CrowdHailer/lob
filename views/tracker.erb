@@ -3,69 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <title>Lob</title>
-</head>
-<body>
-  This page is tracking <br>
-
-  <canvas id="myChart" width="1200" height="800" style="background-color:#EEE"></canvas>
+  <link rel="stylesheet" href="/lob.css" media="screen" title="no title" charset="utf-8">
   <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" > </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
-  <script>
-  var apiKey = "1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_"
-  var realtime = new Ably.Realtime({ key: apiKey });
-  var channelName = "<%= channel_name %>"
-  var channel = realtime.channels.get(channelName);
-
-  var ctx = document.querySelector("#myChart").getContext("2d");
-  var myNewChart = new Chart(ctx);
-  var data = {
-    labels: [],
-    datasets: [{
-      label: "My First dataset",
-      fillColor: "rgba(220,220,220,0)",
-      strokeColor: "limegreen",
-      pointColor: "limegreen",
-      data: []
-    }, {
-      label: "My First dataset",
-      fillColor: "rgba(220,220,220,0)",
-      strokeColor: "green",
-      pointColor: "green",
-      data: []
-    }, {
-      label: "My First dataset",
-      fillColor: "rgba(220,220,220,0)",
-      strokeColor: "teal",
-      pointColor: "teal",
-      data: []
-    }, {
-      label: "My First dataset",
-      fillColor: "rgba(220,220,220,0)",
-      strokeColor: "orange",
-      pointColor: "orange",
-      data: []
-    }]
-  };
-  var myLineChart = new Chart(ctx).Line(data, {animation: false, animationSteps: 4, pointDot : false});
-
-  var i = 0.0
-
-  channel.subscribe("accelerationEvent", function(message) {
-    x = message.data.x;
-    y = message.data.y;
-    z = message.data.z;
-    console.log(message.data.t);
-    m = Math.sqrt(x*x + y*y + z*z);
-    myLineChart.addData([x, y, z, m], i);
-    i = i + 0.25;
-  });
-  channel.subscribe("refresh", function(message) {
-    myLineChart.destroy();
-    i = 0.0;
-    data.labels = [];
-    // labels array is mutated by adding data.
-    myLineChart = new Chart(ctx).Line(data, {animation: false, animationSteps: 4, pointDot : false});
-  });
-  </script>
+  <script src="/lob.js"></script>
+</head>
+<body>
+  <main id="tracker-page">
+    <a href="/">
+      <h1>Lob</h1>
+    </a>
+    <div id="orientation-tracker" data-display="tracker">
+      <canvas id="myChart" width="960" height="800" style="background-color:#EEE"></canvas>
+    </div>
+    <p>Realtime connection powered by <a href="https://ably.io" target="_blank">Ably.io</a></p>
+  </main>
 </body>
 </html>

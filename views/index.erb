@@ -3,15 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <title>Lob</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="/lob.css" media="screen" title="no title" charset="utf-8">
+  <script src="lob.js"></script>
 </head>
 <body>
-  <form class="" action="/join" method="post">
-    <label>
+  <main>
+    <h1>Lob</h1>
+    <footer>
+      <form class="" action="/new-flight" method="post">
+        <button type="submit" name="button">Start Launch</button>
+      </form>
+      <form class="" action="/join" method="post">
+        <label>
 
-      <input type="text" name="channel" autofocus required placeholder="default"><br>
-      <button type="submit" name="flyer" value="yes">Be the flyer</button><br>
-      <button type="submit" name="tracker" value="yes">Be the tracker</button>
-    </label>
-  </form>
+          <input type="text" name="channel" autofocus required placeholder="Enter channel">
+          <button type="submit">Track Launch</button>
+        </label>
+      </form>
+      <p>Realtime connection powered by <a href="https://ably.io" target="_blank">Ably.io</a></p>
+    </footer>
+  </main>
 </body>
 </html>
