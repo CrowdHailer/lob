@@ -122,11 +122,21 @@ ready(function () {
 
 export default actions;
 
-var regex = /^\/([^\/]+)/;
-var channel = window.location.pathname.match(regex)[1];
-var key = window.location.hash.match(/#(.+)/)[1];
-console.info(channel);
-console.info(key);
+function getChannelName(){
+  var regex = /^\/([^\/]+)/;
+  var match = window.location.pathname.match(regex);
+  if (match) {
+    return match[1];
+  }
+}
+
+function getUplinkKey(): string{
+  var match = window.location.hash.match(/#(.+)/);
+  if (match) {
+    return match[1];
+  }
+}
+
 
 declare var Ably: any;
 declare var Chart: any;
@@ -152,8 +162,10 @@ class Uplink {
   }
 }
 
-var uplink = new Uplink({key: key, channelName: channel});
-actions.uplink = uplink;
+if (getChannelName()) {
+  var uplink = new Uplink({key: getUplinkKey(), channelName: getChannelName()});
+  actions.uplink = uplink;
+}
 
 
 ready(function () {

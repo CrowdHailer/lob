@@ -578,15 +578,24 @@ var Lob = (function () { 'use strict';
         var $avionics = document.querySelector("[data-interface~=avionics]");
         var avionicsInterface = new AvionicsInterface($avionics, actions);
     });
-    var regex = /^\/([^\/]+)/;
-    var channel = window.location.pathname.match(regex)[1];
-    var key = window.location.hash.match(/#(.+)/)[1];
-    console.info(channel);
-    console.info(key);
+    function getChannelName() {
+        var regex = /^\/([^\/]+)/;
+        var match = window.location.pathname.match(regex);
+        if (match) {
+            return match[1];
+        }
+    }
+    function getUplinkKey() {
+        var match = window.location.hash.match(/#(.+)/);
+        if (match) {
+            return match[1];
+        }
+    }
     var Uplink = (function () {
         function Uplink(options) {
             var key = options["key"];
             var channelName = options["channelName"];
+            console.log(channelName);
             var realtime = new Ably.Realtime({ key: key });
             this.channel = realtime.channels.get(channelName);
         }
@@ -605,8 +614,11 @@ var Lob = (function () { 'use strict';
         };
         return Uplink;
     })();
-    var uplink = new Uplink({ key: key, channelName: channel });
-    actions.uplink = uplink;
+    if (getChannelName()) {
+        console.log("starting uplink");
+        var uplink = new Uplink({ key: getUplinkKey(), channelName: getChannelName() });
+        actions.uplink = uplink;
+    }
     ready(function () {
         var $tracker = document.querySelector("[data-display~=tracker]");
         if ($tracker) {
