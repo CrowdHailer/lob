@@ -102,7 +102,8 @@ describe("Data Logger", function () {
       dataLogger.newReading(reading2);
       expect(dataLogger.maxAltitude).toBe(0);
       dataLogger.stop();
-      expect(dataLogger.maxAltitude).toBe(1.2);
+      // DEBT pass in extra freefall time
+      expect(dataLogger.maxAltitude).toBe(1.9);
     });
   });
 

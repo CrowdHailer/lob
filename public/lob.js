@@ -70,13 +70,13 @@ var Lob = (function () { 'use strict';
                 var streaks = streak(function (reading) {
                     var a = reading.acceleration;
                     var magnitude = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
-                    return magnitude < 2;
+                    return magnitude < 4;
                 }, this.readings);
                 var flightDurations = streaks.map(function (list) {
                     var last = list.length;
                     var t0 = list[0].timestamp;
                     var t1 = list[last - 1].timestamp;
-                    return (t1 - t0) / 1000;
+                    return (t1 + 250 - t0) / 1000;
                 });
                 var flightDuration = Math.max.apply(null, flightDurations);
                 return Math.max(0, flightDuration);
