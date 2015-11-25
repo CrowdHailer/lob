@@ -76,6 +76,7 @@ var Lob = (function () { 'use strict';
                     var last = list.length;
                     var t0 = list[0].timestamp;
                     var t1 = list[last - 1].timestamp;
+                    // DEBT remove magic numbers
                     return (t1 + 250 - t0) / 1000;
                 });
                 var flightDuration = Math.max.apply(null, flightDurations);
@@ -527,6 +528,10 @@ var Lob = (function () { 'use strict';
             this.$startButton = $root.querySelector("[data-command~=start]");
             this.$stopButton = $root.querySelector("[data-command~=stop]");
             this.$resetButton = $root.querySelector("[data-command~=reset]");
+            var regex = /^\/([^\/]+)/;
+            var channel = window.location.pathname.match(regex)[1];
+            var $channelName = $root.querySelector("[data-hook~=channel-name]");
+            $channelName.innerHTML = "Watch on channel '" + channel + "'";
         }
         DataLoggerDisplay.prototype.update = function (state) {
             this.$flightTime.innerHTML = state.readings.flightTime + "s";

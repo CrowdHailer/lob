@@ -63,6 +63,10 @@ class DataLoggerDisplay {
     this.$startButton = $root.querySelector("[data-command~=start]");
     this.$stopButton = $root.querySelector("[data-command~=stop]");
     this.$resetButton = $root.querySelector("[data-command~=reset]");
+    var regex = /^\/([^\/]+)/;
+    var channel = window.location.pathname.match(regex)[1];
+    var $channelName = $root.querySelector("[data-hook~=channel-name]");
+    $channelName.innerHTML = "Watch on channel '" + channel + "'";
   }
   update (state) {
     this.$flightTime.innerHTML = state.readings.flightTime + "s";
