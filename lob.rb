@@ -9,7 +9,8 @@ end
 
 post '/new-flight' do
   token = client.auth.create_token_request(ttl: 3600)
-  redirect "/test/flyer\#1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_"
+  channel = (1...(36 ** 4)).to_a.sample.to_s(36).upcase
+  redirect "/#{channel}/flyer\#1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_"
 end
 
 post '/join' do
