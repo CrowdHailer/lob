@@ -2,14 +2,16 @@ import Readings from "./readings.ts";
 import { Reading } from "./readings.ts";
 import { round } from "./utils.ts";
 
+// The data logger is implemented as a flux style store.
+// It does not have a dispatch method and currently the application knows directly which methods to call on the data logger
+// Views/Displays are registered with by registerDisplay
+// At the moment after each change of state action a call to updateDisplays must be made manually.
 class DataLogger {
   private displays = [];
   readings = new Readings();
   status = "READY";
-  registerDisplay(display) {
-    this.displays.push(display);
-    display.update(this);
-  }
+
+  // Responses to external actions
   start(){
     this.status = "READING";
     this.updateDisplays();
@@ -28,12 +30,6 @@ class DataLogger {
     this.status = "READY";
     this.readings = new Readings();
     this.updateDisplays();
-  }
-  updateDisplays() {
-    var self = this;
-    this.displays.forEach(function (view) {
-      view.update(self);
-    });
   }
   get maxAltitude(){
     // Altitude Calculation
@@ -55,6 +51,16 @@ class DataLogger {
     } else {
       return 0;
     }
+  }
+  updateDisplays() {
+    var self = this;
+    this.displays.forEach(function (view) {
+      view.update(self);
+    });
+  }
+  registerDisplay(display) {
+    this.displays.push(display);
+    display.update(this);
   }
   static READY = "READY";
   static READING = "READING";

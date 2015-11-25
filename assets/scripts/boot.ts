@@ -2,6 +2,9 @@ console.log("Starting boot ...");
 
 import Events from "./gator.js";
 
+// Interfaces are where user interaction is transformed to domain interactions
+// There is only one interface in this application, this one the avionics interface
+// It can therefore be set up to run on the document element
 class AvionicsInterface {
   private $root;
   private actions;
@@ -22,6 +25,10 @@ class AvionicsInterface {
 }
 
 import DataLogger from "./data-logger.ts";
+
+// The actions class acts as the dispatcher in a fluc architecture
+// It also acts as the actions interface that is put on top of the dispatcher
+// Stores are not registered generally as there is only two stores the datalogger and the uplink
 class Actions {
   dataLogger: DataLogger;
   uplink: Uplink;
@@ -49,6 +56,8 @@ var dataLogger = new DataLogger();
 
 actions.dataLogger = dataLogger;
 
+// Display elements are updated with the state of a store when they are registered to the store.
+// DEBT the data logger display will cause an error if the elements are not present, this error should be caught by the dispatcher when it is registered
 class DataLoggerDisplay {
   $root: Element;
   $flightTime: any;
@@ -105,6 +114,9 @@ import { throttle } from "./utils.ts";
 
 var throttledReport = throttle(reportDeviceMotionEvent, 250, {});
 
+// Accelerometer events are continually fired
+// DEBT the accelerometer is not isolated as a store that can be observed.
+// Implementation as a store will be necessary so that it can be observed and error messages when the accelerometer returns improper values can be
 window.addEventListener("devicemotion", throttledReport);
 
 import { ready } from "./dom.ts";
@@ -170,6 +182,7 @@ if (getChannelName()) {
 
 ready(function () {
   var $tracker = document.querySelector("[data-display~=tracker]");
+  // Procedual handling of canvas drawing
   if ($tracker) {
     var canvas: any = document.querySelector("#myChart");
     var ctx = canvas.getContext("2d");
