@@ -1,32 +1,9 @@
 console.log("Starting boot ...");
 
-declare var Ably: any;
-declare var Chart: any;
-// Uplink represents a single channel
-class Uplink {
-  channel: any;
-  constructor(options) {
-    var key = options["key"];
-    var channelName = options["channelName"];
-    var realtime = new Ably.Realtime({ key: key });
-    this.channel = realtime.channels.get(channelName);
-  }
-  publish(eventName, vector){
-    this.channel.publish(eventName, vector, function(err) {
-      if(err) {
-        console.log("Unable to publish message; err = " + err.message);
-      } else {
-        console.log("Message successfully sent");
-      }
-    });
-  }
-  subscribe(eventName, callback) {
-    this.channel.subscribe(eventName, callback);
-  }
-}
+import Uplink from "./uplink.ts";
 
-if (getChannelName()) {
-  var uplink = new Uplink({key: getUplinkKey(), channelName: getChannelName()});
+if (Uplink.getChannelName()) {
+  var uplink = new Uplink({key: Uplink.getUplinkKey(), channelName: Uplink.getChannelName()});
 }
 
 import Events from "./gator.js";
@@ -66,8 +43,6 @@ var newReading = new ActionDispatcher<any>();
 // It also acts as the actions interface that is put on top of the dispatcher
 // Stores are not registered generally as there is only two stores the datalogger and the uplink
 class Actions {
-  dataLogger: DataLogger;
-  uplink: Uplink;
   startLogging(){
     startLogging.dispatch();
   }
@@ -86,7 +61,6 @@ var actions = new Actions();
 
 var dataLogger = new DataLogger(uplink);
 
-actions.dataLogger = dataLogger;
 startLogging.addListener(dataLogger.start.bind(dataLogger));
 stopLogging.addListener(dataLogger.stop.bind(dataLogger));
 clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
@@ -170,24 +144,11 @@ ready(function () {
 
 export default actions;
 
-function getChannelName(){
-  var regex = /^\/([^\/]+)/;
-  var match = window.location.pathname.match(regex);
-  if (match) {
-    return match[1];
-  }
-}
-
-function getUplinkKey(): string{
-  var match = window.location.hash.match(/#(.+)/);
-  if (match) {
-    return match[1];
-  }
-}
 
 
 
 
+declare var Chart: any;
 
 ready(function () {
   var $tracker = document.querySelector("[data-display~=tracker]");

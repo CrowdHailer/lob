@@ -1,5 +1,44 @@
 var Lob = (function () { 'use strict';
 
+    // Uplink represents a single channel
+    var Uplink = (function () {
+        function Uplink(options) {
+            var key = options["key"];
+            var channelName = options["channelName"];
+            var realtime = new Ably.Realtime({ key: key });
+            this.channel = realtime.channels.get(channelName);
+        }
+        Uplink.prototype.publish = function (eventName, vector) {
+            this.channel.publish(eventName, vector, function (err) {
+                if (err) {
+                    console.log("Unable to publish message; err = " + err.message);
+                }
+                else {
+                    console.log("Message successfully sent");
+                }
+            });
+        };
+        Uplink.prototype.subscribe = function (eventName, callback) {
+            this.channel.subscribe(eventName, callback);
+        };
+        Uplink.getUplinkKey = function () {
+            var match = window.location.hash.match(/#(.+)/);
+            if (match) {
+                return match[1];
+            }
+        };
+        ;
+        Uplink.getChannelName = function () {
+            var regex = /^\/([^\/]+)/;
+            var match = window.location.pathname.match(regex);
+            if (match) {
+                return match[1];
+            }
+        };
+        ;
+        return Uplink;
+    })();
+
     // TODO test
     var ActionDispatcher = (function () {
         function ActionDispatcher() {
@@ -508,31 +547,8 @@ var Lob = (function () { 'use strict';
     var Events = Gator;
 
     console.log("Starting boot ...");
-    // Uplink represents a single channel
-    var Uplink = (function () {
-        function Uplink(options) {
-            var key = options["key"];
-            var channelName = options["channelName"];
-            var realtime = new Ably.Realtime({ key: key });
-            this.channel = realtime.channels.get(channelName);
-        }
-        Uplink.prototype.publish = function (eventName, vector) {
-            this.channel.publish(eventName, vector, function (err) {
-                if (err) {
-                    console.log("Unable to publish message; err = " + err.message);
-                }
-                else {
-                    console.log("Message successfully sent");
-                }
-            });
-        };
-        Uplink.prototype.subscribe = function (eventName, callback) {
-            this.channel.subscribe(eventName, callback);
-        };
-        return Uplink;
-    })();
-    if (getChannelName()) {
-        var uplink = new Uplink({ key: getUplinkKey(), channelName: getChannelName() });
+    if (Uplink.getChannelName()) {
+        var uplink = new Uplink({ key: Uplink.getUplinkKey(), channelName: Uplink.getChannelName() });
     }
     // Interfaces are where user interaction is transformed to domain interactions
     // There is only one interface in this application, this one the avionics interface
@@ -580,7 +596,6 @@ var Lob = (function () { 'use strict';
     })();
     var actions = new Actions();
     var dataLogger = new DataLogger(uplink);
-    actions.dataLogger = dataLogger;
     startLogging.addListener(dataLogger.start.bind(dataLogger));
     stopLogging.addListener(dataLogger.stop.bind(dataLogger));
     clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
@@ -648,19 +663,6 @@ var Lob = (function () { 'use strict';
         var $avionics = document.querySelector("[data-interface~=avionics]");
         var avionicsInterface = new AvionicsInterface($avionics, actions);
     });
-    function getChannelName() {
-        var regex = /^\/([^\/]+)/;
-        var match = window.location.pathname.match(regex);
-        if (match) {
-            return match[1];
-        }
-    }
-    function getUplinkKey() {
-        var match = window.location.hash.match(/#(.+)/);
-        if (match) {
-            return match[1];
-        }
-    }
     ready(function () {
         var $tracker = document.querySelector("[data-display~=tracker]");
         // Procedual handling of canvas drawing
