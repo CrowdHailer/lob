@@ -1,5 +1,7 @@
 console.log("Starting boot ...");
 
+// SETUP ACTIONS FOR THIS application
+
 import ActionDispatcher from "./action-dispatcher.ts";
 
 var startLogging = new ActionDispatcher<void>();
@@ -7,9 +9,8 @@ var stopLogging = new ActionDispatcher<void>();
 var clearDataLog = new ActionDispatcher<void>();
 var newReading = new ActionDispatcher<any>();
 
-// The actions class acts as the dispatcher in a fluc architecture
-// It also acts as the actions interface that is put on top of the dispatcher
-// Stores are not registered generally as there is only two stores the datalogger and the uplink
+// The actions class acts as the dispatcher in a flux architecture
+// It is the top level interface for the application
 class Actions {
   startLogging(){
     startLogging.dispatch();
@@ -27,13 +28,18 @@ class Actions {
 
 var actions = new Actions();
 
+
+// SETUP SERVICES WITHOUT REQUIREMENT ON THE DOM
+
 import Uplink from "./uplink.ts";
+
+// DEBT will fail if there is no key.
+// Need to return null uplink and warning if failed
 
 if (Uplink.getChannelName()) {
   var uplink = new Uplink({key: Uplink.getUplinkKey(), channelName: Uplink.getChannelName()});
 }
 
-import AvionicsInterface from "./avionics-interface.ts";
 
 import DataLogger from "./data-logger.ts";
 var dataLogger = new DataLogger(uplink);
@@ -43,7 +49,8 @@ stopLogging.addListener(dataLogger.stop.bind(dataLogger));
 clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
 newReading.addListener(dataLogger.newReading.bind(dataLogger));
 
-import DataLoggerDisplay from "./data-logger-display.ts";
+
+
 
 function reportDeviceMotionEvent (deviceMotionEvent) {
   var raw = deviceMotionEvent.accelerationIncludingGravity;
@@ -63,6 +70,9 @@ var throttledReport = throttle(reportDeviceMotionEvent, 250, {});
 // DEBT the accelerometer is not isolated as a store that can be observed.
 // Implementation as a store will be necessary so that it can be observed and error messages when the accelerometer returns improper values can be
 window.addEventListener("devicemotion", throttledReport);
+
+import AvionicsInterface from "./avionics-interface.ts";
+import DataLoggerDisplay from "./data-logger-display.ts";
 
 import { ready } from "./dom.ts";
 ready(function () {

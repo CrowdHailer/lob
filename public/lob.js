@@ -614,9 +614,8 @@ var Lob = (function () { 'use strict';
     var stopLogging = new ActionDispatcher();
     var clearDataLog = new ActionDispatcher();
     var newReading = new ActionDispatcher();
-    // The actions class acts as the dispatcher in a fluc architecture
-    // It also acts as the actions interface that is put on top of the dispatcher
-    // Stores are not registered generally as there is only two stores the datalogger and the uplink
+    // The actions class acts as the dispatcher in a flux architecture
+    // It is the top level interface for the application
     var Actions = (function () {
         function Actions() {
         }
@@ -635,6 +634,8 @@ var Lob = (function () { 'use strict';
         return Actions;
     })();
     var actions = new Actions();
+    // DEBT will fail if there is no key.
+    // Need to return null uplink and warning if failed
     if (Uplink.getChannelName()) {
         var uplink = new Uplink({ key: Uplink.getUplinkKey(), channelName: Uplink.getChannelName() });
     }
