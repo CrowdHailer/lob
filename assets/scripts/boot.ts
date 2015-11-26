@@ -152,6 +152,7 @@ function getUplinkKey(): string{
 
 declare var Ably: any;
 declare var Chart: any;
+// Uplink represents a single channel 
 class Uplink {
   channel: any;
   constructor(options) {
