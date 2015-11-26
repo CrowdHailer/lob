@@ -10,6 +10,7 @@ class DataLoggerDisplay {
   $startButton;
   $stopButton;
   $resetButton;
+  $submitButton: HTMLFormElement;
   constructor($root){
     this.$root = $root;
     this.$flightTime = $root.querySelector("[data-hook~=flight-time]");
@@ -17,6 +18,7 @@ class DataLoggerDisplay {
     this.$startButton = $root.querySelector("[data-command~=start]");
     this.$stopButton = $root.querySelector("[data-command~=stop]");
     this.$resetButton = $root.querySelector("[data-command~=reset]");
+    this.$submitButton = $root.querySelector("[data-command~=submit]");
     var regex = /^\/([^\/]+)/;
     var channel = window.location.pathname.match(regex)[1];
     var $channelName = $root.querySelector("[data-hook~=channel-name]");
@@ -39,8 +41,10 @@ class DataLoggerDisplay {
     }
     if (state.status == DataLogger.COMPLETED) {
       this.$resetButton.hidden = false;
+      this.$submitButton.style.display = "";
     } else {
       this.$resetButton.hidden = true;
+      this.$submitButton.style.display = "none";
     }
   }
 }

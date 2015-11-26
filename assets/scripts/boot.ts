@@ -8,6 +8,7 @@ var startLogging = new ActionDispatcher<void>();
 var stopLogging = new ActionDispatcher<void>();
 var clearDataLog = new ActionDispatcher<void>();
 var newReading = new ActionDispatcher<any>();
+var submitFlightLog = new ActionDispatcher<any>();
 
 // The actions class acts as the dispatcher in a flux architecture
 // It is the top level interface for the application
@@ -23,6 +24,9 @@ class Actions {
   }
   clearDataLog(){
     clearDataLog.dispatch();
+  }
+  submitFlightLog(){
+    submitFlightLog.dispatch();
   }
 }
 

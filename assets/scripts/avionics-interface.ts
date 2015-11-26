@@ -20,6 +20,10 @@ class AvionicsInterface {
     events.on("click", "[data-command~=reset]", function (evt: Event) {
       actions.clearDataLog();
     });
+    events.on("submit", "[data-command~=submit]", function (evt: Event) {
+      evt.preventDefault();
+      actions.submitFlightLog();
+    });
   }
 }
 

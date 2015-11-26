@@ -563,6 +563,10 @@ var Lob = (function () { 'use strict';
             events.on("click", "[data-command~=reset]", function (evt) {
                 actions.clearDataLog();
             });
+            events.on("submit", "[data-command~=submit]", function (evt) {
+                evt.preventDefault();
+                actions.submitFlightLog();
+            });
         }
         return AvionicsInterface;
     })();
@@ -578,6 +582,7 @@ var Lob = (function () { 'use strict';
             this.$startButton = $root.querySelector("[data-command~=start]");
             this.$stopButton = $root.querySelector("[data-command~=stop]");
             this.$resetButton = $root.querySelector("[data-command~=reset]");
+            this.$submitButton = $root.querySelector("[data-command~=submit]");
             var regex = /^\/([^\/]+)/;
             var channel = window.location.pathname.match(regex)[1];
             var $channelName = $root.querySelector("[data-hook~=channel-name]");
@@ -601,9 +606,11 @@ var Lob = (function () { 'use strict';
             }
             if (state.status == DataLogger.COMPLETED) {
                 this.$resetButton.hidden = false;
+                this.$submitButton.style.display = "";
             }
             else {
                 this.$resetButton.hidden = true;
+                this.$submitButton.style.display = "none";
             }
         };
         return DataLoggerDisplay;
@@ -614,6 +621,7 @@ var Lob = (function () { 'use strict';
     var stopLogging = new ActionDispatcher();
     var clearDataLog = new ActionDispatcher();
     var newReading = new ActionDispatcher();
+    var submitFlightLog = new ActionDispatcher();
     // The actions class acts as the dispatcher in a flux architecture
     // It is the top level interface for the application
     var Actions = (function () {
@@ -630,6 +638,9 @@ var Lob = (function () { 'use strict';
         };
         Actions.prototype.clearDataLog = function () {
             clearDataLog.dispatch();
+        };
+        Actions.prototype.submitFlightLog = function () {
+            submitFlightLog.dispatch();
         };
         return Actions;
     })();
