@@ -546,6 +546,27 @@ var Lob = (function () { 'use strict';
     }
     var Events = Gator;
 
+    // Interfaces are where user interaction is transformed to domain interactions
+    // There is only one interface in this application, this one the avionics interface
+    // It can therefore be set up to run on the document element
+    var AvionicsInterface = (function () {
+        function AvionicsInterface($root, actions) {
+            this.$root = $root;
+            this.actions = actions;
+            var events = Events($root, null);
+            events.on("click", "[data-command~=start]", function (evt) {
+                actions.startLogging();
+            });
+            events.on("click", "[data-command~=stop]", function (evt) {
+                actions.stopLogging();
+            });
+            events.on("click", "[data-command~=reset]", function (evt) {
+                actions.clearDataLog();
+            });
+        }
+        return AvionicsInterface;
+    })();
+
     // Display elements are updated with the state of a store when they are registered to the store.
     // DEBT the data logger display will cause an error if the elements are not present, this error should be caught by the dispatcher when it is registered
     // TODO currently untested
@@ -617,26 +638,6 @@ var Lob = (function () { 'use strict';
     if (Uplink.getChannelName()) {
         var uplink = new Uplink({ key: Uplink.getUplinkKey(), channelName: Uplink.getChannelName() });
     }
-    // Interfaces are where user interaction is transformed to domain interactions
-    // There is only one interface in this application, this one the avionics interface
-    // It can therefore be set up to run on the document element
-    var AvionicsInterface = (function () {
-        function AvionicsInterface($root, actions) {
-            this.$root = $root;
-            this.actions = actions;
-            var events = Events($root, null);
-            events.on("click", "[data-command~=start]", function (evt) {
-                actions.startLogging();
-            });
-            events.on("click", "[data-command~=stop]", function (evt) {
-                actions.stopLogging();
-            });
-            events.on("click", "[data-command~=reset]", function (evt) {
-                actions.clearDataLog();
-            });
-        }
-        return AvionicsInterface;
-    })();
     var dataLogger = new DataLogger(uplink);
     startLogging.addListener(dataLogger.start.bind(dataLogger));
     stopLogging.addListener(dataLogger.stop.bind(dataLogger));

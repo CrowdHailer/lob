@@ -22,6 +22,7 @@
     ],
     "files": [
         "assets/scripts/action-dispatcher.ts",
+        "assets/scripts/avionics-interface.ts",
         "assets/scripts/boot.ts",
         "assets/scripts/data-logger-display.ts",
         "assets/scripts/data-logger.ts",
