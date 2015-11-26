@@ -1,5 +1,63 @@
 var Lob = (function () { 'use strict';
 
+    // TODO test
+    var ActionDispatcher = (function () {
+        function ActionDispatcher() {
+            this.listeners = [];
+        }
+        ActionDispatcher.prototype.addListener = function (listener) {
+            this.listeners = this.listeners.concat(listener);
+        };
+        ActionDispatcher.prototype.dispatch = function (action) {
+            if (this.listeners.length == 0) {
+                console.warn("no listeners");
+            }
+            else {
+                this.listeners.forEach(function (listener) { listener(action); });
+            }
+        };
+        return ActionDispatcher;
+    })();
+
+    // Uplink represents a single channel
+    var Uplink = (function () {
+        function Uplink(options) {
+            var key = options["key"];
+            var channelName = options["channelName"];
+            var realtime = new Ably.Realtime({ key: key });
+            this.channel = realtime.channels.get(channelName);
+        }
+        Uplink.prototype.publish = function (eventName, vector) {
+            this.channel.publish(eventName, vector, function (err) {
+                if (err) {
+                    console.log("Unable to publish message; err = " + err.message);
+                }
+                else {
+                    console.log("Message successfully sent");
+                }
+            });
+        };
+        Uplink.prototype.subscribe = function (eventName, callback) {
+            this.channel.subscribe(eventName, callback);
+        };
+        Uplink.getUplinkKey = function () {
+            var match = window.location.hash.match(/#(.+)/);
+            if (match) {
+                return match[1];
+            }
+        };
+        ;
+        Uplink.getChannelName = function () {
+            var regex = /^\/([^\/]+)/;
+            var match = window.location.pathname.match(regex);
+            if (match) {
+                return match[1];
+            }
+        };
+        ;
+        return Uplink;
+    })();
+
     function streak(predicate, collection) {
         var current_streak = [];
         var output = [];
@@ -98,16 +156,19 @@ var Lob = (function () { 'use strict';
         return Readings;
     })();
 
+    // The data logger is implemented as a flux style store.
+    // It does not have a dispatch method and currently the application knows directly which methods to call on the data logger
+    // Views/Displays are registered with by registerDisplay
+    // At the moment after each change of state action a call to updateDisplays must be made manually.
+    // DEBT uplink untested
     var DataLogger = (function () {
-        function DataLogger() {
+        function DataLogger(uplink) {
             this.displays = [];
             this.readings = new Readings();
             this.status = "READY";
+            this.uplink = uplink;
         }
-        DataLogger.prototype.registerDisplay = function (display) {
-            this.displays.push(display);
-            display.update(this);
-        };
+        // Responses to external actions
         DataLogger.prototype.start = function () {
             this.status = "READING";
             this.updateDisplays();
@@ -115,6 +176,7 @@ var Lob = (function () { 'use strict';
         DataLogger.prototype.newReading = function (reading) {
             if (this.status == "READING") {
                 this.readings = this.readings.addReading(reading);
+                this.uplink.publish("accelerometerReading", reading);
                 this.updateDisplays();
             }
         };
@@ -125,13 +187,8 @@ var Lob = (function () { 'use strict';
         DataLogger.prototype.reset = function () {
             this.status = "READY";
             this.readings = new Readings();
+            this.uplink.publish("reset", null);
             this.updateDisplays();
-        };
-        DataLogger.prototype.updateDisplays = function () {
-            var self = this;
-            this.displays.forEach(function (view) {
-                view.update(self);
-            });
         };
         Object.defineProperty(DataLogger.prototype, "maxAltitude", {
             get: function () {
@@ -156,12 +213,23 @@ var Lob = (function () { 'use strict';
             enumerable: true,
             configurable: true
         });
+        DataLogger.prototype.updateDisplays = function () {
+            var self = this;
+            this.displays.forEach(function (view) {
+                view.update(self);
+            });
+        };
+        DataLogger.prototype.registerDisplay = function (display) {
+            this.displays.push(display);
+            display.update(this);
+        };
         DataLogger.READY = "READY";
         DataLogger.READING = "READING";
         DataLogger.COMPLETED = "COMPLETED";
         return DataLogger;
     })();
 
+    // All code relating to manipulations requiring a document, element or window node.
     // DEBT untested
     function ready(fn) {
         if (document.readyState !== "loading") {
@@ -478,7 +546,9 @@ var Lob = (function () { 'use strict';
     }
     var Events = Gator;
 
-    console.log("Starting boot ...");
+    // Interfaces are where user interaction is transformed to domain interactions
+    // There is only one interface in this application, this one the avionics interface
+    // It can therefore be set up to run on the document element
     var AvionicsInterface = (function () {
         function AvionicsInterface($root, actions) {
             this.$root = $root;
@@ -496,30 +566,10 @@ var Lob = (function () { 'use strict';
         }
         return AvionicsInterface;
     })();
-    var Actions = (function () {
-        function Actions() {
-        }
-        Actions.prototype.startLogging = function () {
-            this.dataLogger.start();
-        };
-        Actions.prototype.stopLogging = function () {
-            this.dataLogger.stop();
-        };
-        Actions.prototype.newReading = function (reading) {
-            this.dataLogger.newReading(reading);
-            if (this.dataLogger.status == "READING") {
-                this.uplink.publish("accelerometerReading", reading);
-            }
-        };
-        Actions.prototype.clearDataLog = function () {
-            this.dataLogger.reset();
-            this.uplink.publish("reset", null);
-        };
-        return Actions;
-    })();
-    var actions = new Actions();
-    var dataLogger = new DataLogger();
-    actions.dataLogger = dataLogger;
+
+    // Display elements are updated with the state of a store when they are registered to the store.
+    // DEBT the data logger display will cause an error if the elements are not present, this error should be caught by the dispatcher when it is registered
+    // TODO currently untested
     var DataLoggerDisplay = (function () {
         function DataLoggerDisplay($root) {
             this.$root = $root;
@@ -558,6 +608,42 @@ var Lob = (function () { 'use strict';
         };
         return DataLoggerDisplay;
     })();
+
+    console.log("Starting boot ...");
+    var startLogging = new ActionDispatcher();
+    var stopLogging = new ActionDispatcher();
+    var clearDataLog = new ActionDispatcher();
+    var newReading = new ActionDispatcher();
+    // The actions class acts as the dispatcher in a flux architecture
+    // It is the top level interface for the application
+    var Actions = (function () {
+        function Actions() {
+        }
+        Actions.prototype.startLogging = function () {
+            startLogging.dispatch();
+        };
+        Actions.prototype.stopLogging = function () {
+            stopLogging.dispatch();
+        };
+        Actions.prototype.newReading = function (reading) {
+            newReading.dispatch(reading);
+        };
+        Actions.prototype.clearDataLog = function () {
+            clearDataLog.dispatch();
+        };
+        return Actions;
+    })();
+    var actions = new Actions();
+    // DEBT will fail if there is no key.
+    // Need to return null uplink and warning if failed
+    if (Uplink.getChannelName()) {
+        var uplink = new Uplink({ key: Uplink.getUplinkKey(), channelName: Uplink.getChannelName() });
+    }
+    var dataLogger = new DataLogger(uplink);
+    startLogging.addListener(dataLogger.start.bind(dataLogger));
+    stopLogging.addListener(dataLogger.stop.bind(dataLogger));
+    clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
+    newReading.addListener(dataLogger.newReading.bind(dataLogger));
     function reportDeviceMotionEvent(deviceMotionEvent) {
         var raw = deviceMotionEvent.accelerationIncludingGravity;
         if (typeof raw.x === "number") {
@@ -568,6 +654,9 @@ var Lob = (function () { 'use strict';
         }
     }
     var throttledReport = throttle(reportDeviceMotionEvent, 250, {});
+    // Accelerometer events are continually fired
+    // DEBT the accelerometer is not isolated as a store that can be observed.
+    // Implementation as a store will be necessary so that it can be observed and error messages when the accelerometer returns improper values can be
     window.addEventListener("devicemotion", throttledReport);
     ready(function () {
         var $dataLoggerDisplay = document.querySelector("[data-display~=data-logger]");
@@ -578,49 +667,9 @@ var Lob = (function () { 'use strict';
         var $avionics = document.querySelector("[data-interface~=avionics]");
         var avionicsInterface = new AvionicsInterface($avionics, actions);
     });
-    function getChannelName() {
-        var regex = /^\/([^\/]+)/;
-        var match = window.location.pathname.match(regex);
-        if (match) {
-            return match[1];
-        }
-    }
-    function getUplinkKey() {
-        var match = window.location.hash.match(/#(.+)/);
-        if (match) {
-            return match[1];
-        }
-    }
-    var Uplink = (function () {
-        function Uplink(options) {
-            var key = options["key"];
-            var channelName = options["channelName"];
-            console.log(channelName);
-            var realtime = new Ably.Realtime({ key: key });
-            this.channel = realtime.channels.get(channelName);
-        }
-        Uplink.prototype.publish = function (eventName, vector) {
-            this.channel.publish(eventName, vector, function (err) {
-                if (err) {
-                    console.log("Unable to publish message; err = " + err.message);
-                }
-                else {
-                    console.log("Message successfully sent");
-                }
-            });
-        };
-        Uplink.prototype.subscribe = function (eventName, callback) {
-            this.channel.subscribe(eventName, callback);
-        };
-        return Uplink;
-    })();
-    if (getChannelName()) {
-        console.log("starting uplink");
-        var uplink = new Uplink({ key: getUplinkKey(), channelName: getChannelName() });
-        actions.uplink = uplink;
-    }
     ready(function () {
         var $tracker = document.querySelector("[data-display~=tracker]");
+        // Procedual handling of canvas drawing
         if ($tracker) {
             var canvas = document.querySelector("#myChart");
             var ctx = canvas.getContext("2d");

@@ -21,10 +21,14 @@
         "!node_modules/**"
     ],
     "files": [
+        "assets/scripts/action-dispatcher.ts",
+        "assets/scripts/avionics-interface.ts",
         "assets/scripts/boot.ts",
+        "assets/scripts/data-logger-display.ts",
         "assets/scripts/data-logger.ts",
         "assets/scripts/dom.ts",
         "assets/scripts/readings.ts",
+        "assets/scripts/uplink.ts",
         "assets/scripts/utils.ts",
         "test/data-logger-test.ts",
         "test/jasmine.d.ts",
