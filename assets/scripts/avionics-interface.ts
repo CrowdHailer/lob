@@ -22,7 +22,8 @@ class AvionicsInterface {
     });
     events.on("submit", "[data-command~=submit]", function (evt: Event) {
       evt.preventDefault();
-      actions.submitFlightLog();
+      var input: any = evt.srcElement.querySelector("input");
+      actions.submitFlightLog(input.value);
     });
   }
 }

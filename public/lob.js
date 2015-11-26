@@ -10,7 +10,7 @@ var Lob = (function () { 'use strict';
         };
         ActionDispatcher.prototype.dispatch = function (action) {
             if (this.listeners.length == 0) {
-                console.warn("no listeners");
+                console.warn("no listeners", action);
             }
             else {
                 this.listeners.forEach(function (listener) { listener(action); });
@@ -565,7 +565,8 @@ var Lob = (function () { 'use strict';
             });
             events.on("submit", "[data-command~=submit]", function (evt) {
                 evt.preventDefault();
-                actions.submitFlightLog();
+                var input = evt.srcElement.querySelector("input");
+                actions.submitFlightLog(input.value);
             });
         }
         return AvionicsInterface;
@@ -639,8 +640,8 @@ var Lob = (function () { 'use strict';
         Actions.prototype.clearDataLog = function () {
             clearDataLog.dispatch();
         };
-        Actions.prototype.submitFlightLog = function () {
-            submitFlightLog.dispatch();
+        Actions.prototype.submitFlightLog = function (name) {
+            submitFlightLog.dispatch(name);
         };
         return Actions;
     })();
@@ -655,6 +656,33 @@ var Lob = (function () { 'use strict';
     stopLogging.addListener(dataLogger.stop.bind(dataLogger));
     clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
     newReading.addListener(dataLogger.newReading.bind(dataLogger));
+    var FlightLogUploader = (function () {
+        function FlightLogUploader(dataLogger) {
+            this.dataLogger = dataLogger;
+        }
+        FlightLogUploader.prototype.submit = function (name) {
+            var request = new XMLHttpRequest();
+            request.open("POST", "/submit", true);
+            request.onload = function () {
+                if (request.status >= 200 && request.status < 400) {
+                    // Success!
+                    var resp = request.responseText;
+                }
+                else {
+                }
+            };
+            request.onerror = function () {
+                console.log("some error");
+                // There was a connection error of some sort
+            };
+            console.log(this.dataLogger.readings);
+            console.log(name);
+            request.send({ name: name, readings: this.dataLogger.readings.readings });
+        };
+        return FlightLogUploader;
+    })();
+    var flightLogUploader = new FlightLogUploader(dataLogger);
+    submitFlightLog.addListener(flightLogUploader.submit.bind(flightLogUploader));
     function reportDeviceMotionEvent(deviceMotionEvent) {
         var raw = deviceMotionEvent.accelerationIncludingGravity;
         if (typeof raw.x === "number") {

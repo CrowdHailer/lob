@@ -25,3 +25,7 @@ end
 get '/:channel_name/tracker' do
   erb :tracker, locals: {channel_name: params["channel_name"]}
 end
+
+post '/submit' do
+  puts request.POST
+end
