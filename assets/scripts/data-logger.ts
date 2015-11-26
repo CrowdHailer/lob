@@ -6,11 +6,16 @@ import { round } from "./utils.ts";
 // It does not have a dispatch method and currently the application knows directly which methods to call on the data logger
 // Views/Displays are registered with by registerDisplay
 // At the moment after each change of state action a call to updateDisplays must be made manually.
+// DEBT uplink untested
 class DataLogger {
   private displays = [];
   readings = new Readings();
   status = "READY";
+  uplink;
 
+  constructor(uplink){
+    this.uplink = uplink;
+  }
   // Responses to external actions
   start(){
     this.status = "READING";
@@ -19,6 +24,7 @@ class DataLogger {
   newReading(reading: Reading) {
     if (this.status == "READING") {
       this.readings = this.readings.addReading(reading);
+      this.uplink.publish("accelerometerReading", reading);
       this.updateDisplays();
     }
   }
@@ -29,6 +35,7 @@ class DataLogger {
   reset() {
     this.status = "READY";
     this.readings = new Readings();
+    this.uplink.publish("reset", null);
     this.updateDisplays();
   }
   get maxAltitude(){

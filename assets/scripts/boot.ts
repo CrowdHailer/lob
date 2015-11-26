@@ -1,5 +1,34 @@
 console.log("Starting boot ...");
 
+declare var Ably: any;
+declare var Chart: any;
+// Uplink represents a single channel
+class Uplink {
+  channel: any;
+  constructor(options) {
+    var key = options["key"];
+    var channelName = options["channelName"];
+    var realtime = new Ably.Realtime({ key: key });
+    this.channel = realtime.channels.get(channelName);
+  }
+  publish(eventName, vector){
+    this.channel.publish(eventName, vector, function(err) {
+      if(err) {
+        console.log("Unable to publish message; err = " + err.message);
+      } else {
+        console.log("Message successfully sent");
+      }
+    });
+  }
+  subscribe(eventName, callback) {
+    this.channel.subscribe(eventName, callback);
+  }
+}
+
+if (getChannelName()) {
+  var uplink = new Uplink({key: getUplinkKey(), channelName: getChannelName()});
+}
+
 import Events from "./gator.js";
 
 // Interfaces are where user interaction is transformed to domain interactions
@@ -31,6 +60,7 @@ import ActionDispatcher from "./action-dispatcher.ts";
 var startLogging = new ActionDispatcher<void>();
 var stopLogging = new ActionDispatcher<void>();
 var clearDataLog = new ActionDispatcher<void>();
+var newReading = new ActionDispatcher<any>();
 
 // The actions class acts as the dispatcher in a fluc architecture
 // It also acts as the actions interface that is put on top of the dispatcher
@@ -45,25 +75,22 @@ class Actions {
     stopLogging.dispatch();
   }
   newReading(reading) {
-    this.dataLogger.newReading(reading);
-    if (this.dataLogger.status == "READING") {
-      this.uplink.publish("accelerometerReading", reading);
-    }
+    newReading.dispatch(reading);
   }
   clearDataLog(){
     clearDataLog.dispatch();
-    this.uplink.publish("reset", null);
   }
 }
 
 var actions = new Actions();
 
-var dataLogger = new DataLogger();
+var dataLogger = new DataLogger(uplink);
 
 actions.dataLogger = dataLogger;
 startLogging.addListener(dataLogger.start.bind(dataLogger));
 stopLogging.addListener(dataLogger.stop.bind(dataLogger));
 clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
+newReading.addListener(dataLogger.newReading.bind(dataLogger));
 
 // Display elements are updated with the state of a store when they are registered to the store.
 // DEBT the data logger display will cause an error if the elements are not present, this error should be caught by the dispatcher when it is registered
@@ -159,35 +186,7 @@ function getUplinkKey(): string{
 }
 
 
-declare var Ably: any;
-declare var Chart: any;
-// Uplink represents a single channel
-class Uplink {
-  channel: any;
-  constructor(options) {
-    var key = options["key"];
-    var channelName = options["channelName"];
-    var realtime = new Ably.Realtime({ key: key });
-    this.channel = realtime.channels.get(channelName);
-  }
-  publish(eventName, vector){
-    this.channel.publish(eventName, vector, function(err) {
-      if(err) {
-        console.log("Unable to publish message; err = " + err.message);
-      } else {
-        console.log("Message successfully sent");
-      }
-    });
-  }
-  subscribe(eventName, callback) {
-    this.channel.subscribe(eventName, callback);
-  }
-}
 
-if (getChannelName()) {
-  var uplink = new Uplink({key: getUplinkKey(), channelName: getChannelName()});
-  actions.uplink = uplink;
-}
 
 
 ready(function () {

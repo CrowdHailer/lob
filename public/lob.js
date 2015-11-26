@@ -121,11 +121,13 @@ var Lob = (function () { 'use strict';
     // It does not have a dispatch method and currently the application knows directly which methods to call on the data logger
     // Views/Displays are registered with by registerDisplay
     // At the moment after each change of state action a call to updateDisplays must be made manually.
+    // DEBT uplink untested
     var DataLogger = (function () {
-        function DataLogger() {
+        function DataLogger(uplink) {
             this.displays = [];
             this.readings = new Readings();
             this.status = "READY";
+            this.uplink = uplink;
         }
         // Responses to external actions
         DataLogger.prototype.start = function () {
@@ -135,6 +137,7 @@ var Lob = (function () { 'use strict';
         DataLogger.prototype.newReading = function (reading) {
             if (this.status == "READING") {
                 this.readings = this.readings.addReading(reading);
+                this.uplink.publish("accelerometerReading", reading);
                 this.updateDisplays();
             }
         };
@@ -145,6 +148,7 @@ var Lob = (function () { 'use strict';
         DataLogger.prototype.reset = function () {
             this.status = "READY";
             this.readings = new Readings();
+            this.uplink.publish("reset", null);
             this.updateDisplays();
         };
         Object.defineProperty(DataLogger.prototype, "maxAltitude", {
@@ -504,6 +508,32 @@ var Lob = (function () { 'use strict';
     var Events = Gator;
 
     console.log("Starting boot ...");
+    // Uplink represents a single channel
+    var Uplink = (function () {
+        function Uplink(options) {
+            var key = options["key"];
+            var channelName = options["channelName"];
+            var realtime = new Ably.Realtime({ key: key });
+            this.channel = realtime.channels.get(channelName);
+        }
+        Uplink.prototype.publish = function (eventName, vector) {
+            this.channel.publish(eventName, vector, function (err) {
+                if (err) {
+                    console.log("Unable to publish message; err = " + err.message);
+                }
+                else {
+                    console.log("Message successfully sent");
+                }
+            });
+        };
+        Uplink.prototype.subscribe = function (eventName, callback) {
+            this.channel.subscribe(eventName, callback);
+        };
+        return Uplink;
+    })();
+    if (getChannelName()) {
+        var uplink = new Uplink({ key: getUplinkKey(), channelName: getChannelName() });
+    }
     // Interfaces are where user interaction is transformed to domain interactions
     // There is only one interface in this application, this one the avionics interface
     // It can therefore be set up to run on the document element
@@ -527,6 +557,7 @@ var Lob = (function () { 'use strict';
     var startLogging = new ActionDispatcher();
     var stopLogging = new ActionDispatcher();
     var clearDataLog = new ActionDispatcher();
+    var newReading = new ActionDispatcher();
     // The actions class acts as the dispatcher in a fluc architecture
     // It also acts as the actions interface that is put on top of the dispatcher
     // Stores are not registered generally as there is only two stores the datalogger and the uplink
@@ -535,29 +566,25 @@ var Lob = (function () { 'use strict';
         }
         Actions.prototype.startLogging = function () {
             startLogging.dispatch();
-            // this.dataLogger.start();
         };
         Actions.prototype.stopLogging = function () {
             stopLogging.dispatch();
         };
         Actions.prototype.newReading = function (reading) {
-            this.dataLogger.newReading(reading);
-            if (this.dataLogger.status == "READING") {
-                this.uplink.publish("accelerometerReading", reading);
-            }
+            newReading.dispatch(reading);
         };
         Actions.prototype.clearDataLog = function () {
             clearDataLog.dispatch();
-            this.uplink.publish("reset", null);
         };
         return Actions;
     })();
     var actions = new Actions();
-    var dataLogger = new DataLogger();
+    var dataLogger = new DataLogger(uplink);
     actions.dataLogger = dataLogger;
     startLogging.addListener(dataLogger.start.bind(dataLogger));
     stopLogging.addListener(dataLogger.stop.bind(dataLogger));
     clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
+    newReading.addListener(dataLogger.newReading.bind(dataLogger));
     // Display elements are updated with the state of a store when they are registered to the store.
     // DEBT the data logger display will cause an error if the elements are not present, this error should be caught by the dispatcher when it is registered
     var DataLoggerDisplay = (function () {
@@ -633,33 +660,6 @@ var Lob = (function () { 'use strict';
         if (match) {
             return match[1];
         }
-    }
-    // Uplink represents a single channel
-    var Uplink = (function () {
-        function Uplink(options) {
-            var key = options["key"];
-            var channelName = options["channelName"];
-            var realtime = new Ably.Realtime({ key: key });
-            this.channel = realtime.channels.get(channelName);
-        }
-        Uplink.prototype.publish = function (eventName, vector) {
-            this.channel.publish(eventName, vector, function (err) {
-                if (err) {
-                    console.log("Unable to publish message; err = " + err.message);
-                }
-                else {
-                    console.log("Message successfully sent");
-                }
-            });
-        };
-        Uplink.prototype.subscribe = function (eventName, callback) {
-            this.channel.subscribe(eventName, callback);
-        };
-        return Uplink;
-    })();
-    if (getChannelName()) {
-        var uplink = new Uplink({ key: getUplinkKey(), channelName: getChannelName() });
-        actions.uplink = uplink;
     }
     ready(function () {
         var $tracker = document.querySelector("[data-display~=tracker]");

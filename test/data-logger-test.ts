@@ -7,7 +7,7 @@ describe("Data Logger", function () {
 
   beforeEach(function () {
     lastUpdate = undefined;
-    dataLogger = new DataLogger();
+    dataLogger = new DataLogger({publish: function(){ undefined; }});
     dataLogger.registerDisplay({update: function(update){ lastUpdate = update; }});
   });
 
