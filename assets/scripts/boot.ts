@@ -26,6 +26,12 @@ class AvionicsInterface {
 
 import DataLogger from "./data-logger.ts";
 
+import ActionDispatcher from "./action-dispatcher.ts";
+
+var startLogging = new ActionDispatcher<void>();
+var stopLogging = new ActionDispatcher<void>();
+var clearDataLog = new ActionDispatcher<void>();
+
 // The actions class acts as the dispatcher in a fluc architecture
 // It also acts as the actions interface that is put on top of the dispatcher
 // Stores are not registered generally as there is only two stores the datalogger and the uplink
@@ -33,10 +39,10 @@ class Actions {
   dataLogger: DataLogger;
   uplink: Uplink;
   startLogging(){
-    this.dataLogger.start();
+    startLogging.dispatch();
   }
   stopLogging(){
-    this.dataLogger.stop();
+    stopLogging.dispatch();
   }
   newReading(reading) {
     this.dataLogger.newReading(reading);
@@ -45,7 +51,7 @@ class Actions {
     }
   }
   clearDataLog(){
-    this.dataLogger.reset();
+    clearDataLog.dispatch();
     this.uplink.publish("reset", null);
   }
 }
@@ -55,6 +61,9 @@ var actions = new Actions();
 var dataLogger = new DataLogger();
 
 actions.dataLogger = dataLogger;
+startLogging.addListener(dataLogger.start.bind(dataLogger));
+stopLogging.addListener(dataLogger.stop.bind(dataLogger));
+clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
 
 // Display elements are updated with the state of a store when they are registered to the store.
 // DEBT the data logger display will cause an error if the elements are not present, this error should be caught by the dispatcher when it is registered
@@ -152,7 +161,7 @@ function getUplinkKey(): string{
 
 declare var Ably: any;
 declare var Chart: any;
-// Uplink represents a single channel 
+// Uplink represents a single channel
 class Uplink {
   channel: any;
   constructor(options) {

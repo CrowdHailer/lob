@@ -1,5 +1,24 @@
 var Lob = (function () { 'use strict';
 
+    // TODO test
+    var ActionDispatcher = (function () {
+        function ActionDispatcher() {
+            this.listeners = [];
+        }
+        ActionDispatcher.prototype.addListener = function (listener) {
+            this.listeners = this.listeners.concat(listener);
+        };
+        ActionDispatcher.prototype.dispatch = function (action) {
+            if (this.listeners.length == 0) {
+                console.warn("no listeners");
+            }
+            else {
+                this.listeners.forEach(function (listener) { listener(action); });
+            }
+        };
+        return ActionDispatcher;
+    })();
+
     function streak(predicate, collection) {
         var current_streak = [];
         var output = [];
@@ -98,16 +117,17 @@ var Lob = (function () { 'use strict';
         return Readings;
     })();
 
+    // The data logger is implemented as a flux style store.
+    // It does not have a dispatch method and currently the application knows directly which methods to call on the data logger
+    // Views/Displays are registered with by registerDisplay
+    // At the moment after each change of state action a call to updateDisplays must be made manually.
     var DataLogger = (function () {
         function DataLogger() {
             this.displays = [];
             this.readings = new Readings();
             this.status = "READY";
         }
-        DataLogger.prototype.registerDisplay = function (display) {
-            this.displays.push(display);
-            display.update(this);
-        };
+        // Responses to external actions
         DataLogger.prototype.start = function () {
             this.status = "READING";
             this.updateDisplays();
@@ -126,12 +146,6 @@ var Lob = (function () { 'use strict';
             this.status = "READY";
             this.readings = new Readings();
             this.updateDisplays();
-        };
-        DataLogger.prototype.updateDisplays = function () {
-            var self = this;
-            this.displays.forEach(function (view) {
-                view.update(self);
-            });
         };
         Object.defineProperty(DataLogger.prototype, "maxAltitude", {
             get: function () {
@@ -156,12 +170,23 @@ var Lob = (function () { 'use strict';
             enumerable: true,
             configurable: true
         });
+        DataLogger.prototype.updateDisplays = function () {
+            var self = this;
+            this.displays.forEach(function (view) {
+                view.update(self);
+            });
+        };
+        DataLogger.prototype.registerDisplay = function (display) {
+            this.displays.push(display);
+            display.update(this);
+        };
         DataLogger.READY = "READY";
         DataLogger.READING = "READING";
         DataLogger.COMPLETED = "COMPLETED";
         return DataLogger;
     })();
 
+    // All code relating to manipulations requiring a document, element or window node.
     // DEBT untested
     function ready(fn) {
         if (document.readyState !== "loading") {
@@ -479,6 +504,9 @@ var Lob = (function () { 'use strict';
     var Events = Gator;
 
     console.log("Starting boot ...");
+    // Interfaces are where user interaction is transformed to domain interactions
+    // There is only one interface in this application, this one the avionics interface
+    // It can therefore be set up to run on the document element
     var AvionicsInterface = (function () {
         function AvionicsInterface($root, actions) {
             this.$root = $root;
@@ -496,14 +524,21 @@ var Lob = (function () { 'use strict';
         }
         return AvionicsInterface;
     })();
+    var startLogging = new ActionDispatcher();
+    var stopLogging = new ActionDispatcher();
+    var clearDataLog = new ActionDispatcher();
+    // The actions class acts as the dispatcher in a fluc architecture
+    // It also acts as the actions interface that is put on top of the dispatcher
+    // Stores are not registered generally as there is only two stores the datalogger and the uplink
     var Actions = (function () {
         function Actions() {
         }
         Actions.prototype.startLogging = function () {
-            this.dataLogger.start();
+            startLogging.dispatch();
+            // this.dataLogger.start();
         };
         Actions.prototype.stopLogging = function () {
-            this.dataLogger.stop();
+            stopLogging.dispatch();
         };
         Actions.prototype.newReading = function (reading) {
             this.dataLogger.newReading(reading);
@@ -512,7 +547,7 @@ var Lob = (function () { 'use strict';
             }
         };
         Actions.prototype.clearDataLog = function () {
-            this.dataLogger.reset();
+            clearDataLog.dispatch();
             this.uplink.publish("reset", null);
         };
         return Actions;
@@ -520,6 +555,11 @@ var Lob = (function () { 'use strict';
     var actions = new Actions();
     var dataLogger = new DataLogger();
     actions.dataLogger = dataLogger;
+    startLogging.addListener(dataLogger.start.bind(dataLogger));
+    stopLogging.addListener(dataLogger.stop.bind(dataLogger));
+    clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
+    // Display elements are updated with the state of a store when they are registered to the store.
+    // DEBT the data logger display will cause an error if the elements are not present, this error should be caught by the dispatcher when it is registered
     var DataLoggerDisplay = (function () {
         function DataLoggerDisplay($root) {
             this.$root = $root;
@@ -568,6 +608,9 @@ var Lob = (function () { 'use strict';
         }
     }
     var throttledReport = throttle(reportDeviceMotionEvent, 250, {});
+    // Accelerometer events are continually fired
+    // DEBT the accelerometer is not isolated as a store that can be observed.
+    // Implementation as a store will be necessary so that it can be observed and error messages when the accelerometer returns improper values can be
     window.addEventListener("devicemotion", throttledReport);
     ready(function () {
         var $dataLoggerDisplay = document.querySelector("[data-display~=data-logger]");
@@ -591,11 +634,11 @@ var Lob = (function () { 'use strict';
             return match[1];
         }
     }
+    // Uplink represents a single channel
     var Uplink = (function () {
         function Uplink(options) {
             var key = options["key"];
             var channelName = options["channelName"];
-            console.log(channelName);
             var realtime = new Ably.Realtime({ key: key });
             this.channel = realtime.channels.get(channelName);
         }
@@ -615,12 +658,12 @@ var Lob = (function () { 'use strict';
         return Uplink;
     })();
     if (getChannelName()) {
-        console.log("starting uplink");
         var uplink = new Uplink({ key: getUplinkKey(), channelName: getChannelName() });
         actions.uplink = uplink;
     }
     ready(function () {
         var $tracker = document.querySelector("[data-display~=tracker]");
+        // Procedual handling of canvas drawing
         if ($tracker) {
             var canvas = document.querySelector("#myChart");
             var ctx = canvas.getContext("2d");
