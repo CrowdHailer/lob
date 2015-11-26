@@ -23,6 +23,7 @@
     "files": [
         "assets/scripts/action-dispatcher.ts",
         "assets/scripts/boot.ts",
+        "assets/scripts/data-logger-display.ts",
         "assets/scripts/data-logger.ts",
         "assets/scripts/dom.ts",
         "assets/scripts/readings.ts",

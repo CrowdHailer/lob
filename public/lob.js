@@ -1,5 +1,24 @@
 var Lob = (function () { 'use strict';
 
+    // TODO test
+    var ActionDispatcher = (function () {
+        function ActionDispatcher() {
+            this.listeners = [];
+        }
+        ActionDispatcher.prototype.addListener = function (listener) {
+            this.listeners = this.listeners.concat(listener);
+        };
+        ActionDispatcher.prototype.dispatch = function (action) {
+            if (this.listeners.length == 0) {
+                console.warn("no listeners");
+            }
+            else {
+                this.listeners.forEach(function (listener) { listener(action); });
+            }
+        };
+        return ActionDispatcher;
+    })();
+
     // Uplink represents a single channel
     var Uplink = (function () {
         function Uplink(options) {
@@ -37,25 +56,6 @@ var Lob = (function () { 'use strict';
         };
         ;
         return Uplink;
-    })();
-
-    // TODO test
-    var ActionDispatcher = (function () {
-        function ActionDispatcher() {
-            this.listeners = [];
-        }
-        ActionDispatcher.prototype.addListener = function (listener) {
-            this.listeners = this.listeners.concat(listener);
-        };
-        ActionDispatcher.prototype.dispatch = function (action) {
-            if (this.listeners.length == 0) {
-                console.warn("no listeners");
-            }
-            else {
-                this.listeners.forEach(function (listener) { listener(action); });
-            }
-        };
-        return ActionDispatcher;
     })();
 
     function streak(predicate, collection) {
@@ -546,62 +546,9 @@ var Lob = (function () { 'use strict';
     }
     var Events = Gator;
 
-    console.log("Starting boot ...");
-    if (Uplink.getChannelName()) {
-        var uplink = new Uplink({ key: Uplink.getUplinkKey(), channelName: Uplink.getChannelName() });
-    }
-    // Interfaces are where user interaction is transformed to domain interactions
-    // There is only one interface in this application, this one the avionics interface
-    // It can therefore be set up to run on the document element
-    var AvionicsInterface = (function () {
-        function AvionicsInterface($root, actions) {
-            this.$root = $root;
-            this.actions = actions;
-            var events = Events($root, null);
-            events.on("click", "[data-command~=start]", function (evt) {
-                actions.startLogging();
-            });
-            events.on("click", "[data-command~=stop]", function (evt) {
-                actions.stopLogging();
-            });
-            events.on("click", "[data-command~=reset]", function (evt) {
-                actions.clearDataLog();
-            });
-        }
-        return AvionicsInterface;
-    })();
-    var startLogging = new ActionDispatcher();
-    var stopLogging = new ActionDispatcher();
-    var clearDataLog = new ActionDispatcher();
-    var newReading = new ActionDispatcher();
-    // The actions class acts as the dispatcher in a fluc architecture
-    // It also acts as the actions interface that is put on top of the dispatcher
-    // Stores are not registered generally as there is only two stores the datalogger and the uplink
-    var Actions = (function () {
-        function Actions() {
-        }
-        Actions.prototype.startLogging = function () {
-            startLogging.dispatch();
-        };
-        Actions.prototype.stopLogging = function () {
-            stopLogging.dispatch();
-        };
-        Actions.prototype.newReading = function (reading) {
-            newReading.dispatch(reading);
-        };
-        Actions.prototype.clearDataLog = function () {
-            clearDataLog.dispatch();
-        };
-        return Actions;
-    })();
-    var actions = new Actions();
-    var dataLogger = new DataLogger(uplink);
-    startLogging.addListener(dataLogger.start.bind(dataLogger));
-    stopLogging.addListener(dataLogger.stop.bind(dataLogger));
-    clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
-    newReading.addListener(dataLogger.newReading.bind(dataLogger));
     // Display elements are updated with the state of a store when they are registered to the store.
     // DEBT the data logger display will cause an error if the elements are not present, this error should be caught by the dispatcher when it is registered
+    // TODO currently untested
     var DataLoggerDisplay = (function () {
         function DataLoggerDisplay($root) {
             this.$root = $root;
@@ -640,6 +587,61 @@ var Lob = (function () { 'use strict';
         };
         return DataLoggerDisplay;
     })();
+
+    console.log("Starting boot ...");
+    var startLogging = new ActionDispatcher();
+    var stopLogging = new ActionDispatcher();
+    var clearDataLog = new ActionDispatcher();
+    var newReading = new ActionDispatcher();
+    // The actions class acts as the dispatcher in a fluc architecture
+    // It also acts as the actions interface that is put on top of the dispatcher
+    // Stores are not registered generally as there is only two stores the datalogger and the uplink
+    var Actions = (function () {
+        function Actions() {
+        }
+        Actions.prototype.startLogging = function () {
+            startLogging.dispatch();
+        };
+        Actions.prototype.stopLogging = function () {
+            stopLogging.dispatch();
+        };
+        Actions.prototype.newReading = function (reading) {
+            newReading.dispatch(reading);
+        };
+        Actions.prototype.clearDataLog = function () {
+            clearDataLog.dispatch();
+        };
+        return Actions;
+    })();
+    var actions = new Actions();
+    if (Uplink.getChannelName()) {
+        var uplink = new Uplink({ key: Uplink.getUplinkKey(), channelName: Uplink.getChannelName() });
+    }
+    // Interfaces are where user interaction is transformed to domain interactions
+    // There is only one interface in this application, this one the avionics interface
+    // It can therefore be set up to run on the document element
+    var AvionicsInterface = (function () {
+        function AvionicsInterface($root, actions) {
+            this.$root = $root;
+            this.actions = actions;
+            var events = Events($root, null);
+            events.on("click", "[data-command~=start]", function (evt) {
+                actions.startLogging();
+            });
+            events.on("click", "[data-command~=stop]", function (evt) {
+                actions.stopLogging();
+            });
+            events.on("click", "[data-command~=reset]", function (evt) {
+                actions.clearDataLog();
+            });
+        }
+        return AvionicsInterface;
+    })();
+    var dataLogger = new DataLogger(uplink);
+    startLogging.addListener(dataLogger.start.bind(dataLogger));
+    stopLogging.addListener(dataLogger.stop.bind(dataLogger));
+    clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
+    newReading.addListener(dataLogger.newReading.bind(dataLogger));
     function reportDeviceMotionEvent(deviceMotionEvent) {
         var raw = deviceMotionEvent.accelerationIncludingGravity;
         if (typeof raw.x === "number") {
