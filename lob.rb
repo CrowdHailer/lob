@@ -15,7 +15,7 @@ post '/new-flight' do
 end
 
 post '/join' do
-  channel = request.POST["channel"]
+  channel = request.POST["channel"].upcase
   redirect "/#{channel}/tracker\#1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_"
 end
 
