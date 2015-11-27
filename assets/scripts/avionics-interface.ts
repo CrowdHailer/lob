@@ -20,11 +20,11 @@ class AvionicsInterface {
     events.on("click", "[data-command~=reset]", function (evt: Event) {
       actions.clearDataLog();
     });
-    events.on("submit", "[data-command~=submit]", function (evt: Event) {
-      evt.preventDefault();
-      var input: any = evt.srcElement.querySelector("input");
-      actions.submitFlightLog(input.value);
-    });
+    // events.on("submit", "[data-command~=submit]", function (evt: Event) {
+    //   evt.preventDefault();
+    //   var input: any = evt.srcElement.querySelector("input");
+    //   actions.submitFlightLog(input.value);
+    // });
   }
 }
 

@@ -2,6 +2,7 @@ require 'sinatra'
 require "ably"
 
 client = Ably::Rest.new(key: '1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_')
+History = [];
 
 get '/' do
   erb :index
@@ -27,5 +28,15 @@ get '/:channel_name/tracker' do
 end
 
 post '/submit' do
-  puts request.POST
+  flight_time = request.POST['flight-time'];
+  name = request.POST['name'];
+  max_altitude = request.POST['max-altitude'];
+  # TODO validate names/times
+  History << [name, flight_time, max_altitude]
+  History = History.sort_by { |_, _ , m| m.to_i * -1 }
+  erb :submission
+end
+
+get '/leaderboard' do
+  erb :leaderboard, locals: {flights: History}
 end

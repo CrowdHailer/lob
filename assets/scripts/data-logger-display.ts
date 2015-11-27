@@ -6,7 +6,9 @@ import DataLogger from "./data-logger.ts";
 class DataLoggerDisplay {
   $root: Element;
   $flightTime: any;
+  $flightTimeInput: any;
   $maxAltitude;
+  $maxAltitudeInput;
   $startButton;
   $stopButton;
   $resetButton;
@@ -19,6 +21,8 @@ class DataLoggerDisplay {
     this.$stopButton = $root.querySelector("[data-command~=stop]");
     this.$resetButton = $root.querySelector("[data-command~=reset]");
     this.$submitButton = $root.querySelector("[data-command~=submit]");
+    this.$flightTimeInput = $root.querySelector("[name~=flight-time]");
+    this.$maxAltitudeInput = $root.querySelector("[name~=max-altitude]");
     var regex = /^\/([^\/]+)/;
     var channel = window.location.pathname.match(regex)[1];
     var $channelName = $root.querySelector("[data-hook~=channel-name]");
@@ -26,8 +30,9 @@ class DataLoggerDisplay {
   }
   update (state) {
     this.$flightTime.innerHTML = state.readings.flightTime + "s";
-    console.log(state);
+    this.$flightTimeInput.value = state.readings.flightTime;
     this.$maxAltitude.innerHTML = state.maxAltitude + "m";
+    this.$maxAltitudeInput.value = state.maxAltitude;
 
     if (state.status == DataLogger.READY) {
       this.$startButton.hidden = false;

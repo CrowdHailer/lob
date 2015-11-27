@@ -563,11 +563,11 @@ var Lob = (function () { 'use strict';
             events.on("click", "[data-command~=reset]", function (evt) {
                 actions.clearDataLog();
             });
-            events.on("submit", "[data-command~=submit]", function (evt) {
-                evt.preventDefault();
-                var input = evt.srcElement.querySelector("input");
-                actions.submitFlightLog(input.value);
-            });
+            // events.on("submit", "[data-command~=submit]", function (evt: Event) {
+            //   evt.preventDefault();
+            //   var input: any = evt.srcElement.querySelector("input");
+            //   actions.submitFlightLog(input.value);
+            // });
         }
         return AvionicsInterface;
     })();
@@ -584,6 +584,8 @@ var Lob = (function () { 'use strict';
             this.$stopButton = $root.querySelector("[data-command~=stop]");
             this.$resetButton = $root.querySelector("[data-command~=reset]");
             this.$submitButton = $root.querySelector("[data-command~=submit]");
+            this.$flightTimeInput = $root.querySelector("[name~=flight-time]");
+            this.$maxAltitudeInput = $root.querySelector("[name~=max-altitude]");
             var regex = /^\/([^\/]+)/;
             var channel = window.location.pathname.match(regex)[1];
             var $channelName = $root.querySelector("[data-hook~=channel-name]");
@@ -591,8 +593,9 @@ var Lob = (function () { 'use strict';
         }
         DataLoggerDisplay.prototype.update = function (state) {
             this.$flightTime.innerHTML = state.readings.flightTime + "s";
-            console.log(state);
+            this.$flightTimeInput.value = state.readings.flightTime;
             this.$maxAltitude.innerHTML = state.maxAltitude + "m";
+            this.$maxAltitudeInput.value = state.maxAltitude;
             if (state.status == DataLogger.READY) {
                 this.$startButton.hidden = false;
             }
