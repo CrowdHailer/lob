@@ -10,7 +10,7 @@ var Lob = (function () { 'use strict';
         };
         ActionDispatcher.prototype.dispatch = function (action) {
             if (this.listeners.length == 0) {
-                console.warn("no listeners");
+                console.warn("no listeners", action);
             }
             else {
                 this.listeners.forEach(function (listener) { listener(action); });
@@ -563,6 +563,11 @@ var Lob = (function () { 'use strict';
             events.on("click", "[data-command~=reset]", function (evt) {
                 actions.clearDataLog();
             });
+            // events.on("submit", "[data-command~=submit]", function (evt: Event) {
+            //   evt.preventDefault();
+            //   var input: any = evt.srcElement.querySelector("input");
+            //   actions.submitFlightLog(input.value);
+            // });
         }
         return AvionicsInterface;
     })();
@@ -578,6 +583,9 @@ var Lob = (function () { 'use strict';
             this.$startButton = $root.querySelector("[data-command~=start]");
             this.$stopButton = $root.querySelector("[data-command~=stop]");
             this.$resetButton = $root.querySelector("[data-command~=reset]");
+            this.$submitButton = $root.querySelector("[data-command~=submit]");
+            this.$flightTimeInput = $root.querySelector("[name~=flight-time]");
+            this.$maxAltitudeInput = $root.querySelector("[name~=max-altitude]");
             var regex = /^\/([^\/]+)/;
             var channel = window.location.pathname.match(regex)[1];
             var $channelName = $root.querySelector("[data-hook~=channel-name]");
@@ -585,8 +593,9 @@ var Lob = (function () { 'use strict';
         }
         DataLoggerDisplay.prototype.update = function (state) {
             this.$flightTime.innerHTML = state.readings.flightTime + "s";
-            console.log(state);
+            this.$flightTimeInput.value = state.readings.flightTime;
             this.$maxAltitude.innerHTML = state.maxAltitude + "m";
+            this.$maxAltitudeInput.value = state.maxAltitude;
             if (state.status == DataLogger.READY) {
                 this.$startButton.hidden = false;
             }
@@ -601,9 +610,11 @@ var Lob = (function () { 'use strict';
             }
             if (state.status == DataLogger.COMPLETED) {
                 this.$resetButton.hidden = false;
+                this.$submitButton.style.display = "";
             }
             else {
                 this.$resetButton.hidden = true;
+                this.$submitButton.style.display = "none";
             }
         };
         return DataLoggerDisplay;
@@ -614,6 +625,7 @@ var Lob = (function () { 'use strict';
     var stopLogging = new ActionDispatcher();
     var clearDataLog = new ActionDispatcher();
     var newReading = new ActionDispatcher();
+    var submitFlightLog = new ActionDispatcher();
     // The actions class acts as the dispatcher in a flux architecture
     // It is the top level interface for the application
     var Actions = (function () {
@@ -631,6 +643,9 @@ var Lob = (function () { 'use strict';
         Actions.prototype.clearDataLog = function () {
             clearDataLog.dispatch();
         };
+        Actions.prototype.submitFlightLog = function (name) {
+            submitFlightLog.dispatch(name);
+        };
         return Actions;
     })();
     var actions = new Actions();
@@ -644,6 +659,33 @@ var Lob = (function () { 'use strict';
     stopLogging.addListener(dataLogger.stop.bind(dataLogger));
     clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
     newReading.addListener(dataLogger.newReading.bind(dataLogger));
+    var FlightLogUploader = (function () {
+        function FlightLogUploader(dataLogger) {
+            this.dataLogger = dataLogger;
+        }
+        FlightLogUploader.prototype.submit = function (name) {
+            var request = new XMLHttpRequest();
+            request.open("POST", "/submit", true);
+            request.onload = function () {
+                if (request.status >= 200 && request.status < 400) {
+                    // Success!
+                    var resp = request.responseText;
+                }
+                else {
+                }
+            };
+            request.onerror = function () {
+                console.log("some error");
+                // There was a connection error of some sort
+            };
+            console.log(this.dataLogger.readings);
+            console.log(name);
+            request.send({ name: name, readings: this.dataLogger.readings.readings });
+        };
+        return FlightLogUploader;
+    })();
+    var flightLogUploader = new FlightLogUploader(dataLogger);
+    submitFlightLog.addListener(flightLogUploader.submit.bind(flightLogUploader));
     function reportDeviceMotionEvent(deviceMotionEvent) {
         var raw = deviceMotionEvent.accelerationIncludingGravity;
         if (typeof raw.x === "number") {

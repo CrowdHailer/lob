@@ -8,6 +8,7 @@ var startLogging = new ActionDispatcher<void>();
 var stopLogging = new ActionDispatcher<void>();
 var clearDataLog = new ActionDispatcher<void>();
 var newReading = new ActionDispatcher<any>();
+var submitFlightLog = new ActionDispatcher<string>();
 
 // The actions class acts as the dispatcher in a flux architecture
 // It is the top level interface for the application
@@ -23,6 +24,9 @@ class Actions {
   }
   clearDataLog(){
     clearDataLog.dispatch();
+  }
+  submitFlightLog(name: string){
+    submitFlightLog.dispatch(name);
   }
 }
 
@@ -50,6 +54,42 @@ clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
 newReading.addListener(dataLogger.newReading.bind(dataLogger));
 
 
+
+
+
+
+class FlightLogUploader {
+  dataLogger;
+  constructor(dataLogger){
+    this.dataLogger = dataLogger;
+  }
+  submit(name){
+    var request = new XMLHttpRequest();
+    request.open("POST", "/submit", true);
+
+    request.onload = function() {
+      if (request.status >= 200 && request.status < 400) {
+        // Success!
+        var resp = request.responseText;
+      } else {
+        // We reached our target server, but it returned an error
+
+      }
+    };
+
+    request.onerror = function() {
+      console.log("some error");
+      // There was a connection error of some sort
+    };
+
+    console.log(this.dataLogger.readings);
+    console.log(name);
+    request.send({name: name, readings: this.dataLogger.readings.readings});
+  }
+}
+
+var flightLogUploader = new FlightLogUploader(dataLogger);
+submitFlightLog.addListener(flightLogUploader.submit.bind(flightLogUploader));
 
 
 function reportDeviceMotionEvent (deviceMotionEvent) {

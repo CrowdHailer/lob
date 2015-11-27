@@ -6,7 +6,7 @@ class ActionDispatcher<Action> {
   }
   dispatch(action?: Action){
     if (this.listeners.length == 0) {
-      console.warn("no listeners");
+      console.warn("no listeners", action);
     } else {
       this.listeners.forEach(function(listener){ listener(action); });
     }
