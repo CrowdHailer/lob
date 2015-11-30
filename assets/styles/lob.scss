@@ -9,8 +9,9 @@
 @include scut-sticky-footer-fluid(body, footer);
 // @include scut-reset-semanticize;
 
-a {
+a.clean {
   text-decoration: none;
+  color: inherit;
 }
 
 p {
@@ -45,9 +46,11 @@ h1 {
   margin: 0;
 }
 h2 {
-  font-size: 180%;
+  font-size: 120%;
   text-align: center;
+  font-weight: inherit;
   color: #444;
+  margin: 0;
 }
 
 span {
@@ -70,7 +73,7 @@ form {
   text-align: right;
   border-radius: 4px;
   margin: 1rem auto;
-  max-width: 720px;
+  max-width: 560px;
 }
 
 ::-webkit-input-placeholder {

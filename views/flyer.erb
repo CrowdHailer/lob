@@ -12,8 +12,8 @@
   <link rel="stylesheet" href="/lob.css" media="screen" title="no title" charset="utf-8">
 </head>
 <body data-interface="avionics" data-display="data-logger">
-  <main>
-    <a href="/">
+  <main class="width-limited">
+    <a class="clean" href="/">
       <h1>Lob</h1>
     </a>
     <h2 data-hook="channel-name">Watch on channel '????'</h2>
@@ -23,19 +23,19 @@
     <p>
       <span class="right">Height:</span><span class="left" data-hook="max-altitude"></span>
     </p>
-    <footer>
-      <form class="" action="index.html" method="post">
-        <button type="button" data-command="start">Start</button>
-        <button type="button" data-command="stop">Stop</button>
-        <button type="button" data-command="reset">Reset</button>
-      </form>
-      <form class="" action="/submit" method="post" data-command="submit">
-        <input type="hidden" name="flight-time" value="0">
-        <input type="hidden" name="max-altitude" value="0">
-        <input type="text" name="name" autofocus required placeholder="Enter name">
-        <button type="submit">Submit</button>
-      </form>
-    </footer>
+    <form class="" action="index.html" method="post">
+      <button type="button" data-command="start">Start</button>
+      <button type="button" data-command="stop">Stop</button>
+      <button type="button" data-command="reset">Reset</button>
+    </form>
+    <form class="" action="/submit" method="post" data-command="submit">
+      <input type="hidden" name="flight-time" value="0">
+      <input type="hidden" name="max-altitude" value="0">
+      <input type="text" name="name" autofocus required placeholder="Enter name">
+      <button type="submit">Submit</button>
+    </form>
   </main>
+  <footer>
+  </footer>
 </body>
 </html>

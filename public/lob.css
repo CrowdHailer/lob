@@ -50,8 +50,9 @@ footer {
   display: table-row;
   height: 1px; }
 
-a {
-  text-decoration: none; }
+a.clean {
+  text-decoration: none;
+  color: inherit; }
 
 html, body {
   margin: 0; }
@@ -76,9 +77,11 @@ h1 {
   margin: 0; }
 
 h2 {
-  font-size: 180%;
+  font-size: 120%;
   text-align: center;
-  color: #444; }
+  font-weight: inherit;
+  color: #444;
+  margin: 0; }
 
 span {
   width: 50%;
@@ -97,7 +100,7 @@ form {
   text-align: right;
   border-radius: 4px;
   margin: 1rem auto;
-  max-width: 720px; }
+  max-width: 560px; }
 
 ::-webkit-input-placeholder {
   color: #777; }
