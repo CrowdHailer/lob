@@ -1,41 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-
-  <title>Lob</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-
-  <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" ></script>
-  <script src="/lob.js"></script>
-  <link rel="stylesheet" href="/lob.css" media="screen" title="no title" charset="utf-8">
-</head>
-<body data-interface="avionics" data-display="data-logger">
-  <main class="width-limited">
-    <a class="clean" href="/">
-      <h1>Lob</h1>
-    </a>
-    <h2 data-hook="channel-name">Watch on channel '????'</h2>
-    <p>
-      <span class="right">Time:</span><span class="left" data-hook="flight-time"></span>
-    </p>
-    <p>
-      <span class="right">Height:</span><span class="left" data-hook="max-altitude"></span>
-    </p>
-    <form class="" action="index.html" method="post">
-      <button type="button" data-command="start">Start</button>
-      <button type="button" data-command="stop">Stop</button>
-      <button type="button" data-command="reset">Reset</button>
-    </form>
-    <form class="" action="/submit" method="post" data-command="submit">
-      <input type="hidden" name="flight-time" value="0">
-      <input type="hidden" name="max-altitude" value="0">
-      <input type="text" name="name" autofocus required placeholder="Enter name">
-      <button type="submit">Submit</button>
-    </form>
-  </main>
-  <footer>
-  </footer>
-</body>
-</html>
+<main class="width-limited" data-interface="avionics" data-display="data-logger">
+  <a class="clean" href="/">
+    <h1>Lob</h1>
+  </a>
+  <h2 data-hook="channel-name">Watch on channel '????'</h2>
+  <p>
+    <span class="right">Time:</span><span class="left" data-hook="flight-time"></span>
+  </p>
+  <p>
+    <span class="right">Height:</span><span class="left" data-hook="max-altitude"></span>
+  </p>
+  <form class="" action="index.html" method="post">
+    <button type="button" data-command="start">Start</button>
+    <button type="button" data-command="stop">Stop</button>
+    <button type="button" data-command="reset">Reset</button>
+  </form>
+  <form class="" action="/submit" method="post" data-command="submit">
+    <input type="hidden" name="flight-time" value="0">
+    <input type="hidden" name="max-altitude" value="0">
+    <input type="text" name="name" autofocus required placeholder="Enter name">
+    <button type="submit">Submit</button>
+  </form>
+</main>
