@@ -1,4 +1,4 @@
-@import url(https://fonts.googleapis.com/css?family=Raleway);
+@import url(https://fonts.googleapis.com/css?family=Raleway:400,200);
 
 @import 'vendor/scut';
 
@@ -6,54 +6,58 @@
 // Preferred behaviour
 @include scut-reset-border-box;
 @include scut-reset-button;
-@include scut-reset-semanticize;
+@include scut-sticky-footer-fluid(body, footer);
+// @include scut-reset-semanticize;
+
+a.clean {
+  text-decoration: none;
+  color: inherit;
+}
+
+p {
+  // padding: 0 1em;
+}
+
+// Structure
 
 html, body {
-  height: 100%;
-  border: 0;
   margin: 0;
 }
 
 body {
   font-family: 'Raleway', sans-serif;
+  font-weight: 200;
   background-color: #FFCC00;
-  padding: 1.2rem;
+  font-size: 1.8rem;
+}
+
+.width-limited {
+  overflow: hidden;
+  max-width: 960px;
+  margin: 0 auto;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+footer p {
+  padding-left: 1em;
+  padding-right: 1em;
 }
 
 h1 {
-  font-size: 400%;
+  font-size: 300%;
   text-align: center;
-  margin: 1rem 0;
-  color: black;
-  text-decoration: underline;
+  font-weight: inherit;
+  margin: 0;
 }
 h2 {
-  font-size: 180%;
+  font-size: 120%;
   text-align: center;
+  font-weight: inherit;
   color: #444;
-}
-a {
-  text-decoration: none;
+  margin: 0;
 }
 
-main {
-  border: 3px solid black;
-  border-radius: 6px;
-  min-height: 100%;
-  position: relative;
-  overflow: hidden;
-  max-width: 966px;
-  margin: 0 auto;
-}
-
-#orientation-tracker {
-  max-width: 960px;
-}
-p {
-  margin: 1rem 0;
-  padding: 0 1rem;
-  font-size: 140%;
-}
 span {
   width: 50%;
   display: inline-block;
@@ -67,21 +71,14 @@ span {
   }
 }
 
-footer {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
 form {
   border: 2px solid;
   display: block;
   padding: 0.5em;
-  font-size: 160%;
   text-align: right;
   border-radius: 4px;
-  margin: 1rem;
+  margin: 1rem auto;
+  max-width: 560px;
 }
 
 ::-webkit-input-placeholder {

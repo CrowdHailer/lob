@@ -1,25 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-
-  <title>Lob</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-
-  <link rel="stylesheet" href="/lob.css" media="screen" title="no title" charset="utf-8">
-</head>
-<body data-interface="avionics" data-display="data-logger">
-  <main>
-    <a href="/">
-      <h1>Lob</h1>
-    </a>
-    <h2 data-hook="channel-name">Leaderboard</h2>
-    <ol>
+<main class="width-limited">
+  <a class="clean" href="/">
+    <h1>Legends</h1>
+  </a>
+  <ol>
     <% flights.each do |name, time, max_altitude| %>
-      <li><%= name %>: <%= max_altitude %>m</li>
+    <li><%= name %>: <%= max_altitude %>m</li>
     <% end %>
-    </ol>
-  </main>
-</body>
-</html>
+  </ol>
+</main>
