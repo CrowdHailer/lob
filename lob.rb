@@ -2,7 +2,7 @@ require 'sinatra'
 require "ably"
 
 client = Ably::Rest.new(key: '1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_')
-History = [];
+History = [["Peter", "2", "12"]];
 
 get '/' do
   erb :index
