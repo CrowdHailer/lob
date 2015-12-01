@@ -4,13 +4,17 @@ require "ably"
 client = Ably::Rest.new(key: '1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_')
 History = [["Peter", "2", "12"]];
 
+def create_channel_name
+  (1...(36 ** 4)).to_a.sample.to_s(36).upcase
+end
+
 get '/' do
   erb :index
 end
 
 post '/new-flight' do
   token = client.auth.request_token.token
-  channel = (1...(36 ** 4)).to_a.sample.to_s(36).upcase
+  channel = create_channel_name
   redirect "/flyer?token=#{token}&channel=#{channel}"
 end
 
