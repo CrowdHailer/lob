@@ -1,12 +1,7 @@
 // TODO test
 declare var Ably: any;
 
-function getParameterByName(name) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-        results = regex.exec(location.search);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-}
+import { getParameterByName } from "./utils.ts";
 
 // Uplink represents a single channel
 class Uplink {

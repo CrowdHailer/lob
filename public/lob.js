@@ -19,46 +19,6 @@ var Lob = (function () { 'use strict';
         return ActionDispatcher;
     })();
 
-    function getParameterByName(name) {
-        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
-        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-    }
-    // Uplink represents a single channel
-    var Uplink = (function () {
-        function Uplink(options) {
-            var token = options["token"];
-            var channelName = options["channelName"];
-            var realtime = new Ably.Realtime({ token: token });
-            realtime.connection.on("failed", function () {
-                alert("failed to connect");
-            });
-            this.channel = realtime.channels.get(channelName);
-        }
-        Uplink.prototype.publish = function (eventName, vector) {
-            this.channel.publish(eventName, vector, function (err) {
-                if (err) {
-                    console.log("Unable to publish message; err = " + err.message);
-                }
-                else {
-                    console.log("Message successfully sent");
-                }
-            });
-        };
-        Uplink.prototype.subscribe = function (eventName, callback) {
-            this.channel.subscribe(eventName, callback);
-        };
-        Uplink.getUplinkToken = function () {
-            return getParameterByName("token");
-        };
-        ;
-        Uplink.getChannelName = function () {
-            return getParameterByName("channel");
-        };
-        ;
-        return Uplink;
-    })();
-
     function streak(predicate, collection) {
         var current_streak = [];
         var output = [];
@@ -105,6 +65,46 @@ var Lob = (function () { 'use strict';
             return parseFloat(value.toPrecision(precision));
         };
     }
+    function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+    // Uplink represents a single channel
+    var Uplink = (function () {
+        function Uplink(options) {
+            var token = options["token"];
+            var channelName = options["channelName"];
+            var realtime = new Ably.Realtime({ token: token });
+            realtime.connection.on("failed", function () {
+                alert("failed to connect");
+            });
+            this.channel = realtime.channels.get(channelName);
+        }
+        Uplink.prototype.publish = function (eventName, vector) {
+            this.channel.publish(eventName, vector, function (err) {
+                if (err) {
+                    console.log("Unable to publish message; err = " + err.message);
+                }
+                else {
+                    console.log("Message successfully sent");
+                }
+            });
+        };
+        Uplink.prototype.subscribe = function (eventName, callback) {
+            this.channel.subscribe(eventName, callback);
+        };
+        Uplink.getUplinkToken = function () {
+            return getParameterByName("token");
+        };
+        ;
+        Uplink.getChannelName = function () {
+            return getParameterByName("channel");
+        };
+        ;
+        return Uplink;
+    })();
 
     var Readings = (function () {
         function Readings(readings) {
@@ -587,8 +587,7 @@ var Lob = (function () { 'use strict';
             this.$submitButton = $root.querySelector("[data-command~=submit]");
             this.$flightTimeInput = $root.querySelector("[name~=flight-time]");
             this.$maxAltitudeInput = $root.querySelector("[name~=max-altitude]");
-            var regex = /^\/([^\/]+)/;
-            var channel = window.location.pathname.match(regex)[1];
+            var channel = getParameterByName("channel");
             var $channelName = $root.querySelector("[data-hook~=channel-name]");
             $channelName.innerHTML = "Watch on channel '" + channel + "'";
         }
