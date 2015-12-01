@@ -11,7 +11,7 @@ end
 post '/new-flight' do
   token = client.auth.request_token.token
   channel = (1...(36 ** 4)).to_a.sample.to_s(36).upcase
-  redirect "/#{channel}/flyer\##{token}"
+  redirect "/flyer?token=#{token}&channel=#{channel}"
 end
 
 post '/join' do
@@ -20,7 +20,7 @@ post '/join' do
   redirect "/#{channel}/tracker\##{token}"
 end
 
-get '/:channel_name/flyer' do
+get '/flyer' do
   erb :flyer
 end
 

@@ -1,6 +1,13 @@
 // TODO test
 declare var Ably: any;
 
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
 // Uplink represents a single channel
 class Uplink {
   channel: any;
@@ -25,18 +32,11 @@ class Uplink {
   subscribe(eventName, callback) {
     this.channel.subscribe(eventName, callback);
   }
-  static getUplinkKey(): string{
-    var match = window.location.hash.match(/#(.+)/);
-    if (match) {
-      return match[1];
-    }
+  static getUplinkToken(): string {
+    return getParameterByName("token");
   };
   static getChannelName(){
-    var regex = /^\/([^\/]+)/;
-    var match = window.location.pathname.match(regex);
-    if (match) {
-      return match[1];
-    }
+    return getParameterByName("channel");
   };
 }
 

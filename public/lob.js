@@ -19,6 +19,11 @@ var Lob = (function () { 'use strict';
         return ActionDispatcher;
     })();
 
+    function getParameterByName(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
     // Uplink represents a single channel
     var Uplink = (function () {
         function Uplink(options) {
@@ -43,19 +48,12 @@ var Lob = (function () { 'use strict';
         Uplink.prototype.subscribe = function (eventName, callback) {
             this.channel.subscribe(eventName, callback);
         };
-        Uplink.getUplinkKey = function () {
-            var match = window.location.hash.match(/#(.+)/);
-            if (match) {
-                return match[1];
-            }
+        Uplink.getUplinkToken = function () {
+            return getParameterByName("token");
         };
         ;
         Uplink.getChannelName = function () {
-            var regex = /^\/([^\/]+)/;
-            var match = window.location.pathname.match(regex);
-            if (match) {
-                return match[1];
-            }
+            return getParameterByName("channel");
         };
         ;
         return Uplink;
@@ -655,7 +653,7 @@ var Lob = (function () { 'use strict';
     // DEBT will fail if there is no key.
     // Need to return null uplink and warning if failed
     if (Uplink.getChannelName()) {
-        var uplink = new Uplink({ token: Uplink.getUplinkKey(), channelName: Uplink.getChannelName() });
+        var uplink = new Uplink({ token: Uplink.getUplinkToken(), channelName: Uplink.getChannelName() });
     }
     var dataLogger = new DataLogger(uplink);
     startLogging.addListener(dataLogger.start.bind(dataLogger));
