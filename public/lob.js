@@ -22,9 +22,9 @@ var Lob = (function () { 'use strict';
     // Uplink represents a single channel
     var Uplink = (function () {
         function Uplink(options) {
-            var key = options["key"];
+            var token = options["token"];
             var channelName = options["channelName"];
-            var realtime = new Ably.Realtime({ key: key });
+            var realtime = new Ably.Realtime({ token: token });
             this.channel = realtime.channels.get(channelName);
         }
         Uplink.prototype.publish = function (eventName, vector) {
@@ -652,7 +652,7 @@ var Lob = (function () { 'use strict';
     // DEBT will fail if there is no key.
     // Need to return null uplink and warning if failed
     if (Uplink.getChannelName()) {
-        var uplink = new Uplink({ key: Uplink.getUplinkKey(), channelName: Uplink.getChannelName() });
+        var uplink = new Uplink({ token: Uplink.getUplinkKey(), channelName: Uplink.getChannelName() });
     }
     var dataLogger = new DataLogger(uplink);
     startLogging.addListener(dataLogger.start.bind(dataLogger));

@@ -5,9 +5,9 @@ declare var Ably: any;
 class Uplink {
   channel: any;
   constructor(options) {
-    var key = options["key"];
+    var token = options["token"];
     var channelName = options["channelName"];
-    var realtime = new Ably.Realtime({ key: key });
+    var realtime = new Ably.Realtime({ token: token });
     this.channel = realtime.channels.get(channelName);
   }
   publish(eventName, vector){

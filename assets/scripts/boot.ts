@@ -41,7 +41,7 @@ import Uplink from "./uplink.ts";
 // Need to return null uplink and warning if failed
 
 if (Uplink.getChannelName()) {
-  var uplink = new Uplink({key: Uplink.getUplinkKey(), channelName: Uplink.getChannelName()});
+  var uplink = new Uplink({token: Uplink.getUplinkKey(), channelName: Uplink.getChannelName()});
 }
 
 
