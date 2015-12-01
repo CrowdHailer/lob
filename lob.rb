@@ -16,15 +16,16 @@ end
 
 post '/join' do
   channel = request.POST["channel"].upcase
-  redirect "/#{channel}/tracker\#1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_"
+  token = client.auth.request_token.token
+  redirect "/#{channel}/tracker\##{token}"
 end
 
 get '/:channel_name/flyer' do
-  erb :flyer, locals: {channel_name: params["channel_name"]}
+  erb :flyer
 end
 
 get '/:channel_name/tracker' do
-  erb :tracker, locals: {channel_name: params["channel_name"]}
+  erb :tracker
 end
 
 post '/submit' do
