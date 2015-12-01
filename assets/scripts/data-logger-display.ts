@@ -1,5 +1,5 @@
 import DataLogger from "./data-logger.ts";
-
+import { getParameterByName } from "./utils.ts";
 // Display elements are updated with the state of a store when they are registered to the store.
 // DEBT the data logger display will cause an error if the elements are not present, this error should be caught by the dispatcher when it is registered
 // TODO currently untested
@@ -23,8 +23,7 @@ class DataLoggerDisplay {
     this.$submitButton = $root.querySelector("[data-command~=submit]");
     this.$flightTimeInput = $root.querySelector("[name~=flight-time]");
     this.$maxAltitudeInput = $root.querySelector("[name~=max-altitude]");
-    var regex = /^\/([^\/]+)/;
-    var channel = window.location.pathname.match(regex)[1];
+    var channel = getParameterByName("channel");
     var $channelName = $root.querySelector("[data-hook~=channel-name]");
     $channelName.innerHTML = "Watch on channel '" + channel + "'";
   }

@@ -1,13 +1,18 @@
 // TODO test
 declare var Ably: any;
 
+import { getParameterByName } from "./utils.ts";
+
 // Uplink represents a single channel
 class Uplink {
   channel: any;
   constructor(options) {
-    var key = options["key"];
+    var token = options["token"];
     var channelName = options["channelName"];
-    var realtime = new Ably.Realtime({ key: key });
+    var realtime = new Ably.Realtime({ token: token });
+    realtime.connection.on("failed", function() {
+      alert("failed to connect");
+    });
     this.channel = realtime.channels.get(channelName);
   }
   publish(eventName, vector){
@@ -22,18 +27,11 @@ class Uplink {
   subscribe(eventName, callback) {
     this.channel.subscribe(eventName, callback);
   }
-  static getUplinkKey(): string{
-    var match = window.location.hash.match(/#(.+)/);
-    if (match) {
-      return match[1];
-    }
+  static getUplinkToken(): string {
+    return getParameterByName("token");
   };
   static getChannelName(){
-    var regex = /^\/([^\/]+)/;
-    var match = window.location.pathname.match(regex);
-    if (match) {
-      return match[1];
-    }
+    return getParameterByName("channel");
   };
 }
 
