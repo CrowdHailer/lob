@@ -8,6 +8,9 @@ class Uplink {
     var token = options["token"];
     var channelName = options["channelName"];
     var realtime = new Ably.Realtime({ token: token });
+    realtime.connection.on("failed", function() {
+      alert("failed to connect");
+    });
     this.channel = realtime.channels.get(channelName);
   }
   publish(eventName, vector){
