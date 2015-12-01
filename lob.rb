@@ -17,14 +17,14 @@ end
 post '/join' do
   channel = request.POST["channel"].upcase
   token = client.auth.request_token.token
-  redirect "/#{channel}/tracker\##{token}"
+  redirect "/tracker?token=#{token}&channel=#{channel}"
 end
 
 get '/flyer' do
   erb :flyer
 end
 
-get '/:channel_name/tracker' do
+get '/tracker' do
   erb :tracker
 end
 
