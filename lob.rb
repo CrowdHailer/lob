@@ -3,7 +3,7 @@ require "sinatra/cookies"
 
 require "ably"
 
-client = Ably::Rest.new(key: '1YRBpA.Kva1OA:Wy71uGGrQ8kFl8L_')
+client = Ably::Rest.new(key: ENV.fetch("ABLY_API_KEY"))
 History = [["Peter", "2", "12"]];
 
 def create_channel_name
