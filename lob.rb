@@ -34,7 +34,7 @@ post '/submit' do
   max_altitude = request.POST['max-altitude'];
   # TODO validate names/times
   History << [name, flight_time, max_altitude]
-  History = History.sort_by { |_, _ , m| m.to_i * -1 }
+  History = History.sort_by { |_, _ , m| m.to_f * -1 }
   erb :submission
 end
 
