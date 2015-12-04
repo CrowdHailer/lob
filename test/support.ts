@@ -8,3 +8,11 @@ export function createTranscriptFunction(){
   func = f;
   return func;
 };
+
+export function createTranscriptLogger(){
+  return {
+    info: createTranscriptFunction(),
+    warn: createTranscriptFunction(),
+    error: createTranscriptFunction()
+  };
+}

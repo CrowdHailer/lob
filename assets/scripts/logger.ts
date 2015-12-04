@@ -16,7 +16,12 @@ export function create (prefix){
 
 export interface Logger {
   info: (...items) => void;
+  warn: (...items) => void;
   error: (...items) => void;
 }
 
-export var NullLogger = {info: function(...a){ null; }, error: function(...a){ null; }};
+export var NullLogger = {
+  info: function(...a){ null; },
+  warn: function(...a){ null; },
+  error: function(...a){ null; }
+};

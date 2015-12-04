@@ -13,7 +13,12 @@ function Dispatcher(handlers, world){
         world.error(e);
       }
     });
-    world.info.apply(world, args);
+
+    if (handlers.length == 0) {
+      world.warn.apply(world, args);
+    } else {
+      world.info.apply(world, args);
+    }
   };
   this.register = function(handler){
     return new Dispatcher(handlers.concat(handler), world);
