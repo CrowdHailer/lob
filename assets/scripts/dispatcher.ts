@@ -1,4 +1,4 @@
-var NullLogger = {info: function(...a){ null; }, error: function(...a){ null; }};
+import { NullLogger } from "./logger.ts";
 
 // Raise Error for circular calls
 // Pass multiple arguments probably fails with type declaration

@@ -1,6 +1,28 @@
 var Lob = (function () { 'use strict';
 
-    var NullLogger$1 = { info: function () {
+    function create$1(prefix) {
+        prefix = "[" + prefix + "]";
+        var notices = [prefix];
+        return {
+            info: function () {
+                var _ = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    _[_i - 0] = arguments[_i];
+                }
+                var args = Array.prototype.slice.call(arguments);
+                console.info.apply(console, notices.concat(args));
+            },
+            error: function () {
+                var _ = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    _[_i - 0] = arguments[_i];
+                }
+                var args = Array.prototype.slice.call(arguments);
+                console.error.apply(console, notices.concat(args));
+            }
+        };
+    }
+    var NullLogger = { info: function () {
             var a = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 a[_i - 0] = arguments[_i];
@@ -13,6 +35,7 @@ var Lob = (function () { 'use strict';
             }
             null;
         } };
+
     // Raise Error for circular calls
     // Pass multiple arguments probably fails with type declaration
     // warn not log if no handlers
@@ -34,29 +57,16 @@ var Lob = (function () { 'use strict';
         };
     }
     ;
-    function create$1(world) {
-        if (world === void 0) { world = NullLogger$1; }
+    function create$2(world) {
+        if (world === void 0) { world = NullLogger; }
         return new Dispatcher([], world);
     }
     ;
 
-    var NullLogger = { info: function () {
-            var a = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                a[_i - 0] = arguments[_i];
-            }
-            null;
-        }, error: function () {
-            var a = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                a[_i - 0] = arguments[_i];
-            }
-            null;
-        } };
     function create(filter, logger) {
         if (logger === void 0) { logger = NullLogger; }
         var action;
-        var dispatcher = create$1(logger);
+        var dispatcher = create$2(logger);
         action = function (minutiae) {
             var noDetailWithAction = arguments.length == 0;
             try {
@@ -680,52 +690,14 @@ var Lob = (function () { 'use strict';
     })();
 
     console.log("Starting boot ...");
-    var Logger = {
-        create: function (prefix) {
-            prefix = "[" + prefix + "]";
-            var notices = [prefix];
-            return {
-                info: function () {
-                    var _ = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        _[_i - 0] = arguments[_i];
-                    }
-                    var args = Array.prototype.slice.call(arguments);
-                    console.info.apply(console, notices.concat(args));
-                },
-                error: function () {
-                    var _ = [];
-                    for (var _i = 0; _i < arguments.length; _i++) {
-                        _[_i - 0] = arguments[_i];
-                    }
-                    var args = Array.prototype.slice.call(arguments);
-                    console.error.apply(console, notices.concat(args));
-                }
-            };
-        }
-    };
-    // class MyConsole{
-    //   prefix = "";
-    //   constructor(prefix){
-    //     this.prefix = "[" + prefix + "]";
-    //   }
-    //   info(a){
-    //     var argsz = Array.prototype.slice.call(arguments);
-    //     var args = [this.prefix].concat(argsz);
-    //     console.info.apply(console, args);
-    //   }
-    //   error(a){
-    //     console.error(this.prefix, a);
-    //   }
-    // }
     // The actions class acts as the dispatcher in a flux architecture
     // It is the top level interface for the application
     var Actions = {
-        startLogging: create(function () { null; }, Logger.create("Start Logging")),
-        stopLogging: create(function () { null; }),
-        newReading: create(function (a) { return a; }),
-        clearDataLog: create(function () { null; }),
-        submitFlightLog: create(function () { null; })
+        startLogging: create(function () { null; }, create$1("Start Logging")),
+        stopLogging: create(function () { null; }, create$1("Stop Logging")),
+        newReading: create(function (a) { return a; }, create$1("new Reading")),
+        clearDataLog: create(function () { null; }, create$1("Clear Datalog")),
+        submitFlightLog: create(function () { null; }, create$1("Submit Flight log"))
     };
     // DEBT will fail if there is no key.
     // Need to return null uplink and warning if failed

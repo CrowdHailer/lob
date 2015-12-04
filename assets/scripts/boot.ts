@@ -5,33 +5,18 @@ console.log("Starting boot ...");
 import * as Dispatcher from "./dispatcher.ts";
 import * as Action from "./action.ts";
 
+import * as Logger from "./logger.ts";
 
-var Logger = {
-  create: function(prefix){
-    prefix = "[" + prefix + "]";
-    var notices = [prefix];
-    return {
-      info: function(..._){
-        var args = Array.prototype.slice.call(arguments);
-        console.info.apply(console, notices.concat(args));
-      },
-      error: function(..._){
-        var args = Array.prototype.slice.call(arguments);
-        console.error.apply(console, notices.concat(args));
-      }
-    };
-  }
-};
 
 
 // The actions class acts as the dispatcher in a flux architecture
 // It is the top level interface for the application
 var Actions = {
   startLogging: Action.create(function(){ null; }, Logger.create("Start Logging")),
-  stopLogging: Action.create(function(){ null; }),
-  newReading: Action.create(function(a: any){ return a; }),
-  clearDataLog: Action.create(function(){ null; }),
-  submitFlightLog: Action.create(function(){ null; })
+  stopLogging: Action.create(function(){ null; }, Logger.create("Stop Logging")),
+  newReading: Action.create(function(a: any){ return a; }, Logger.create("new Reading")),
+  clearDataLog: Action.create(function(){ null; }, Logger.create("Clear Datalog")),
+  submitFlightLog: Action.create(function(){ null; }, Logger.create("Submit Flight log"))
 };
 
 // SETUP SERVICES WITHOUT REQUIREMENT ON THE DOM
