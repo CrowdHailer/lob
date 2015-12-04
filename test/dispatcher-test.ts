@@ -8,37 +8,19 @@ function createTranscriptFunction(){
   func = f;
   return func;
 };
-
-var NullLogger = {info: function(...a){ null; }, error: function(...a){ null; }};
-
-function Dispatcher(handlers, world=NullLogger){
-  this.dispatch = function(minutiae){
-    handlers.forEach(function(handler){
-      try {
-        handler.call({}, minutiae);
-      } catch(e) {
-        world.error(e);
-      }
-    });
-    world.info(minutiae);
-  };
-  this.register = function(handler){
-    return new Dispatcher(handlers.concat(handler), world);
-  };
-};
+import * as Dispatcher from "../assets/scripts/dispatcher.ts";
 
 describe("Dispatcher", function(){
   it("should pass the minutiae (precise details) to a registered listener", function(){
     var handler = createTranscriptFunction();
-    var dispatcher = new Dispatcher([handler]);
+    var dispatcher = Dispatcher.create().register(handler);
     dispatcher.dispatch("some data");
     expect(handler.transcript[0]).toEqual(["some data"]);
   });
 
   it("should be possible to register new handlers", function(){
     var handler = createTranscriptFunction();
-    var dispatcher = new Dispatcher([]);
-    dispatcher = dispatcher.register(handler);
+    var dispatcher = Dispatcher.create().register(handler);
     dispatcher.dispatch("some data");
     expect(handler.transcript[0]).toEqual(["some data"]);
   });
@@ -46,7 +28,7 @@ describe("Dispatcher", function(){
   it("should dispatch to all handlers after error", function(){
     var badHandler = function(){ throw new Error("bad handler"); };
     var handler = createTranscriptFunction();
-    var dispatcher = new Dispatcher([]);
+    var dispatcher = Dispatcher.create().register(handler);
     dispatcher = dispatcher.register(badHandler).register(handler);
     dispatcher.dispatch("some data");
     expect(handler.transcript[0]).toEqual(["some data"]);
@@ -54,7 +36,7 @@ describe("Dispatcher", function(){
 
   it("should log as info each dispatched action", function(){
     var logger = {info: createTranscriptFunction(), error: createTranscriptFunction()};
-    var dispatcher = new Dispatcher([], logger);
+    var dispatcher = Dispatcher.create(logger);
     dispatcher.dispatch("some data");
     expect(logger.info.transcript[0]).toEqual(["some data"]);
   });
@@ -62,8 +44,7 @@ describe("Dispatcher", function(){
   it("should log as an error if a dispatch fails", function(){
     var badHandler = function(){ throw new Error("bad handler"); };
     var logger = {info: createTranscriptFunction(), error: createTranscriptFunction()};
-    var dispatcher = new Dispatcher([], logger);
-    dispatcher = dispatcher.register(badHandler);
+    var dispatcher = Dispatcher.create(logger).register(badHandler);
     dispatcher.dispatch("some data");
     expect(logger.error.transcript[0]).toEqual([new Error("bad handler")]);
   });

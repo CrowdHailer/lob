@@ -26,6 +26,7 @@
         "assets/scripts/boot.ts",
         "assets/scripts/data-logger-display.ts",
         "assets/scripts/data-logger.ts",
+        "assets/scripts/dispatcher.ts",
         "assets/scripts/dom.ts",
         "assets/scripts/readings.ts",
         "assets/scripts/uplink.ts",
