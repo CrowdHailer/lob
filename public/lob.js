@@ -142,12 +142,14 @@ var Lob = (function () { 'use strict';
 
     // Uplink represents a single channel
     var Uplink = (function () {
-        function Uplink(options) {
+        function Uplink(options, actions) {
             var token = options["token"];
             var channelName = options["channelName"];
             var realtime = new Ably.Realtime({ token: token });
-            realtime.connection.on("failed", function () {
-                alert("failed to connect");
+            realtime.connection.on("failed", function (err) {
+                console.log(err);
+                console.log(err.reason);
+                actions.failedConnection(err.reason);
             });
             this.channel = realtime.channels.get(channelName);
         }
@@ -164,14 +166,6 @@ var Lob = (function () { 'use strict';
         Uplink.prototype.subscribe = function (eventName, callback) {
             this.channel.subscribe(eventName, callback);
         };
-        Uplink.getUplinkToken = function () {
-            return getParameterByName("token");
-        };
-        ;
-        Uplink.getChannelName = function () {
-            return getParameterByName("channel");
-        };
-        ;
         return Uplink;
     })();
 
@@ -690,19 +684,19 @@ var Lob = (function () { 'use strict';
     })();
 
     console.log("Starting boot ...");
-    // The actions class acts as the dispatcher in a flux architecture
-    // It is the top level interface for the application
     var Actions = {
         startLogging: create(function () { null; }, create$1("Start Logging")),
         stopLogging: create(function () { null; }, create$1("Stop Logging")),
         newReading: create(function (a) { return a; }, create$1("new Reading")),
         clearDataLog: create(function () { null; }, create$1("Clear Datalog")),
-        submitFlightLog: create(function () { null; }, create$1("Submit Flight log"))
+        submitFlightLog: create(function () { null; }, create$1("Submit Flight log")),
+        failedConnection: create(function (reason) { return reason; }, create$1("Failed Connection")),
     };
-    // DEBT will fail if there is no key.
-    // Need to return null uplink and warning if failed
-    if (Uplink.getChannelName()) {
-        var uplink = new Uplink({ token: Uplink.getUplinkToken(), channelName: Uplink.getChannelName() });
+    var token = getParameterByName("token");
+    // i.e. channel name
+    var name = getParameterByName("channel");
+    if (name) {
+        var uplink = new Uplink({ token: token, channelName: name }, Actions);
     }
     var dataLogger = new DataLogger(uplink);
     Actions.startLogging.register(dataLogger.start.bind(dataLogger));

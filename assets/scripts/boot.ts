@@ -1,23 +1,17 @@
 console.log("Starting boot ...");
 
-// SETUP ACTIONS FOR THIS application
-
-import * as Dispatcher from "./dispatcher.ts";
 import * as Action from "./action.ts";
-
 import * as Logger from "./logger.ts";
 
-
-
-// The actions class acts as the dispatcher in a flux architecture
-// It is the top level interface for the application
 var Actions = {
   startLogging: Action.create(function(){ null; }, Logger.create("Start Logging")),
   stopLogging: Action.create(function(){ null; }, Logger.create("Stop Logging")),
   newReading: Action.create(function(a: any){ return a; }, Logger.create("new Reading")),
   clearDataLog: Action.create(function(){ null; }, Logger.create("Clear Datalog")),
-  submitFlightLog: Action.create(function(){ null; }, Logger.create("Submit Flight log"))
+  submitFlightLog: Action.create(function(){ null; }, Logger.create("Submit Flight log")),
+  failedConnection: Action.create(function(reason: any){ return reason; }, Logger.create("Failed Connection")),
 };
+// These Actions are the top level interface for the application
 
 // SETUP SERVICES WITHOUT REQUIREMENT ON THE DOM
 
@@ -26,8 +20,13 @@ import Uplink from "./uplink.ts";
 // DEBT will fail if there is no key.
 // Need to return null uplink and warning if failed
 
-if (Uplink.getChannelName()) {
-  var uplink = new Uplink({token: Uplink.getUplinkToken(), channelName: Uplink.getChannelName()});
+import { getParameterByName } from "./utils.ts";
+var token = getParameterByName("token");
+// i.e. channel name
+var name = getParameterByName("channel");
+
+if (name) {
+  var uplink = new Uplink({token: token, channelName: name}, Actions);
 }
 
 
@@ -38,10 +37,6 @@ Actions.startLogging.register(dataLogger.start.bind(dataLogger));
 Actions.stopLogging.register(dataLogger.stop.bind(dataLogger));
 Actions.clearDataLog.register(dataLogger.reset.bind(dataLogger));
 Actions.newReading.register(dataLogger.newReading.bind(dataLogger));
-
-
-
-
 
 
 class FlightLogUploader {
