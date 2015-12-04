@@ -28,4 +28,11 @@ describe("Action", function(){
     action();
     expect(logger.error.transcript[0]).toEqual([new Error("bad filter")]);
   });
+
+  it("should log as info each dispatched action", function(){
+    var logger = {info: createTranscriptFunction(), error: createTranscriptFunction()};
+    var action = Action.create(identityFn, logger);
+    action("some data");
+    expect(logger.info.transcript[0]).toEqual(["some data"]);
+  });
 });

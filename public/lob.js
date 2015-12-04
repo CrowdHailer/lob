@@ -1,5 +1,76 @@
 var Lob = (function () { 'use strict';
 
+    var NullLogger$1 = { info: function () {
+            var a = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                a[_i - 0] = arguments[_i];
+            }
+            null;
+        }, error: function () {
+            var a = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                a[_i - 0] = arguments[_i];
+            }
+            null;
+        } };
+    // Raise Error for circular calls
+    // Pass multiple arguments probably fails with type declaration
+    // warn not log if no handlers
+    function Dispatcher(handlers, world) {
+        this.dispatch = function (minutiae) {
+            handlers.forEach(function (handler) {
+                try {
+                    handler.call({}, minutiae);
+                }
+                catch (e) {
+                    world.error(e);
+                }
+            });
+            world.info(minutiae);
+        };
+        this.register = function (handler) {
+            return new Dispatcher(handlers.concat(handler), world);
+        };
+    }
+    ;
+    function create$1(world) {
+        if (world === void 0) { world = NullLogger$1; }
+        return new Dispatcher([], world);
+    }
+    ;
+
+    var NullLogger = { info: function () {
+            var a = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                a[_i - 0] = arguments[_i];
+            }
+            null;
+        }, error: function () {
+            var a = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                a[_i - 0] = arguments[_i];
+            }
+            null;
+        } };
+    function create(filter, logger) {
+        if (logger === void 0) { logger = NullLogger; }
+        var action;
+        var dispatcher = create$1(logger);
+        action = function (minutiae) {
+            try {
+                dispatcher.dispatch(filter(minutiae));
+            }
+            catch (e) {
+                logger.error(e);
+            }
+        };
+        action.register = function (handler) {
+            dispatcher = dispatcher.register(handler);
+        };
+        return action;
+    }
+    ;
+
     function streak(predicate, collection) {
         var current_streak = [];
         var output = [];
@@ -221,45 +292,6 @@ var Lob = (function () { 'use strict';
             document.addEventListener("DOMContentLoaded", fn);
         }
     }
-
-    var NullLogger = { info: function () {
-            var a = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                a[_i - 0] = arguments[_i];
-            }
-            null;
-        }, error: function () {
-            var a = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                a[_i - 0] = arguments[_i];
-            }
-            null;
-        } };
-    // Raise Error for circular calls
-    // Pass multiple arguments probably fails with type declaration
-    // warn not log if no handlers
-    function Dispatcher(handlers, world) {
-        this.dispatch = function (minutiae) {
-            handlers.forEach(function (handler) {
-                try {
-                    handler.call({}, minutiae);
-                }
-                catch (e) {
-                    world.error(e);
-                }
-            });
-            world.info(minutiae);
-        };
-        this.register = function (handler) {
-            return new Dispatcher(handlers.concat(handler), world);
-        };
-    }
-    ;
-    function create(world) {
-        if (world === void 0) { world = NullLogger; }
-        return new Dispatcher([], world);
-    }
-    ;
 
     /**
      * Copyright 2014 Craig Campbell
@@ -641,28 +673,27 @@ var Lob = (function () { 'use strict';
     })();
 
     console.log("Starting boot ...");
-    function Action(func, world) {
-        // The default behaviour is to simply dispatch the call through to the dispatcher
-        func = func || function (a) { this.dispatch(a); };
-        // Set as any to allow adding methods to function
-        var action;
-        var dispatcher = Object.create(create(world));
-        action = func.bind(dispatcher);
-        // Dispatcher is immutable so it is wrapped in a mutable object
-        action.register = function (handler) {
-            dispatcher.__proto__ = dispatcher.register(handler);
+    var MyConsole = (function () {
+        function MyConsole(prefix) {
+            this.prefix = "";
+            this.prefix = "[" + prefix + "]";
+        }
+        MyConsole.prototype.info = function (a) {
+            console.info(this.prefix, a);
         };
-        return action;
-    }
-    ;
+        MyConsole.prototype.error = function (a) {
+            console.error(this.prefix, a);
+        };
+        return MyConsole;
+    })();
     // The actions class acts as the dispatcher in a flux architecture
     // It is the top level interface for the application
     var Actions = {
-        startLogging: Action(),
-        stopLogging: Action(),
-        newReading: Action(),
-        clearDataLog: Action(),
-        submitFlightLog: Action()
+        startLogging: create(function () { null; }, new MyConsole("Start Loggin")),
+        stopLogging: create(function () { null; }),
+        newReading: create(function (a) { return a; }),
+        clearDataLog: create(function () { null; }),
+        submitFlightLog: create(function () { null; })
     };
     // DEBT will fail if there is no key.
     // Need to return null uplink and warning if failed

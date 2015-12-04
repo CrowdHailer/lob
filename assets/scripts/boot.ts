@@ -3,44 +3,30 @@ console.log("Starting boot ...");
 // SETUP ACTIONS FOR THIS application
 
 import * as Dispatcher from "./dispatcher.ts";
+import * as Action from "./action.ts";
 
-function Action(func?, world?){
-  // The default behaviour is to simply dispatch the call through to the dispatcher
-  func = func || function(a){ this.dispatch(a); };
 
-  // Set as any to allow adding methods to function
-  var action: any;
-  var dispatcher = Object.create(Dispatcher.create(world));
-  action = func.bind(dispatcher);
-
-  // Dispatcher is immutable so it is wrapped in a mutable object
-  action.register = function(handler){
-    dispatcher.__proto__ = dispatcher.register(handler);
-  };
-  return action;
-};
-
-function ErrorAction(func?, world?){
-  func = func || function(a){ return a; };
-
-  var dispatcher = Dispatcher.create(world);
-  var action: any = function(action){
-    dispatcher.dispatch(func(action));
-  };
-  action.register = function(handler){
-    dispatcher = dispatcher.register(handler);
-  };
-  return action;
+class MyConsole{
+  prefix = "";
+  constructor(prefix){
+    this.prefix = "[" + prefix + "]";
+  }
+  info(a){
+    console.info(this.prefix, a);
+  }
+  error(a){
+    console.error(this.prefix, a);
+  }
 }
 
 // The actions class acts as the dispatcher in a flux architecture
 // It is the top level interface for the application
 var Actions = {
-  startLogging: Action(),
-  stopLogging: Action(),
-  newReading: Action(),
-  clearDataLog: Action(),
-  submitFlightLog: Action()
+  startLogging: Action.create(function(){ null; }, new MyConsole("Start Loggin")),
+  stopLogging: Action.create(function(){ null; }),
+  newReading: Action.create(function(a: any){ return a; }),
+  clearDataLog: Action.create(function(){ null; }),
+  submitFlightLog: Action.create(function(){ null; })
 };
 
 // SETUP SERVICES WITHOUT REQUIREMENT ON THE DOM

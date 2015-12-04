@@ -10,7 +10,7 @@ export function create(filter: () => void, logger?: Logger): {(): void, register
 export function create<A, B>(filter: (a: A) => B, logger?: Logger): {(a: A): void, register: (handler: (m: B)=> void) => void}
 export function create(filter, logger=NullLogger){
   var action: any;
-  var dispatcher = Dispatcher.create();
+  var dispatcher = Dispatcher.create(logger);
   action = function(minutiae){
     try {
       dispatcher.dispatch(filter(minutiae));
