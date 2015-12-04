@@ -9,20 +9,21 @@ function createTranscriptFunction(){
   return func;
 };
 
-function Dispatcher(handlers, world={info: function(...a){ null; }}){
-  this.dispatch = function(){
-    var args = Array.prototype.slice.call(arguments);
-    handlers.forEach(function(h){
-      try {
-        h.apply({}, args);
-      } catch(e) {
+var NullLogger = {info: function(...a){ null; }, error: function(...a){ null; }};
 
+function Dispatcher(handlers, world=NullLogger){
+  this.dispatch = function(minutiae){
+    handlers.forEach(function(handler){
+      try {
+        handler.call({}, minutiae);
+      } catch(e) {
+        world.error(e);
       }
     });
-    world.info.apply({}, args);
+    world.info(minutiae);
   };
   this.register = function(handler){
-    return new Dispatcher(handlers.concat(handler));
+    return new Dispatcher(handlers.concat(handler), world);
   };
 };
 
@@ -31,9 +32,7 @@ describe("Dispatcher", function(){
     var handler = createTranscriptFunction();
     var dispatcher = new Dispatcher([handler]);
     dispatcher.dispatch("some data");
-    dispatcher.dispatch(1, 2);
     expect(handler.transcript[0]).toEqual(["some data"]);
-    expect(handler.transcript[1]).toEqual([1, 2]);
   });
 
   it("should be possible to register new handlers", function(){
@@ -54,9 +53,18 @@ describe("Dispatcher", function(){
   });
 
   it("should log as info each dispatched action", function(){
-    var logger = {info: createTranscriptFunction()};
+    var logger = {info: createTranscriptFunction(), error: createTranscriptFunction()};
     var dispatcher = new Dispatcher([], logger);
     dispatcher.dispatch("some data");
     expect(logger.info.transcript[0]).toEqual(["some data"]);
+  });
+
+  it("should log as an error if a dispatch fails", function(){
+    var badHandler = function(){ throw new Error("bad handler"); };
+    var logger = {info: createTranscriptFunction(), error: createTranscriptFunction()};
+    var dispatcher = new Dispatcher([], logger);
+    dispatcher = dispatcher.register(badHandler);
+    dispatcher.dispatch("some data");
+    expect(logger.error.transcript[0]).toEqual([new Error("bad handler")]);
   });
 });
