@@ -21,7 +21,6 @@
         "!node_modules/**"
     ],
     "files": [
-        "assets/scripts/action-dispatcher.ts",
         "assets/scripts/action.ts",
         "assets/scripts/avionics-interface.ts",
         "assets/scripts/boot.ts",
