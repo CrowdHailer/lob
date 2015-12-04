@@ -2,6 +2,7 @@
 import "./readings-test.ts";
 import "./data-logger-test.ts";
 import "./streak-test.ts";
+import "./dispatcher-test.ts";
 
 describe("Lob", function() {
 
