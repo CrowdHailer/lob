@@ -2,36 +2,22 @@ console.log("Starting boot ...");
 
 // SETUP ACTIONS FOR THIS application
 
-import ActionDispatcher from "./action-dispatcher.ts";
+import * as Dispatcher from "./dispatcher.ts";
+import * as Action from "./action.ts";
 
-var startLogging = new ActionDispatcher<void>();
-var stopLogging = new ActionDispatcher<void>();
-var clearDataLog = new ActionDispatcher<void>();
-var newReading = new ActionDispatcher<any>();
-var submitFlightLog = new ActionDispatcher<string>();
+import * as Logger from "./logger.ts";
+
+
 
 // The actions class acts as the dispatcher in a flux architecture
 // It is the top level interface for the application
-class Actions {
-  startLogging(){
-    startLogging.dispatch();
-  }
-  stopLogging(){
-    stopLogging.dispatch();
-  }
-  newReading(reading) {
-    newReading.dispatch(reading);
-  }
-  clearDataLog(){
-    clearDataLog.dispatch();
-  }
-  submitFlightLog(name: string){
-    submitFlightLog.dispatch(name);
-  }
-}
-
-var actions = new Actions();
-
+var Actions = {
+  startLogging: Action.create(function(){ null; }, Logger.create("Start Logging")),
+  stopLogging: Action.create(function(){ null; }, Logger.create("Stop Logging")),
+  newReading: Action.create(function(a: any){ return a; }, Logger.create("new Reading")),
+  clearDataLog: Action.create(function(){ null; }, Logger.create("Clear Datalog")),
+  submitFlightLog: Action.create(function(){ null; }, Logger.create("Submit Flight log"))
+};
 
 // SETUP SERVICES WITHOUT REQUIREMENT ON THE DOM
 
@@ -48,10 +34,10 @@ if (Uplink.getChannelName()) {
 import DataLogger from "./data-logger.ts";
 var dataLogger = new DataLogger(uplink);
 
-startLogging.addListener(dataLogger.start.bind(dataLogger));
-stopLogging.addListener(dataLogger.stop.bind(dataLogger));
-clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
-newReading.addListener(dataLogger.newReading.bind(dataLogger));
+Actions.startLogging.register(dataLogger.start.bind(dataLogger));
+Actions.stopLogging.register(dataLogger.stop.bind(dataLogger));
+Actions.clearDataLog.register(dataLogger.reset.bind(dataLogger));
+Actions.newReading.register(dataLogger.newReading.bind(dataLogger));
 
 
 
@@ -89,13 +75,13 @@ class FlightLogUploader {
 }
 
 var flightLogUploader = new FlightLogUploader(dataLogger);
-submitFlightLog.addListener(flightLogUploader.submit.bind(flightLogUploader));
+Actions.submitFlightLog.register(flightLogUploader.submit.bind(flightLogUploader));
 
 
 function reportDeviceMotionEvent (deviceMotionEvent) {
   var raw = deviceMotionEvent.accelerationIncludingGravity;
   if (typeof raw.x === "number") {
-    actions.newReading({acceleration: {x: raw.x, y: raw.y, z: raw.z}, timestamp: Date.now()});
+    Actions.newReading({acceleration: {x: raw.x, y: raw.y, z: raw.z}, timestamp: Date.now()});
   }
   else {
     console.warn("Device accelerometer returns null data");
@@ -124,10 +110,10 @@ ready(function () {
 
 
   var $avionics = document.querySelector("[data-interface~=avionics]");
-  var avionicsInterface = new AvionicsInterface($avionics, actions);
+  var avionicsInterface = new AvionicsInterface($avionics, Actions);
 });
 
-export default actions;
+export default Actions;
 
 
 

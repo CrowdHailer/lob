@@ -1,23 +1,92 @@
 var Lob = (function () { 'use strict';
 
-    // TODO test
-    var ActionDispatcher = (function () {
-        function ActionDispatcher() {
-            this.listeners = [];
-        }
-        ActionDispatcher.prototype.addListener = function (listener) {
-            this.listeners = this.listeners.concat(listener);
-        };
-        ActionDispatcher.prototype.dispatch = function (action) {
-            if (this.listeners.length == 0) {
-                console.warn("no listeners", action);
+    function create$1(prefix) {
+        prefix = "[" + prefix + "]";
+        var notices = [prefix];
+        return {
+            info: function () {
+                var _ = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    _[_i - 0] = arguments[_i];
+                }
+                var args = Array.prototype.slice.call(arguments);
+                console.info.apply(console, notices.concat(args));
+            },
+            error: function () {
+                var _ = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    _[_i - 0] = arguments[_i];
+                }
+                var args = Array.prototype.slice.call(arguments);
+                console.error.apply(console, notices.concat(args));
             }
-            else {
-                this.listeners.forEach(function (listener) { listener(action); });
+        };
+    }
+    var NullLogger = { info: function () {
+            var a = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                a[_i - 0] = arguments[_i];
+            }
+            null;
+        }, error: function () {
+            var a = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                a[_i - 0] = arguments[_i];
+            }
+            null;
+        } };
+
+    // Raise Error for circular calls
+    // Pass multiple arguments probably fails with type declaration
+    // warn not log if no handlers
+    function Dispatcher(handlers, world) {
+        this.dispatch = function () {
+            var args = arguments;
+            handlers.forEach(function (handler) {
+                try {
+                    handler.apply({}, args);
+                }
+                catch (e) {
+                    world.error(e);
+                }
+            });
+            world.info.apply(world, args);
+        };
+        this.register = function (handler) {
+            return new Dispatcher(handlers.concat(handler), world);
+        };
+    }
+    ;
+    function create$2(world) {
+        if (world === void 0) { world = NullLogger; }
+        return new Dispatcher([], world);
+    }
+    ;
+
+    function create(filter, logger) {
+        if (logger === void 0) { logger = NullLogger; }
+        var action;
+        var dispatcher = create$2(logger);
+        action = function (minutiae) {
+            var noDetailWithAction = arguments.length == 0;
+            try {
+                if (noDetailWithAction) {
+                    dispatcher.dispatch();
+                }
+                else {
+                    dispatcher.dispatch(filter(minutiae));
+                }
+            }
+            catch (e) {
+                logger.error(e);
             }
         };
-        return ActionDispatcher;
-    })();
+        action.register = function (handler) {
+            dispatcher = dispatcher.register(handler);
+        };
+        return action;
+    }
+    ;
 
     function streak(predicate, collection) {
         var current_streak = [];
@@ -621,44 +690,25 @@ var Lob = (function () { 'use strict';
     })();
 
     console.log("Starting boot ...");
-    var startLogging = new ActionDispatcher();
-    var stopLogging = new ActionDispatcher();
-    var clearDataLog = new ActionDispatcher();
-    var newReading = new ActionDispatcher();
-    var submitFlightLog = new ActionDispatcher();
     // The actions class acts as the dispatcher in a flux architecture
     // It is the top level interface for the application
-    var Actions = (function () {
-        function Actions() {
-        }
-        Actions.prototype.startLogging = function () {
-            startLogging.dispatch();
-        };
-        Actions.prototype.stopLogging = function () {
-            stopLogging.dispatch();
-        };
-        Actions.prototype.newReading = function (reading) {
-            newReading.dispatch(reading);
-        };
-        Actions.prototype.clearDataLog = function () {
-            clearDataLog.dispatch();
-        };
-        Actions.prototype.submitFlightLog = function (name) {
-            submitFlightLog.dispatch(name);
-        };
-        return Actions;
-    })();
-    var actions = new Actions();
+    var Actions = {
+        startLogging: create(function () { null; }, create$1("Start Logging")),
+        stopLogging: create(function () { null; }, create$1("Stop Logging")),
+        newReading: create(function (a) { return a; }, create$1("new Reading")),
+        clearDataLog: create(function () { null; }, create$1("Clear Datalog")),
+        submitFlightLog: create(function () { null; }, create$1("Submit Flight log"))
+    };
     // DEBT will fail if there is no key.
     // Need to return null uplink and warning if failed
     if (Uplink.getChannelName()) {
         var uplink = new Uplink({ token: Uplink.getUplinkToken(), channelName: Uplink.getChannelName() });
     }
     var dataLogger = new DataLogger(uplink);
-    startLogging.addListener(dataLogger.start.bind(dataLogger));
-    stopLogging.addListener(dataLogger.stop.bind(dataLogger));
-    clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
-    newReading.addListener(dataLogger.newReading.bind(dataLogger));
+    Actions.startLogging.register(dataLogger.start.bind(dataLogger));
+    Actions.stopLogging.register(dataLogger.stop.bind(dataLogger));
+    Actions.clearDataLog.register(dataLogger.reset.bind(dataLogger));
+    Actions.newReading.register(dataLogger.newReading.bind(dataLogger));
     var FlightLogUploader = (function () {
         function FlightLogUploader(dataLogger) {
             this.dataLogger = dataLogger;
@@ -685,11 +735,11 @@ var Lob = (function () { 'use strict';
         return FlightLogUploader;
     })();
     var flightLogUploader = new FlightLogUploader(dataLogger);
-    submitFlightLog.addListener(flightLogUploader.submit.bind(flightLogUploader));
+    Actions.submitFlightLog.register(flightLogUploader.submit.bind(flightLogUploader));
     function reportDeviceMotionEvent(deviceMotionEvent) {
         var raw = deviceMotionEvent.accelerationIncludingGravity;
         if (typeof raw.x === "number") {
-            actions.newReading({ acceleration: { x: raw.x, y: raw.y, z: raw.z }, timestamp: Date.now() });
+            Actions.newReading({ acceleration: { x: raw.x, y: raw.y, z: raw.z }, timestamp: Date.now() });
         }
         else {
             console.warn("Device accelerometer returns null data");
@@ -707,7 +757,7 @@ var Lob = (function () { 'use strict';
             dataLogger.registerDisplay(dataLoggerDisplay);
         }
         var $avionics = document.querySelector("[data-interface~=avionics]");
-        var avionicsInterface = new AvionicsInterface($avionics, actions);
+        var avionicsInterface = new AvionicsInterface($avionics, Actions);
     });
     ready(function () {
         var $tracker = document.querySelector("[data-display~=tracker]");
@@ -766,7 +816,7 @@ var Lob = (function () { 'use strict';
         }
     });
 
-    return actions;
+    return Actions;
 
 })();
 //# sourceMappingURL=lob.js.map
