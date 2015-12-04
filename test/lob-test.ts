@@ -3,6 +3,7 @@ import "./readings-test.ts";
 import "./data-logger-test.ts";
 import "./streak-test.ts";
 import "./dispatcher-test.ts";
+import "./action-test.ts";
 
 describe("Lob", function() {
 

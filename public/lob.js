@@ -642,10 +642,13 @@ var Lob = (function () { 'use strict';
 
     console.log("Starting boot ...");
     function Action(func, world) {
-        func = func || function (a) { console.log(a, this); this.dispatch(a); };
+        // The default behaviour is to simply dispatch the call through to the dispatcher
+        func = func || function (a) { this.dispatch(a); };
+        // Set as any to allow adding methods to function
         var action;
         var dispatcher = Object.create(create(world));
         action = func.bind(dispatcher);
+        // Dispatcher is immutable so it is wrapped in a mutable object
         action.register = function (handler) {
             dispatcher.__proto__ = dispatcher.register(handler);
         };
