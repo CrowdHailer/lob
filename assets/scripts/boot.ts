@@ -2,36 +2,46 @@ console.log("Starting boot ...");
 
 // SETUP ACTIONS FOR THIS application
 
-import ActionDispatcher from "./action-dispatcher.ts";
+import * as Dispatcher from "./dispatcher.ts";
 
-var startLogging = new ActionDispatcher<void>();
-var stopLogging = new ActionDispatcher<void>();
-var clearDataLog = new ActionDispatcher<void>();
-var newReading = new ActionDispatcher<any>();
-var submitFlightLog = new ActionDispatcher<string>();
+function Action(func?, world?){
+  // The default behaviour is to simply dispatch the call through to the dispatcher
+  func = func || function(a){ this.dispatch(a); };
+
+  // Set as any to allow adding methods to function
+  var action: any;
+  var dispatcher = Object.create(Dispatcher.create(world));
+  action = func.bind(dispatcher);
+
+  // Dispatcher is immutable so it is wrapped in a mutable object
+  action.register = function(handler){
+    dispatcher.__proto__ = dispatcher.register(handler);
+  };
+  return action;
+};
+
+function ErrorAction(func?, world?){
+  func = func || function(a){ return a; };
+
+  var dispatcher = Dispatcher.create(world);
+  var action: any = function(action){
+    dispatcher.dispatch(func(action));
+  };
+  action.register = function(handler){
+    dispatcher = dispatcher.register(handler);
+  };
+  return action;
+}
 
 // The actions class acts as the dispatcher in a flux architecture
 // It is the top level interface for the application
-class Actions {
-  startLogging(){
-    startLogging.dispatch();
-  }
-  stopLogging(){
-    stopLogging.dispatch();
-  }
-  newReading(reading) {
-    newReading.dispatch(reading);
-  }
-  clearDataLog(){
-    clearDataLog.dispatch();
-  }
-  submitFlightLog(name: string){
-    submitFlightLog.dispatch(name);
-  }
-}
-
-var actions = new Actions();
-
+var Actions = {
+  startLogging: Action(),
+  stopLogging: Action(),
+  newReading: Action(),
+  clearDataLog: Action(),
+  submitFlightLog: Action()
+};
 
 // SETUP SERVICES WITHOUT REQUIREMENT ON THE DOM
 
@@ -48,10 +58,10 @@ if (Uplink.getChannelName()) {
 import DataLogger from "./data-logger.ts";
 var dataLogger = new DataLogger(uplink);
 
-startLogging.addListener(dataLogger.start.bind(dataLogger));
-stopLogging.addListener(dataLogger.stop.bind(dataLogger));
-clearDataLog.addListener(dataLogger.reset.bind(dataLogger));
-newReading.addListener(dataLogger.newReading.bind(dataLogger));
+Actions.startLogging.register(dataLogger.start.bind(dataLogger));
+Actions.stopLogging.register(dataLogger.stop.bind(dataLogger));
+Actions.clearDataLog.register(dataLogger.reset.bind(dataLogger));
+Actions.newReading.register(dataLogger.newReading.bind(dataLogger));
 
 
 
@@ -89,13 +99,13 @@ class FlightLogUploader {
 }
 
 var flightLogUploader = new FlightLogUploader(dataLogger);
-submitFlightLog.addListener(flightLogUploader.submit.bind(flightLogUploader));
+Actions.submitFlightLog.register(flightLogUploader.submit.bind(flightLogUploader));
 
 
 function reportDeviceMotionEvent (deviceMotionEvent) {
   var raw = deviceMotionEvent.accelerationIncludingGravity;
   if (typeof raw.x === "number") {
-    actions.newReading({acceleration: {x: raw.x, y: raw.y, z: raw.z}, timestamp: Date.now()});
+    Actions.newReading({acceleration: {x: raw.x, y: raw.y, z: raw.z}, timestamp: Date.now()});
   }
   else {
     console.warn("Device accelerometer returns null data");
@@ -124,10 +134,10 @@ ready(function () {
 
 
   var $avionics = document.querySelector("[data-interface~=avionics]");
-  var avionicsInterface = new AvionicsInterface($avionics, actions);
+  var avionicsInterface = new AvionicsInterface($avionics, Actions);
 });
 
-export default actions;
+export default Actions;
 
 
 
