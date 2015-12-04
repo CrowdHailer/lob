@@ -12,6 +12,14 @@ var Lob = (function () { 'use strict';
                 var args = Array.prototype.slice.call(arguments);
                 console.info.apply(console, notices.concat(args));
             },
+            warn: function () {
+                var _ = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    _[_i - 0] = arguments[_i];
+                }
+                var args = Array.prototype.slice.call(arguments);
+                console.warn.apply(console, notices.concat(args));
+            },
             error: function () {
                 var _ = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
@@ -22,19 +30,29 @@ var Lob = (function () { 'use strict';
             }
         };
     }
-    var NullLogger = { info: function () {
+    var NullLogger = {
+        info: function () {
             var a = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 a[_i - 0] = arguments[_i];
             }
             null;
-        }, error: function () {
+        },
+        warn: function () {
             var a = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 a[_i - 0] = arguments[_i];
             }
             null;
-        } };
+        },
+        error: function () {
+            var a = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                a[_i - 0] = arguments[_i];
+            }
+            null;
+        }
+    };
 
     // Raise Error for circular calls
     // Pass multiple arguments probably fails with type declaration
@@ -50,7 +68,12 @@ var Lob = (function () { 'use strict';
                     world.error(e);
                 }
             });
-            world.info.apply(world, args);
+            if (handlers.length == 0) {
+                world.warn.apply(world, args);
+            }
+            else {
+                world.info.apply(world, args);
+            }
         };
         this.register = function (handler) {
             return new Dispatcher(handlers.concat(handler), world);
@@ -147,8 +170,6 @@ var Lob = (function () { 'use strict';
             var channelName = options["channelName"];
             var realtime = new Ably.Realtime({ token: token });
             realtime.connection.on("failed", function (err) {
-                console.log(err);
-                console.log(err.reason);
                 actions.failedConnection(err.reason);
             });
             this.channel = realtime.channels.get(channelName);
