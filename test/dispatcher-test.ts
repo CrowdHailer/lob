@@ -33,6 +33,13 @@ describe("Dispatcher", function(){
     expect(logger.info.transcript[0]).toEqual(["some data"]);
   });
 
+  it("should log event when no data as info each dispatched action", function(){
+    var logger = {info: createTranscriptFunction(), error: createTranscriptFunction()};
+    var dispatcher = Dispatcher.create(logger);
+    dispatcher.dispatch();
+    expect(logger.info.transcript[0]).toEqual([]);
+  });
+
   it("should log as an error if a dispatch fails", function(){
     var badHandler = function(){ throw new Error("bad handler"); };
     var logger = {info: createTranscriptFunction(), error: createTranscriptFunction()};

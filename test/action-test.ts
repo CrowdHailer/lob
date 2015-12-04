@@ -14,6 +14,14 @@ describe("Action", function(){
     expect(handler.transcript[0]).toEqual(["some data"]);
   });
 
+  it("should dispatcher event with no details", function(){
+    var action = Action.create(function(){ null; });
+    var handler = createTranscriptFunction();
+    action.register(handler);
+    action();
+    expect(handler.transcript[0]).toEqual([]);
+  });
+
   it("should pass details through filter", function(){
     var action = Action.create(function(_string: string){ return "some extended data"; });
     var handler = createTranscriptFunction();
@@ -24,8 +32,8 @@ describe("Action", function(){
 
   it("should log error if filter raises exception", function(){
     var logger = {info: createTranscriptFunction(), error: createTranscriptFunction()};
-    var action = Action.create(function (){ throw new Error("bad filter"); }, logger);
-    action();
+    var action = Action.create(function (any){ throw new Error("bad filter"); }, logger);
+    action("any string");
     expect(logger.error.transcript[0]).toEqual([new Error("bad filter")]);
   });
 

@@ -17,16 +17,17 @@ var Lob = (function () { 'use strict';
     // Pass multiple arguments probably fails with type declaration
     // warn not log if no handlers
     function Dispatcher(handlers, world) {
-        this.dispatch = function (minutiae) {
+        this.dispatch = function () {
+            var args = arguments;
             handlers.forEach(function (handler) {
                 try {
-                    handler.call({}, minutiae);
+                    handler.apply({}, args);
                 }
                 catch (e) {
                     world.error(e);
                 }
             });
-            world.info(minutiae);
+            world.info.apply(world, args);
         };
         this.register = function (handler) {
             return new Dispatcher(handlers.concat(handler), world);
@@ -57,8 +58,14 @@ var Lob = (function () { 'use strict';
         var action;
         var dispatcher = create$1(logger);
         action = function (minutiae) {
+            var noDetailWithAction = arguments.length == 0;
             try {
-                dispatcher.dispatch(filter(minutiae));
+                if (noDetailWithAction) {
+                    dispatcher.dispatch();
+                }
+                else {
+                    dispatcher.dispatch(filter(minutiae));
+                }
             }
             catch (e) {
                 logger.error(e);
@@ -673,23 +680,48 @@ var Lob = (function () { 'use strict';
     })();
 
     console.log("Starting boot ...");
-    var MyConsole = (function () {
-        function MyConsole(prefix) {
-            this.prefix = "";
-            this.prefix = "[" + prefix + "]";
+    var Logger = {
+        create: function (prefix) {
+            prefix = "[" + prefix + "]";
+            var notices = [prefix];
+            return {
+                info: function () {
+                    var _ = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        _[_i - 0] = arguments[_i];
+                    }
+                    var args = Array.prototype.slice.call(arguments);
+                    console.info.apply(console, notices.concat(args));
+                },
+                error: function () {
+                    var _ = [];
+                    for (var _i = 0; _i < arguments.length; _i++) {
+                        _[_i - 0] = arguments[_i];
+                    }
+                    var args = Array.prototype.slice.call(arguments);
+                    console.error.apply(console, notices.concat(args));
+                }
+            };
         }
-        MyConsole.prototype.info = function (a) {
-            console.info(this.prefix, a);
-        };
-        MyConsole.prototype.error = function (a) {
-            console.error(this.prefix, a);
-        };
-        return MyConsole;
-    })();
+    };
+    // class MyConsole{
+    //   prefix = "";
+    //   constructor(prefix){
+    //     this.prefix = "[" + prefix + "]";
+    //   }
+    //   info(a){
+    //     var argsz = Array.prototype.slice.call(arguments);
+    //     var args = [this.prefix].concat(argsz);
+    //     console.info.apply(console, args);
+    //   }
+    //   error(a){
+    //     console.error(this.prefix, a);
+    //   }
+    // }
     // The actions class acts as the dispatcher in a flux architecture
     // It is the top level interface for the application
     var Actions = {
-        startLogging: create(function () { null; }, new MyConsole("Start Loggin")),
+        startLogging: create(function () { null; }, Logger.create("Start Logging")),
         stopLogging: create(function () { null; }),
         newReading: create(function (a) { return a; }),
         clearDataLog: create(function () { null; }),

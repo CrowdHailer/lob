@@ -4,15 +4,16 @@ var NullLogger = {info: function(...a){ null; }, error: function(...a){ null; }}
 // Pass multiple arguments probably fails with type declaration
 // warn not log if no handlers
 function Dispatcher(handlers, world){
-  this.dispatch = function(minutiae){
+  this.dispatch = function(){
+    var args = arguments;
     handlers.forEach(function(handler){
       try {
-        handler.call({}, minutiae);
+        handler.apply({}, args);
       } catch(e) {
         world.error(e);
       }
     });
-    world.info(minutiae);
+    world.info.apply(world, args);
   };
   this.register = function(handler){
     return new Dispatcher(handlers.concat(handler), world);

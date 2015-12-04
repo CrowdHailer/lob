@@ -12,8 +12,13 @@ export function create(filter, logger=NullLogger){
   var action: any;
   var dispatcher = Dispatcher.create(logger);
   action = function(minutiae){
+    var noDetailWithAction = arguments.length == 0;
     try {
-      dispatcher.dispatch(filter(minutiae));
+      if (noDetailWithAction) {
+        dispatcher.dispatch();
+      } else {
+        dispatcher.dispatch(filter(minutiae));
+      }
     }
     catch (e) {
       logger.error(e);
