@@ -719,6 +719,9 @@ var Lob = (function () { 'use strict';
     if (name) {
         var uplink = new Uplink({ token: token, channelName: name }, Actions);
     }
+    Actions.failedConnection.register(function (reason) {
+        swal("failed to connect", reason.message, "error");
+    });
     var dataLogger = new DataLogger(uplink);
     Actions.startLogging.register(dataLogger.start.bind(dataLogger));
     Actions.stopLogging.register(dataLogger.stop.bind(dataLogger));

@@ -29,6 +29,10 @@ if (name) {
   var uplink = new Uplink({token: token, channelName: name}, Actions);
 }
 
+declare function swal(..._)
+Actions.failedConnection.register(function(reason){
+  swal("failed to connect", reason.message, "error");
+});
 
 import DataLogger from "./data-logger.ts";
 var dataLogger = new DataLogger(uplink);
