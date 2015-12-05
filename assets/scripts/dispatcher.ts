@@ -1,4 +1,4 @@
-import { NullLogger } from "./logger.ts";
+import { DefaultLogger } from "./logger.ts";
 
 // Raise Error for circular calls
 function Dispatcher(handlers, world){
@@ -23,7 +23,7 @@ function Dispatcher(handlers, world){
   };
 };
 
-export function create(world=NullLogger){
+export function create(world=DefaultLogger){
   return new Dispatcher([], world);
 };
 export default Dispatcher;

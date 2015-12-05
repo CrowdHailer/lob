@@ -2,7 +2,7 @@ import { createTranscriptFunction, createTranscriptLogger } from "./support.ts";
 
 import * as Dispatcher from "../assets/scripts/dispatcher.ts";
 
-
+import { NullLogger } from "../assets/scripts/logger.ts";
 
 describe("Dispatcher", function(){
   it("should pass the minutiae (precise details) to a registered listener", function(){
@@ -19,10 +19,10 @@ describe("Dispatcher", function(){
     expect(handler.transcript[0]).toEqual(["some data"]);
   });
 
-  xit("should dispatch to all handlers after error", function(){
+  it("should dispatch to all handlers after error NOTE assuming Logger silent", function(){
     var badHandler = function(){ throw new Error("bad handler"); };
     var handler = createTranscriptFunction();
-    var dispatcher = Dispatcher.create().register(handler);
+    var dispatcher = Dispatcher.create(NullLogger).register(handler);
     dispatcher = dispatcher.register(badHandler).register(handler);
     dispatcher.dispatch("some data");
     expect(handler.transcript[0]).toEqual(["some data"]);

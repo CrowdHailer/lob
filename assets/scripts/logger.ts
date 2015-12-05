@@ -25,9 +25,15 @@ export interface Logger {
   error: (...items) => void;
 }
 
-export var NullLogger = {
+export var DefaultLogger = {
   info: function(...a){ null; },
   warn: function(...a){ null; },
   // error logging should be used for errors and in development these should be thrown
   error: function(e){ throw e; }
+};
+
+export var NullLogger = {
+  info: function(...a){ null; },
+  warn: function(...a){ null; },
+  error: function(...a){ null; },
 };
