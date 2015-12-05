@@ -713,6 +713,29 @@ var Lob = (function () { 'use strict';
         submitFlightLog: create(function () { null; }, create$1("Submit Flight log")),
         failedConnection: create(function (reason) { return reason; }, create$1("Failed Connection")),
     };
+    // These Actions are the top level interface for the application
+    var App = Object.create(Actions);
+    function LiveFlightChannel(properties, app) {
+        var token = properties["token"];
+        var name = properties["name"];
+        // separate to connect method
+        var realtime = new Ably.Realtime({ token: token });
+        realtime.connection.on("connected", function (a) { console.log(a); });
+    }
+    App.channel = function () {
+        var instance;
+        if (instance) {
+            return instance;
+        }
+        var token = getParameterByName("token");
+        var name = getParameterByName("channel");
+        instance = LiveFlightChannel({ token: token, channelName: name }, Actions);
+        return instance;
+    };
+    App.channel();
+    // SETUP SERVICES WITHOUT REQUIREMENT ON THE DOM
+    // DEBT will fail if there is no key.
+    // Need to return null uplink and warning if failed
     var token = getParameterByName("token");
     // i.e. channel name
     var name = getParameterByName("channel");

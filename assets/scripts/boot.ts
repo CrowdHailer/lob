@@ -12,15 +12,49 @@ var Actions = {
   failedConnection: Action.create(function(reason: any){ return reason; }, Logger.create("Failed Connection")),
 };
 // These Actions are the top level interface for the application
+var App = Object.create(Actions);
+
+import Uplink from "./uplink.ts";
+import { getParameterByName } from "./utils.ts";
+declare var Ably: any;
+
+function LiveFlightChannel(properties, app){
+  var token = properties["token"];
+  var name = properties["name"];
+
+  // separate to connect method
+  var realtime = new Ably.Realtime({ token: token });
+  realtime.connection.on("connected", function(){ app.connectionEstablished(); });
+  realtime.connection.on("failed", function(err) {
+    app.failedConnection(err.reason);
+  });
+
+  return {
+    publishReading: 5,
+  };
+}
+
+App.channel = function(){
+  var instance;
+  if (instance) {
+    return instance;
+  }
+
+  var token = getParameterByName("token");
+  var name = getParameterByName("channel");
+
+  instance = LiveFlightChannel({token: token, channelName: name}, Actions);
+  return instance;
+};
+
+// App.channel()
 
 // SETUP SERVICES WITHOUT REQUIREMENT ON THE DOM
 
-import Uplink from "./uplink.ts";
 
 // DEBT will fail if there is no key.
 // Need to return null uplink and warning if failed
 
-import { getParameterByName } from "./utils.ts";
 var token = getParameterByName("token");
 // i.e. channel name
 var name = getParameterByName("channel");
