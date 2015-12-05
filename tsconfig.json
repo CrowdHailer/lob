@@ -34,6 +34,7 @@
         "assets/scripts/uplink.ts",
         "assets/scripts/utils.ts",
         "test/action-test.ts",
+        "test/avionics-presenter-test.ts",
         "test/data-logger-test.ts",
         "test/dispatcher-test.ts",
         "test/jasmine.d.ts",

@@ -5,6 +5,7 @@ import "./streak-test.ts";
 import "./dispatcher-test.ts";
 import "./action-test.ts";
 import "./state-test.ts";
+import "./avionics-presenter-test.ts";
 
 describe("Lob", function() {
 

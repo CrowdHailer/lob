@@ -1,4 +1,5 @@
 import * as State from "../assets/scripts/state.ts";
+import { freefallReading, stationaryReading } from "./support.ts";
 
 describe("State", function(){
   describe("reset", function(){
@@ -9,19 +10,6 @@ describe("State", function(){
       expect(newState.flightRecords).toEqual([]);
     });
   });
-
-  function freefallReading(timestamp=10000){
-    return {
-      acceleration: {x: 0, y: 0, z: -1},
-      timestamp: timestamp
-    };
-  };
-  function stationaryReading(timestamp=10000){
-    return {
-      acceleration: {x: 0, y: 0, z: -10},
-      timestamp: timestamp
-    };
-  };
 
   describe("new reading", function(){
     it("should add reading as currentReading", function(){
@@ -39,7 +27,7 @@ describe("State", function(){
       expect(newState.currentFlightReadings[0]).toEqual(reading);
     });
 
-    it("should should move current flight to past flightS", function(){
+    xit("should should move current flight to past flightS", function(){
       var readings = [freefallReading(), freefallReading()];
       var reading = stationaryReading();
       var state = State.DEFAULT;

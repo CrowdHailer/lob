@@ -8,11 +8,11 @@ var Reading = {
   }
 };
 
-export var DEFAULT = {
+export var DEFAULT = Object.freeze({
   currentFlightReadings: [],
   currentReading: null,
   flightRecords: []
-};
+});
 export function handleReset(_state=DEFAULT){
   return DEFAULT;
 };
