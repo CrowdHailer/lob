@@ -71,13 +71,31 @@ function Display($root){
     }
   };
 }
+import AvionicsInterface from "./avionics-interface.ts";
+
+var App = {
+  actions: Actions,
+  store: store
+};
+
+function Avionics($root, world){
+  var ui = new AvionicsInterface($root, world.actions);
+
+  var display = Display($root);
+  world.store.register(display.update);
+
+  return {
+    display: display,
+    ui: ui
+  };
+};
 
 import { ready } from "./dom.ts";
-import AvionicsInterface from "./avionics-interface.ts";
 ready(function () {
   var $avionics = document.querySelector("[data-interface~=avionics]");
-  var avionicsInterface = new AvionicsInterface($avionics, Actions);
-  var display = Display($avionics);
-
-  store.register(display.update);
+  var avionics = Avionics($avionics, App);
+  // var avionicsInterface = new AvionicsInterface($avionics, Actions);
+  // var display = Display($avionics);
+  //
+  // store.register(display.update);
 });
