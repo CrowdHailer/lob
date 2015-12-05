@@ -27,7 +27,7 @@
             error: function (e) { throw e; }
         };
     }
-    var NullLogger = {
+    var DefaultLogger = {
         info: function () {
             var a = [];
             for (var _i = 0; _i < arguments.length; _i++) {
@@ -44,6 +44,29 @@
         },
         // error logging should be used for errors and in development these should be thrown
         error: function (e) { throw e; }
+    };
+    var NullLogger = {
+        info: function () {
+            var a = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                a[_i - 0] = arguments[_i];
+            }
+            null;
+        },
+        warn: function () {
+            var a = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                a[_i - 0] = arguments[_i];
+            }
+            null;
+        },
+        error: function () {
+            var a = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                a[_i - 0] = arguments[_i];
+            }
+            null;
+        },
     };
 
     // Raise Error for circular calls
@@ -71,7 +94,7 @@
     }
     ;
     function create$2(world) {
-        if (world === void 0) { world = NullLogger; }
+        if (world === void 0) { world = DefaultLogger; }
         return new Dispatcher([], world);
     }
     ;
