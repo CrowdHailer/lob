@@ -554,10 +554,8 @@
         var $avionics = document.querySelector("[data-interface~=avionics]");
         var avionicsInterface = new AvionicsInterface($avionics, Actions);
     });
-    function StateStore() {
+    function StateStore(logger) {
         var state;
-        var logger = create$1("State Store");
-        logger.error = function (e) { throw e; };
         var dispatcher = create$2(logger);
         function dispatch(store) {
             dispatcher.dispatch(store);
@@ -582,7 +580,8 @@
         };
         return store;
     }
-    var store = StateStore();
+    var logger = create$1("State Store");
+    var store = StateStore(logger);
     store.resetReadings();
     Actions.resetReadings.register(store.resetReadings);
     function Display($root) {

@@ -21,10 +21,8 @@ ready(function () {
 import * as Dispatcher from "./dispatcher.ts";
 import * as State from "./state.ts";
 
-function StateStore(){
+function StateStore(logger){
   var state;
-  var logger = Logger.create("State Store");
-  logger.error = function(e){ throw e; };
   var dispatcher = Dispatcher.create(logger);
 
   function dispatch(store){
@@ -55,7 +53,8 @@ function StateStore(){
 
 
 export default Actions;
-export var store = StateStore();
+var logger = Logger.create("State Store");
+export var store = StateStore(logger);
 
 store.resetReadings();
 import { round } from "./utils.ts";
