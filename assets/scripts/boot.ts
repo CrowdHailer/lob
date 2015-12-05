@@ -32,3 +32,22 @@ ready(function () {
   var avionics = Avionics($avionics, App);
 });
 export default App;
+
+function reportDeviceMotionEvent (deviceMotionEvent) {
+  var raw = deviceMotionEvent.accelerationIncludingGravity;
+  if (typeof raw.x === "number") {
+    App.actions.newReading({acceleration: {x: raw.x, y: raw.y, z: raw.z}, timestamp: Date.now()});
+  }
+  else {
+    console.warn("Device accelerometer returns null data");
+  }
+}
+
+import { throttle } from "./utils.ts";
+
+var throttledReport = throttle(reportDeviceMotionEvent, 50, {});
+
+// Accelerometer events are continually fired
+// DEBT the accelerometer is not isolated as a store that can be observed.
+// Implementation as a store will be necessary so that it can be observed and error messages when the accelerometer returns improper values can be
+window.addEventListener("devicemotion", throttledReport);

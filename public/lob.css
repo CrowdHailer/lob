@@ -55,7 +55,8 @@ a.clean {
   color: inherit; }
 
 .center {
-  text-align: center; }
+  text-align: center;
+  font-family: monospace; }
 
 html, body {
   margin: 0; }

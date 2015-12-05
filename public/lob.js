@@ -202,6 +202,34 @@ var Lob = (function () { 'use strict';
         }
     }
 
+    // TODO currently untested
+    function throttle(fn, threshhold, scope) {
+        threshhold = threshhold || 250;
+        var last, deferTimer;
+        return function () {
+            var context = scope || this;
+            var now = Date.now(), args = arguments;
+            if (last && now < last + threshhold) {
+                // hold on to it
+                clearTimeout(deferTimer);
+                deferTimer = setTimeout(function () {
+                    last = now;
+                    fn.apply(context, args);
+                }, threshhold);
+            }
+            else {
+                last = now;
+                fn.apply(context, args);
+            }
+        };
+    }
+    // TODO currently untested
+    function round(precision) {
+        return function (value) {
+            return parseFloat(value.toFixed(precision));
+        };
+    }
+
     /**
      * Copyright 2014 Craig Campbell
      *
@@ -527,13 +555,6 @@ var Lob = (function () { 'use strict';
     }
     // export default AvionicsInterface
 
-    // TODO currently untested
-    function round(precision) {
-        return function (value) {
-            return parseFloat(value.toFixed(precision));
-        };
-    }
-
     function readingsDuration(readings) {
         if (!readings[0]) {
             return 0;
@@ -644,6 +665,20 @@ var Lob = (function () { 'use strict';
         var $avionics = document.querySelector("[data-interface~=avionics]");
         var avionics = Avionics($avionics, App);
     });
+    function reportDeviceMotionEvent(deviceMotionEvent) {
+        var raw = deviceMotionEvent.accelerationIncludingGravity;
+        if (typeof raw.x === "number") {
+            App.actions.newReading({ acceleration: { x: raw.x, y: raw.y, z: raw.z }, timestamp: Date.now() });
+        }
+        else {
+            console.warn("Device accelerometer returns null data");
+        }
+    }
+    var throttledReport = throttle(reportDeviceMotionEvent, 50, {});
+    // Accelerometer events are continually fired
+    // DEBT the accelerometer is not isolated as a store that can be observed.
+    // Implementation as a store will be necessary so that it can be observed and error messages when the accelerometer returns improper values can be
+    window.addEventListener("devicemotion", throttledReport);
 
     return App;
 
