@@ -23,6 +23,7 @@
     "files": [
         "assets/scripts/action.ts",
         "assets/scripts/avionics-interface.ts",
+        "assets/scripts/avionics-presenter.ts",
         "assets/scripts/boot.ts",
         "assets/scripts/data-logger-display.ts",
         "assets/scripts/data-logger.ts",
