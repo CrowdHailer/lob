@@ -1,4 +1,5 @@
 import { round } from "./utils.ts";
+import * as State from "./state.ts";
 
 function readingsDuration(readings){
   if (!readings[0]) { return 0; }
@@ -25,7 +26,7 @@ function altitudeForFreefallDuration(duration){
   return round(2)(9.81/8 * t * t);
 }
 
-export function create(state){
+export function create(state: State.State){
   return Object.create({}, {
     maxFlightTime: {
       get: function(){

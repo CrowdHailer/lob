@@ -8,7 +8,18 @@ var Reading = {
   }
 };
 
-export var DEFAULT = Object.freeze({
+interface Reading {
+  acceleration: Object;
+  timestamp: number;
+}
+
+export interface State {
+  currentFlightReadings: Reading[];
+  currentReading: Reading;
+  flightRecords: Reading[][];
+}
+
+export var DEFAULT: State = Object.freeze({
   currentFlightReadings: [],
   currentReading: null,
   flightRecords: []
@@ -16,7 +27,7 @@ export var DEFAULT = Object.freeze({
 export function handleReset(_state=DEFAULT){
   return DEFAULT;
 };
-export function handleNewReading(reading, state=DEFAULT){
+export function handleNewReading(reading: Reading, state=DEFAULT){
   var flightRecords = state.flightRecords;
   var currentFlightReadings = state.currentFlightReadings;
 

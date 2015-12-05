@@ -17,7 +17,8 @@ describe("Avionics AvionicsPresenter", function(){
   describe("in early flight state", function(){
     var state = {
       currentFlightReadings: [freefallReading()],
-      flightRecords: []
+      flightRecords: [],
+      currentReading: null
     };
     var presenter = AvionicsPresenter.create(state);
     it("should have a maxFlightTime of .250", function(){
@@ -30,7 +31,8 @@ describe("Avionics AvionicsPresenter", function(){
   describe("in mid flight state", function(){
     var state = {
       currentFlightReadings: [freefallReading(100), freefallReading(200)],
-      flightRecords: []
+      flightRecords: [],
+      currentReading: null
     };
     var presenter = AvionicsPresenter.create(state);
     it("should have a maxFlightTime of .250", function(){
@@ -43,6 +45,7 @@ describe("Avionics AvionicsPresenter", function(){
   describe("after flight state", function(){
     var state = {
       currentFlightReadings: [],
+      currentReading: null,
       flightRecords: [
         [freefallReading(100), freefallReading(200)],
         [freefallReading(100), freefallReading(300)],
