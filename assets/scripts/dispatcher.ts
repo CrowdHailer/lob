@@ -1,8 +1,6 @@
 import { NullLogger } from "./logger.ts";
 
 // Raise Error for circular calls
-// Pass multiple arguments probably fails with type declaration
-// warn not log if no handlers
 function Dispatcher(handlers, world){
   this.dispatch = function(){
     var args = arguments;

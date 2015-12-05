@@ -38,6 +38,7 @@
         "test/jasmine.d.ts",
         "test/lob-test.ts",
         "test/readings-test.ts",
+        "test/state-test.ts",
         "test/streak-test.ts",
         "test/support.ts"
     ],
