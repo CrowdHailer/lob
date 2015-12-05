@@ -109,6 +109,338 @@
     }
     ;
 
+    // All code relating to manipulations requiring a document, element or window node.
+    // DEBT untested
+    function ready(fn) {
+        if (document.readyState !== "loading") {
+            fn();
+        }
+        else {
+            document.addEventListener("DOMContentLoaded", fn);
+        }
+    }
+
+    /**
+     * Copyright 2014 Craig Campbell
+     *
+     * Licensed under the Apache License, Version 2.0 (the "License");
+     * you may not use this file except in compliance with the License.
+     * You may obtain a copy of the License at
+     *
+     * http://www.apache.org/licenses/LICENSE-2.0
+     *
+     * Unless required by applicable law or agreed to in writing, software
+     * distributed under the License is distributed on an "AS IS" BASIS,
+     * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     * See the License for the specific language governing permissions and
+     * limitations under the License.
+     *
+     * GATOR.JS
+     * Simple Event Delegation
+     *
+     * @version 1.2.4
+     *
+     * Compatible with IE 9+, FF 3.6+, Safari 5+, Chrome
+     *
+     * Include legacy.js for compatibility with older browsers
+     *
+     *             .-._   _ _ _ _ _ _ _ _
+     *  .-''-.__.-'00  '-' ' ' ' ' ' ' ' '-.
+     * '.___ '    .   .--_'-' '-' '-' _'-' '._
+     *  V: V 'vv-'   '_   '.       .'  _..' '.'.
+     *    '=.____.=_.--'   :_.__.__:_   '.   : :
+     *            (((____.-'        '-.  /   : :
+     *                              (((-'\ .' /
+     *                            _____..'  .'
+     *                           '-._____.-'
+     */
+    var _matcher;
+    var _level = 0;
+    var _id = 0;
+    var _handlers = {};
+    var _gatorInstances = {};
+    function _addEvent(gator, type, callback) {
+        // blur and focus do not bubble up but if you use event capturing
+        // then you will get them
+        var useCapture = type == 'blur' || type == 'focus';
+        gator.element.addEventListener(type, callback, useCapture);
+    }
+    function _cancel(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    /**
+     * returns function to use for determining if an element
+     * matches a query selector
+     *
+     * @returns {Function}
+     */
+    function _getMatcher(element) {
+        if (_matcher) {
+            return _matcher;
+        }
+        if (element.matches) {
+            _matcher = element.matches;
+            return _matcher;
+        }
+        if (element.webkitMatchesSelector) {
+            _matcher = element.webkitMatchesSelector;
+            return _matcher;
+        }
+        if (element.mozMatchesSelector) {
+            _matcher = element.mozMatchesSelector;
+            return _matcher;
+        }
+        if (element.msMatchesSelector) {
+            _matcher = element.msMatchesSelector;
+            return _matcher;
+        }
+        if (element.oMatchesSelector) {
+            _matcher = element.oMatchesSelector;
+            return _matcher;
+        }
+        // if it doesn't match a native browser method
+        // fall back to the gator function
+        _matcher = Gator.matchesSelector;
+        return _matcher;
+    }
+    /**
+     * determines if the specified element matches a given selector
+     *
+     * @param {Node} element - the element to compare against the selector
+     * @param {string} selector
+     * @param {Node} boundElement - the element the listener was attached to
+     * @returns {void|Node}
+     */
+    function _matchesSelector(element, selector, boundElement) {
+        // no selector means this event was bound directly to this element
+        if (selector == '_root') {
+            return boundElement;
+        }
+        // if we have moved up to the element you bound the event to
+        // then we have come too far
+        if (element === boundElement) {
+            return;
+        }
+        // if this is a match then we are done!
+        if (_getMatcher(element).call(element, selector)) {
+            return element;
+        }
+        // if this element did not match but has a parent we should try
+        // going up the tree to see if any of the parent elements match
+        // for example if you are looking for a click on an <a> tag but there
+        // is a <span> inside of the a tag that it is the target,
+        // it should still work
+        if (element.parentNode) {
+            _level++;
+            return _matchesSelector(element.parentNode, selector, boundElement);
+        }
+    }
+    function _addHandler(gator, event, selector, callback) {
+        if (!_handlers[gator.id]) {
+            _handlers[gator.id] = {};
+        }
+        if (!_handlers[gator.id][event]) {
+            _handlers[gator.id][event] = {};
+        }
+        if (!_handlers[gator.id][event][selector]) {
+            _handlers[gator.id][event][selector] = [];
+        }
+        _handlers[gator.id][event][selector].push(callback);
+    }
+    function _removeHandler(gator, event, selector, callback) {
+        // if there are no events tied to this element at all
+        // then don't do anything
+        if (!_handlers[gator.id]) {
+            return;
+        }
+        // if there is no event type specified then remove all events
+        // example: Gator(element).off()
+        if (!event) {
+            for (var type in _handlers[gator.id]) {
+                if (_handlers[gator.id].hasOwnProperty(type)) {
+                    _handlers[gator.id][type] = {};
+                }
+            }
+            return;
+        }
+        // if no callback or selector is specified remove all events of this type
+        // example: Gator(element).off('click')
+        if (!callback && !selector) {
+            _handlers[gator.id][event] = {};
+            return;
+        }
+        // if a selector is specified but no callback remove all events
+        // for this selector
+        // example: Gator(element).off('click', '.sub-element')
+        if (!callback) {
+            delete _handlers[gator.id][event][selector];
+            return;
+        }
+        // if we have specified an event type, selector, and callback then we
+        // need to make sure there are callbacks tied to this selector to
+        // begin with.  if there aren't then we can stop here
+        if (!_handlers[gator.id][event][selector]) {
+            return;
+        }
+        // if there are then loop through all the callbacks and if we find
+        // one that matches remove it from the array
+        for (var i = 0; i < _handlers[gator.id][event][selector].length; i++) {
+            if (_handlers[gator.id][event][selector][i] === callback) {
+                _handlers[gator.id][event][selector].splice(i, 1);
+                break;
+            }
+        }
+    }
+    function _handleEvent(id, e, type) {
+        if (!_handlers[id][type]) {
+            return;
+        }
+        var target = e.target || e.srcElement, selector, match, matches = {}, i = 0, j = 0;
+        // find all events that match
+        _level = 0;
+        for (selector in _handlers[id][type]) {
+            if (_handlers[id][type].hasOwnProperty(selector)) {
+                match = _matchesSelector(target, selector, _gatorInstances[id].element);
+                if (match && Gator.matchesEvent(type, _gatorInstances[id].element, match, selector == '_root', e)) {
+                    _level++;
+                    _handlers[id][type][selector].match = match;
+                    matches[_level] = _handlers[id][type][selector];
+                }
+            }
+        }
+        // stopPropagation() fails to set cancelBubble to true in Webkit
+        // @see http://code.google.com/p/chromium/issues/detail?id=162270
+        e.stopPropagation = function () {
+            e.cancelBubble = true;
+        };
+        for (i = 0; i <= _level; i++) {
+            if (matches[i]) {
+                for (j = 0; j < matches[i].length; j++) {
+                    if (matches[i][j].call(matches[i].match, e) === false) {
+                        Gator.cancel(e);
+                        return;
+                    }
+                    if (e.cancelBubble) {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    /**
+     * binds the specified events to the element
+     *
+     * @param {string|Array} events
+     * @param {string} selector
+     * @param {Function} callback
+     * @param {boolean=} remove
+     * @returns {Object}
+     */
+    function _bind(events, selector, callback, remove) {
+        // fail silently if you pass null or undefined as an alement
+        // in the Gator constructor
+        if (!this.element) {
+            return;
+        }
+        if (!(events instanceof Array)) {
+            events = [events];
+        }
+        if (!callback && typeof (selector) == 'function') {
+            callback = selector;
+            selector = '_root';
+        }
+        var id = this.id, i;
+        function _getGlobalCallback(type) {
+            return function (e) {
+                _handleEvent(id, e, type);
+            };
+        }
+        for (i = 0; i < events.length; i++) {
+            if (remove) {
+                _removeHandler(this, events[i], selector, callback);
+                continue;
+            }
+            if (!_handlers[id] || !_handlers[id][events[i]]) {
+                Gator.addEvent(this, events[i], _getGlobalCallback(events[i]));
+            }
+            _addHandler(this, events[i], selector, callback);
+        }
+        return this;
+    }
+    /**
+     * Gator object constructor
+     *
+     * @param {Node} element
+     */
+    function Gator(element, id) {
+        // called as function
+        if (!(this instanceof Gator)) {
+            // only keep one Gator instance per node to make sure that
+            // we don't create a ton of new objects if you want to delegate
+            // multiple events from the same node
+            //
+            // for example: Gator(document).on(...
+            for (var key in _gatorInstances) {
+                if (_gatorInstances[key].element === element) {
+                    return _gatorInstances[key];
+                }
+            }
+            _id++;
+            _gatorInstances[_id] = new Gator(element, _id);
+            return _gatorInstances[_id];
+        }
+        this.element = element;
+        this.id = id;
+    }
+    /**
+     * adds an event
+     *
+     * @param {string|Array} events
+     * @param {string} selector
+     * @param {Function} callback
+     * @returns {Object}
+     */
+    Gator.prototype.on = function (events, selector, callback) {
+        return _bind.call(this, events, selector, callback);
+    };
+    /**
+     * removes an event
+     *
+     * @param {string|Array} events
+     * @param {string} selector
+     * @param {Function} callback
+     * @returns {Object}
+     */
+    Gator.prototype.off = function (events, selector, callback) {
+        return _bind.call(this, events, selector, callback, true);
+    };
+    Gator.matchesSelector = function () { };
+    Gator.cancel = _cancel;
+    Gator.addEvent = _addEvent;
+    Gator.matchesEvent = function () {
+        return true;
+    };
+    if (typeof module !== 'undefined' && module.exports) {
+        module.exports = Gator;
+    }
+    var Events = Gator;
+
+    // Interfaces are where user interaction is transformed to domain interactions
+    // There is only one interface in this application, this one the avionics interface
+    // It can therefore be set up to run on the document element
+    var AvionicsInterface = (function () {
+        function AvionicsInterface($root, app) {
+            this.$root = $root;
+            this.app = app;
+            var events = Events($root, null);
+            events.on("click", "[data-command~=reset]", function (evt) {
+                app.resetReadings();
+            });
+        }
+        return AvionicsInterface;
+    })();
+
     var FREEFALL_LIMIT = 4;
     var Reading = {
         freefall: function (reading) {
@@ -146,27 +478,42 @@
     }
     ;
 
+    // TODO currently untested
+    function round(precision) {
+        return function (value) {
+            return parseFloat(value.toPrecision(precision));
+        };
+    }
+
     console.log("Starting boot ...");
     var Actions = {
         newReading: create(function (a) { return a; }, create$1("New Reading")),
-        reset: create(function () { null; }, create$1("Reset")),
+        resetReadings: create(function () { null; }, create$1("Reset")),
         submitFlightLog: create(function () { null; }, create$1("Submit Flight log")),
         failedConnection: create(function (reason) { return reason; }, create$1("Failed Connection")),
     };
+    ready(function () {
+        var $avionics = document.querySelector("[data-interface~=avionics]");
+        var avionicsInterface = new AvionicsInterface($avionics, Actions);
+    });
     function StateStore() {
         var state;
-        var dispatcher = create$2();
+        var logger = create$1("State Store");
+        logger.error = function (e) { throw e; };
+        var dispatcher = create$2(logger);
         function dispatch(store) {
             dispatcher.dispatch(store);
         }
         return {
-            reset: function () {
+            resetReadings: function () {
                 state = handleReset(state);
                 dispatch(this);
+                return this;
             },
             newReading: function (reading) {
                 state = handleNewReading(reading, state);
                 dispatch(this);
+                return this;
             },
             getState: function () {
                 return state;
@@ -177,6 +524,70 @@
         };
     }
     var store = StateStore();
+    store.resetReadings();
+    Actions.resetReadings.register(store.resetReadings);
+    function AvionicsPresenter(state) {
+        var state = state.getState();
+        return Object.create({}, {
+            flightTime: {
+                get: function () {
+                    var flights = state.flightRecords.concat([state.currentFlightReadings]);
+                    var flightDurations = flights.map(function (flightRecord) {
+                        var last = flightRecord.length;
+                        var t0 = flightRecord[0].timestamp;
+                        var t1 = flightRecord[last - 1].timestamp;
+                        return (t1 + 250 - t0) / 1000;
+                    });
+                    var flightDuration = Math.max.apply(null, flightDurations);
+                    return Math.max(0, flightDuration);
+                }
+            },
+            maxAltitude: {
+                get: function () {
+                    // Altitude Calculation
+                    // SUVAT
+                    // s = vt - 0.5 * a * t^2
+                    // input
+                    // s = s <- desired result
+                    // u = ? <- not needed
+                    // v = 0 <- stationary at top
+                    // a = - 9.81 <- local g
+                    // t = flightTime/2 time to top of arc
+                    // s = 9.81 * 1/8 t^2
+                    var flights = state.flightRecords;
+                    console.log(flights);
+                    var flightDurations = flights.map(function (flightRecord) {
+                        var last = flightRecord.length;
+                        console.log("flightRecord", flightRecord);
+                        var t0 = flightRecord[0].timestamp;
+                        var t1 = flightRecord[last - 1].timestamp;
+                        return (t1 + 250 - t0) / 1000;
+                    });
+                    var flightDuration = Math.max.apply(null, flightDurations);
+                    flightDuration = Math.max(0, flightDuration);
+                    var t = flightDuration;
+                    return round(2)(9.81 / 8 * t * t);
+                }
+            }
+        });
+    }
+    function Display($root) {
+        var presenter;
+        function render() {
+            null;
+        }
+        ;
+        return {
+            update: function (state) {
+                presenter = AvionicsPresenter(state);
+                console.log("p", presenter);
+                console.log("ft", presenter.flightTime);
+                console.log(presenter.maxAltitude);
+            }
+        };
+    }
+    var display = Display(null);
+    store.register(display.update);
 
     exports['default'] = Actions;
     exports.store = store;
