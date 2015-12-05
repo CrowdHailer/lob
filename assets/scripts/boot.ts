@@ -24,10 +24,12 @@ function StateStore(){
     reset: function(){
       state = State.handleReset(state);
       dispatch(this);
+      return this;
     },
     newReading: function(reading){
       state = State.handleNewReading(reading, state);
       dispatch(this);
+      return this;
     },
     getState: function(){
       return state;
@@ -38,5 +40,23 @@ function StateStore(){
   };
 }
 
+
 export default Actions;
-export var store = StateStore();
+export var store = StateStore().reset;
+
+function AvionicsPresenter(state){
+  null;
+}
+
+function Display($root){
+  var presenter;
+  function render(){
+    null;
+  };
+  return {
+    update: function(state){
+      presenter = AvionicsPresenter(state);
+      render();
+    }
+  };
+}
