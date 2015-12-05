@@ -11,10 +11,11 @@ export function create (prefix){
       var args = Array.prototype.slice.call(arguments);
       console.warn.apply(console, notices.concat(args));
     },
-    error: function(..._){
-      var args = Array.prototype.slice.call(arguments);
-      console.error.apply(console, notices.concat(args));
-    }
+    // error: function(..._){
+    //   var args = Array.prototype.slice.call(arguments);
+    //   console.error.apply(console, notices.concat(args));
+    // }
+    error: function(e){ throw e; }
   };
 }
 

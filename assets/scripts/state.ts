@@ -27,7 +27,7 @@ export var DEFAULT: State = Object.freeze({
 export function handleReset(_state=DEFAULT){
   return DEFAULT;
 };
-export function handleNewReading(reading: Reading, state=DEFAULT){
+export function handleNewReading(reading: Reading, state=DEFAULT): State{
   var flightRecords = state.flightRecords;
   var currentFlightReadings = state.currentFlightReadings;
 

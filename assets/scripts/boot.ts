@@ -31,16 +31,16 @@ function StateStore(){
     dispatcher.dispatch(store);
   }
 
-  return {
+  var store = {
     resetReadings: function(){
       state = State.handleReset(state);
-      dispatch(this);
-      return this;
+      dispatch(store);
+      return store;
     },
     newReading: function(reading){
       state = State.handleNewReading(reading, state);
-      dispatch(this);
-      return this;
+      dispatch(store);
+      return store;
     },
     getState: function(){
       return state;
@@ -49,6 +49,8 @@ function StateStore(){
       dispatcher = dispatcher.register(callback);
     }
   };
+
+  return store;
 }
 
 
@@ -60,64 +62,16 @@ import { round } from "./utils.ts";
 
 Actions.resetReadings.register(store.resetReadings);
 
-function AvionicsPresenter(state){
-  var state = state.getState();
-  return Object.create({},{
-    flightTime: {
-      get: function(){
-        var flights = state.flightRecords.concat([state.currentFlightReadings]);
-        var flightDurations = flights.map(function(flightRecord){
-          var last = flightRecord.length;
-          var t0 = flightRecord[0].timestamp;
-          var t1 = flightRecord[last - 1].timestamp;
-          return (t1 + 250 - t0) / 1000;
-        });
-        var flightDuration = Math.max.apply(null, flightDurations);
-        return Math.max(0, flightDuration);
-      }
-    },
-    maxAltitude: {
-      get: function(){
-        // Altitude Calculation
-
-        // SUVAT
-        // s = vt - 0.5 * a * t^2
-        // input
-        // s = s <- desired result
-        // u = ? <- not needed
-        // v = 0 <- stationary at top
-        // a = - 9.81 <- local g
-        // t = flightTime/2 time to top of arc
-
-        // s = 9.81 * 1/8 t^2
-
-        var flights = state.flightRecords;
-        var flightDurations = flights.map(function(flightRecord){
-          var last = flightRecord.length;
-          var t0 = flightRecord[0].timestamp;
-          var t1 = flightRecord[last - 1].timestamp;
-          return (t1 + 250 - t0) / 1000;
-        });
-        var flightDuration = Math.max.apply(null, flightDurations);
-        flightDuration =  Math.max(0, flightDuration);
-        var t = flightDuration;
-        return round(2)(9.81/8 * t * t);
-      }
-    }
-  });
-}
-
+import * as AvionicsPresenter from "./avionics-presenter.ts";
 function Display($root){
   var presenter;
   function render(){
     null;
   };
   return {
-    update: function(state){
-      presenter = AvionicsPresenter(state);
-      console.log("p", presenter);
-      console.log("ft", presenter.flightTime);
-      console.log(presenter.maxAltitude);
+    update: function(store){
+      var state = store.getState();
+      presenter = AvionicsPresenter.create(state);
     }
   };
 }
