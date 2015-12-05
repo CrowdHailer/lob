@@ -22,8 +22,6 @@
     ],
     "files": [
         "assets/scripts/action.ts",
-        "assets/scripts/avionics-interface.ts",
-        "assets/scripts/avionics-presenter.ts",
         "assets/scripts/avionics/component.ts",
         "assets/scripts/avionics/display.ts",
         "assets/scripts/avionics/interface.ts",
@@ -33,6 +31,7 @@
         "assets/scripts/dom.ts",
         "assets/scripts/logger.ts",
         "assets/scripts/state.ts",
+        "assets/scripts/store.ts",
         "assets/scripts/uplink.ts",
         "assets/scripts/utils.ts",
         "test/action-test.ts",

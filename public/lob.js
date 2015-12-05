@@ -1,4 +1,4 @@
-(function (exports) { 'use strict';
+var Lob = (function () { 'use strict';
 
     function create$1(prefix) {
         prefix = "[" + prefix + "]";
@@ -124,17 +124,6 @@
     }
     ;
 
-    // All code relating to manipulations requiring a document, element or window node.
-    // DEBT untested
-    function ready(fn) {
-        if (document.readyState !== "loading") {
-            fn();
-        }
-        else {
-            document.addEventListener("DOMContentLoaded", fn);
-        }
-    }
-
     var FREEFALL_LIMIT = 4;
     var Reading = {
         freefall: function (reading) {
@@ -171,6 +160,47 @@
         };
     }
     ;
+
+    function StateStore(logger) {
+        if (logger === void 0) { logger = DefaultLogger; }
+        var state;
+        var dispatcher = create$2(logger);
+        function dispatch(store) {
+            dispatcher.dispatch(store);
+        }
+        var store = {
+            resetReadings: function () {
+                state = handleReset(state);
+                dispatch(store);
+                return store;
+            },
+            newReading: function (reading) {
+                state = handleNewReading(reading, state);
+                dispatch(store);
+                return store;
+            },
+            getState: function () {
+                return state;
+            },
+            register: function (callback) {
+                dispatcher = dispatcher.register(callback);
+                dispatch(store);
+                return store;
+            }
+        };
+        return store;
+    }
+
+    // All code relating to manipulations requiring a document, element or window node.
+    // DEBT untested
+    function ready(fn) {
+        if (document.readyState !== "loading") {
+            fn();
+        }
+        else {
+            document.addEventListener("DOMContentLoaded", fn);
+        }
+    }
 
     /**
      * Copyright 2014 Craig Campbell
@@ -576,46 +606,18 @@
     ;
 
     console.log("Starting boot ...");
-    var Actions = {
+    var actions = {
         newReading: create(function (a) { return a; }, create$1("New Reading")),
         resetReadings: create(function () { null; }, create$1("Reset")),
         submitFlightLog: create(function () { null; }, create$1("Submit Flight log")),
         failedConnection: create(function (reason) { return reason; }, create$1("Failed Connection")),
     };
-    function StateStore(logger) {
-        var state;
-        var dispatcher = create$2(logger);
-        function dispatch(store) {
-            dispatcher.dispatch(store);
-        }
-        var store = {
-            resetReadings: function () {
-                state = handleReset(state);
-                dispatch(store);
-                return store;
-            },
-            newReading: function (reading) {
-                state = handleNewReading(reading, state);
-                dispatch(store);
-                return store;
-            },
-            getState: function () {
-                return state;
-            },
-            register: function (callback) {
-                dispatcher = dispatcher.register(callback);
-                dispatch(store);
-                return store;
-            }
-        };
-        return store;
-    }
-    var logger = create$1("State Store");
-    var store = StateStore(logger);
+    var store = StateStore();
     store.resetReadings();
-    Actions.resetReadings.register(store.resetReadings);
+    actions.resetReadings.register(store.resetReadings);
+    actions.newReading.register(store.newReading);
     var App = {
-        actions: Actions,
+        actions: actions,
         store: store
     };
     ready(function () {
@@ -623,8 +625,7 @@
         var avionics = Avionics($avionics, App);
     });
 
-    exports['default'] = Actions;
-    exports.store = store;
+    return App;
 
-})((this.Lob = {}));
+})();
 //# sourceMappingURL=lob.js.map
