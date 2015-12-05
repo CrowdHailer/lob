@@ -1,6 +1,6 @@
 import * as State from "../assets/scripts/state.ts";
 import { freefallReading, stationaryReading } from "./support.ts";
-import * as AvionicsPresenter from "../assets/scripts/avionics-presenter.ts";
+import * as AvionicsPresenter from "../assets/scripts/avionics/presenter.ts";
 
 describe("Avionics AvionicsPresenter", function(){
   describe("default state", function (){

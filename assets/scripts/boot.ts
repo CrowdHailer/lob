@@ -51,51 +51,18 @@ var logger = Logger.create("State Store");
 export var store = StateStore(logger);
 
 store.resetReadings();
-import { round } from "./utils.ts";
 
 Actions.resetReadings.register(store.resetReadings);
 
-import * as AvionicsPresenter from "./avionics-presenter.ts";
-function Display($root){
-  var $flightTime = $root.querySelector("[data-hook~=flight-time]");
-  var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
-  function render(presentation){
-    $flightTime.innerHTML = presentation.maxFlightTime + "s";
-    $maxAltitude.innerHTML = presentation.maxAltitude + "m";
-  };
-  return {
-    update: function(store){
-      var state = store.getState();
-      var presenter = AvionicsPresenter.create(state);
-      render(presenter);
-    }
-  };
-}
-import AvionicsInterface from "./avionics-interface.ts";
 
 var App = {
   actions: Actions,
   store: store
 };
 
-function Avionics($root, world){
-  var ui = new AvionicsInterface($root, world.actions);
-
-  var display = Display($root);
-  world.store.register(display.update);
-
-  return {
-    display: display,
-    ui: ui
-  };
-};
-
+import Avionics from "./avionics/component.ts";
 import { ready } from "./dom.ts";
 ready(function () {
   var $avionics = document.querySelector("[data-interface~=avionics]");
   var avionics = Avionics($avionics, App);
-  // var avionicsInterface = new AvionicsInterface($avionics, Actions);
-  // var display = Display($avionics);
-  //
-  // store.register(display.update);
 });

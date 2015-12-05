@@ -172,56 +172,6 @@
     }
     ;
 
-    // TODO currently untested
-    function round(precision) {
-        return function (value) {
-            return parseFloat(value.toPrecision(precision));
-        };
-    }
-
-    function readingsDuration(readings) {
-        if (!readings[0]) {
-            return 0;
-        }
-        var last = readings.length;
-        var t0 = readings[0].timestamp;
-        var t1 = readings[last - 1].timestamp;
-        // DEBT Magic number that make sense when sample rate is every 250ms
-        return (t1 + 250 - t0) / 1000;
-    }
-    function altitudeForFreefallDuration(duration) {
-        // Altitude Calculation
-        // SUVAT
-        // s = vt - 0.5 * a * t^2
-        // input
-        // s = s <- desired result
-        // u = ? <- not needed
-        // v = 0 <- stationary at top
-        // a = - 9.81 <- local g
-        // t = flightTime/2 time to top of arc
-        // s = 9.81 * 1/8 t^2
-        var t = duration;
-        return round(2)(9.81 / 8 * t * t);
-    }
-    function create$3(state) {
-        return Object.create({}, {
-            maxFlightTime: {
-                get: function () {
-                    var flights = state.flightRecords.concat([state.currentFlightReadings]);
-                    var flightDurations = flights.map(readingsDuration);
-                    return Math.max.apply(null, flightDurations);
-                }
-            },
-            maxAltitude: {
-                get: function () {
-                    var flightDurations = state.flightRecords.map(readingsDuration);
-                    var max = Math.max.apply(null, [0].concat(flightDurations));
-                    return altitudeForFreefallDuration(max);
-                }
-            }
-        });
-    }
-
     /**
      * Copyright 2014 Craig Campbell
      *
@@ -542,6 +492,88 @@
         }
         return AvionicsInterface;
     })();
+    function create$3($root, app) {
+        return new AvionicsInterface($root, app);
+    }
+    // export default AvionicsInterface
+
+    // TODO currently untested
+    function round(precision) {
+        return function (value) {
+            return parseFloat(value.toPrecision(precision));
+        };
+    }
+
+    function readingsDuration(readings) {
+        if (!readings[0]) {
+            return 0;
+        }
+        var last = readings.length;
+        var t0 = readings[0].timestamp;
+        var t1 = readings[last - 1].timestamp;
+        // DEBT Magic number that make sense when sample rate is every 250ms
+        return (t1 + 250 - t0) / 1000;
+    }
+    function altitudeForFreefallDuration(duration) {
+        // Altitude Calculation
+        // SUVAT
+        // s = vt - 0.5 * a * t^2
+        // input
+        // s = s <- desired result
+        // u = ? <- not needed
+        // v = 0 <- stationary at top
+        // a = - 9.81 <- local g
+        // t = flightTime/2 time to top of arc
+        // s = 9.81 * 1/8 t^2
+        var t = duration;
+        return round(2)(9.81 / 8 * t * t);
+    }
+    function create$5(state) {
+        return Object.create({}, {
+            maxFlightTime: {
+                get: function () {
+                    var flights = state.flightRecords.concat([state.currentFlightReadings]);
+                    var flightDurations = flights.map(readingsDuration);
+                    return Math.max.apply(null, flightDurations);
+                }
+            },
+            maxAltitude: {
+                get: function () {
+                    var flightDurations = state.flightRecords.map(readingsDuration);
+                    var max = Math.max.apply(null, [0].concat(flightDurations));
+                    return altitudeForFreefallDuration(max);
+                }
+            }
+        });
+    }
+
+    function Display($root) {
+        var $flightTime = $root.querySelector("[data-hook~=flight-time]");
+        var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
+        function render(presentation) {
+            $flightTime.innerHTML = presentation.maxFlightTime + "s";
+            $maxAltitude.innerHTML = presentation.maxAltitude + "m";
+        }
+        ;
+        return {
+            update: function (store) {
+                var state = store.getState();
+                var presenter = create$5(state);
+                render(presenter);
+            }
+        };
+    }
+
+    function Avionics($root, world) {
+        var ui = create$3($root, world.actions);
+        var display = Display($root);
+        world.store.register(display.update);
+        return {
+            display: display,
+            ui: ui
+        };
+    }
+    ;
 
     console.log("Starting boot ...");
     var Actions = {
@@ -582,43 +614,13 @@
     var store = StateStore(logger);
     store.resetReadings();
     Actions.resetReadings.register(store.resetReadings);
-    function Display($root) {
-        var $flightTime = $root.querySelector("[data-hook~=flight-time]");
-        var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
-        function render(presentation) {
-            $flightTime.innerHTML = presentation.maxFlightTime + "s";
-            $maxAltitude.innerHTML = presentation.maxAltitude + "m";
-        }
-        ;
-        return {
-            update: function (store) {
-                var state = store.getState();
-                var presenter = create$3(state);
-                render(presenter);
-            }
-        };
-    }
     var App = {
         actions: Actions,
         store: store
     };
-    function Avionics($root, world) {
-        var ui = new AvionicsInterface($root, world.actions);
-        var display = Display($root);
-        world.store.register(display.update);
-        return {
-            display: display,
-            ui: ui
-        };
-    }
-    ;
     ready(function () {
         var $avionics = document.querySelector("[data-interface~=avionics]");
         var avionics = Avionics($avionics, App);
-        // var avionicsInterface = new AvionicsInterface($avionics, Actions);
-        // var display = Display($avionics);
-        //
-        // store.register(display.update);
     });
 
     exports['default'] = Actions;

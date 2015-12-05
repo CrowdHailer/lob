@@ -17,4 +17,8 @@ class AvionicsInterface {
   }
 }
 
-export default AvionicsInterface
+export default function create($root, app){
+  return new AvionicsInterface($root, app);
+}
+
+// export default AvionicsInterface

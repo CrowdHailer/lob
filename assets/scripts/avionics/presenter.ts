@@ -1,5 +1,5 @@
-import { round } from "./utils.ts";
-import * as State from "./state.ts";
+import { round } from "../utils.ts";
+import * as State from "../state.ts";
 
 function readingsDuration(readings){
   if (!readings[0]) { return 0; }
