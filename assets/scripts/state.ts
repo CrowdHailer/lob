@@ -9,7 +9,7 @@ var Reading = {
 };
 
 interface Reading {
-  acceleration: Object;
+  acceleration: {x: number, y: number, z: number};
   timestamp: number;
 }
 

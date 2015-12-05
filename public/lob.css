@@ -54,6 +54,9 @@ a.clean {
   text-decoration: none;
   color: inherit; }
 
+.center {
+  text-align: center; }
+
 html, body {
   margin: 0; }
 

@@ -530,7 +530,7 @@ var Lob = (function () { 'use strict';
     // TODO currently untested
     function round(precision) {
         return function (value) {
-            return parseFloat(value.toPrecision(precision));
+            return parseFloat(value.toFixed(precision));
         };
     }
 
@@ -558,6 +558,11 @@ var Lob = (function () { 'use strict';
         var t = duration;
         return round(2)(9.81 / 8 * t * t);
     }
+    function format(i) {
+        var padding = "00000";
+        var str = i.toFixed(2);
+        return padding.substring(0, padding.length - str.length) + str;
+    }
     function create$5(state) {
         return Object.create({}, {
             maxFlightTime: {
@@ -573,6 +578,19 @@ var Lob = (function () { 'use strict';
                     var max = Math.max.apply(null, [0].concat(flightDurations));
                     return altitudeForFreefallDuration(max);
                 }
+            },
+            currentReading: {
+                get: function () {
+                    if (!state.currentReading) {
+                        return "Waiting.";
+                    }
+                    ;
+                    var acceleration = state.currentReading.acceleration;
+                    var x = acceleration.x;
+                    var y = acceleration.y;
+                    var z = acceleration.z;
+                    return "[" + [format(x), format(y), format(z)].join(", ") + "]";
+                }
             }
         });
     }
@@ -580,9 +598,11 @@ var Lob = (function () { 'use strict';
     function Display($root) {
         var $flightTime = $root.querySelector("[data-hook~=flight-time]");
         var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
+        var $currentReading = $root.querySelector("[data-hook~=current-reading]");
         function render(presentation) {
             $flightTime.innerHTML = presentation.maxFlightTime + "s";
             $maxAltitude.innerHTML = presentation.maxAltitude + "m";
+            $currentReading.innerHTML = presentation.currentReading;
         }
         ;
         return {

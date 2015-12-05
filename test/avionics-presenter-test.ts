@@ -12,13 +12,17 @@ describe("Avionics AvionicsPresenter", function(){
     it("should have a maxAltitude of 0", function(){
       expect(presenter.maxAltitude).toBe(0);
     });
+    it("should have a current Reading of waiting", function(){
+      expect(presenter.currentReading).toEqual("Waiting.")
+    });
   });
 
   describe("in early flight state", function(){
+    var reading = freefallReading()
     var state = {
-      currentFlightReadings: [freefallReading()],
+      currentFlightReadings: [reading],
       flightRecords: [],
-      currentReading: null
+      currentReading: reading
     };
     var presenter = AvionicsPresenter.create(state);
     it("should have a maxFlightTime of .250", function(){
@@ -26,6 +30,9 @@ describe("Avionics AvionicsPresenter", function(){
     });
     it("should have a maxAltitude of 0", function(){
       expect(presenter.maxAltitude).toBe(0);
+    });
+    it("should have a current Reading of with details", function(){
+      expect(presenter.currentReading).toEqual("[00.00, 00.00, -1.00]")
     });
   });
   describe("in mid flight state", function(){

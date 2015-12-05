@@ -26,6 +26,12 @@ function altitudeForFreefallDuration(duration){
   return round(2)(9.81/8 * t * t);
 }
 
+function format(i: number){
+  var padding = "00000";
+  var str = i.toFixed(2);
+  return padding.substring(0, padding.length - str.length) + str;
+}
+
 export function create(state: State.State){
   return Object.create({}, {
     maxFlightTime: {
@@ -40,6 +46,16 @@ export function create(state: State.State){
         var flightDurations = state.flightRecords.map(readingsDuration);
         var max = Math.max.apply(null, [0].concat(flightDurations));
         return altitudeForFreefallDuration(max);
+      }
+    },
+    currentReading: {
+      get: function(){
+        if (!state.currentReading){ return "Waiting."; };
+        var acceleration = state.currentReading.acceleration;
+        var x = acceleration.x;
+        var y = acceleration.y;
+        var z = acceleration.z;
+        return "[" + [format(x), format(y), format(z)].join(", ") + "]";
       }
     }
   });
