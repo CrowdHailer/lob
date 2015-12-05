@@ -110,8 +110,26 @@ ready(function () {
 
 export default Actions;
 
+var State: any;
+function Store(){
+  var state;
+  return {
+    newReading: function(reading){
+      state = State.handleReading(reading, state);
+    },
+    handleReset: function(){
+      state = State.handleReset(state);
+    }
+  };
+}
 
-
+var handleReading = function(reading, state){
+  var a = {
+    running: [1,2,3]
+    // make running empty when not currently weighleiss
+  };
+  return state;
+};
 
 
 declare var Chart: any;
