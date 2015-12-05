@@ -92,10 +92,8 @@ function AvionicsPresenter(state){
         // s = 9.81 * 1/8 t^2
 
         var flights = state.flightRecords;
-        console.log(flights);
         var flightDurations = flights.map(function(flightRecord){
           var last = flightRecord.length;
-          console.log("flightRecord", flightRecord)
           var t0 = flightRecord[0].timestamp;
           var t1 = flightRecord[last - 1].timestamp;
           return (t1 + 250 - t0) / 1000;
