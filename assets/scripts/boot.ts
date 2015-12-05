@@ -10,14 +10,6 @@ var Actions = {
   failedConnection: Action.create(function(reason: any){ return reason; }, Logger.create("Failed Connection")),
 };
 
-import AvionicsInterface from "./avionics-interface.ts";
-
-import { ready } from "./dom.ts";
-ready(function () {
-  var $avionics = document.querySelector("[data-interface~=avionics]");
-  var avionicsInterface = new AvionicsInterface($avionics, Actions);
-});
-
 import * as Dispatcher from "./dispatcher.ts";
 import * as State from "./state.ts";
 
@@ -45,6 +37,8 @@ function StateStore(logger){
     },
     register: function(callback){
       dispatcher = dispatcher.register(callback);
+      dispatch(store);
+      return store;
     }
   };
 
@@ -63,18 +57,27 @@ Actions.resetReadings.register(store.resetReadings);
 
 import * as AvionicsPresenter from "./avionics-presenter.ts";
 function Display($root){
-  var presenter;
-  function render(){
-    null;
+  var $flightTime = $root.querySelector("[data-hook~=flight-time]");
+  var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
+  function render(presentation){
+    $flightTime.innerHTML = presentation.maxFlightTime + "s";
+    $maxAltitude.innerHTML = presentation.maxAltitude + "m";
   };
   return {
     update: function(store){
       var state = store.getState();
-      presenter = AvionicsPresenter.create(state);
+      var presenter = AvionicsPresenter.create(state);
+      render(presenter);
     }
   };
 }
 
-var display = Display(null);
+import { ready } from "./dom.ts";
+import AvionicsInterface from "./avionics-interface.ts";
+ready(function () {
+  var $avionics = document.querySelector("[data-interface~=avionics]");
+  var avionicsInterface = new AvionicsInterface($avionics, Actions);
+  var display = Display($avionics);
 
-store.register(display.update);
+  store.register(display.update);
+});
