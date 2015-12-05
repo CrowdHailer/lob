@@ -1,40 +1,4 @@
-var FREEFALL_LIMIT = 4;
-
-var Reading = {
-  freefall: function(reading){
-    var a = reading.acceleration;
-    var magnitude = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
-    return magnitude < FREEFALL_LIMIT;
-  }
-};
-
-var State = {
-  DEFAULT: {
-    currentFlightReadings: [],
-    currentReading: null,
-    flightRecords: []
-  },
-  handleReset: function(_state=State.DEFAULT){
-    return State.DEFAULT;
-  },
-  handleNewReading: function(reading, state=State.DEFAULT){
-    var flightRecords = state.flightRecords;
-    var currentFlightReadings = state.currentFlightReadings;
-
-    if (Reading.freefall(reading)){
-      currentFlightReadings = currentFlightReadings.concat(reading);
-    } else if (currentFlightReadings[0]){
-      flightRecords = flightRecords.concat([currentFlightReadings]);
-      currentFlightReadings = [];
-    }
-
-    return {
-      currentFlightReadings: currentFlightReadings,
-      currentReading: reading,
-      flightRecords: flightRecords
-    };
-  }
-};
+import * as State from "../assets/scripts/state.ts";
 
 describe("State", function(){
   describe("reset", function(){
