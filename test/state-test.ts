@@ -27,11 +27,14 @@ describe("State", function(){
       expect(newState.currentFlightReadings[0]).toEqual(reading);
     });
 
-    xit("should should move current flight to past flightS", function(){
+    it("should should move current flight to past flightS", function(){
       var readings = [freefallReading(), freefallReading()];
       var reading = stationaryReading();
-      var state = State.DEFAULT;
-      state.currentFlightReadings = readings;
+      var state = {
+        currentFlightReadings: readings,
+        flightRecords: [],
+        currentReading: null
+      };
       var newState = State.handleNewReading(reading, state);
       expect(newState.currentFlightReadings).toEqual([]);
       expect(newState.flightRecords[0]).toEqual(readings);
