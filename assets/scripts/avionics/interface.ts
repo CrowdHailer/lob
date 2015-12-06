@@ -1,5 +1,5 @@
 // TODO test
-import Events from "./gator.js";
+import Events from "../gator.js";
 
 // Interfaces are where user interaction is transformed to domain interactions
 // There is only one interface in this application, this one the avionics interface

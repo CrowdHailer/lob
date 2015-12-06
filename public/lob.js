@@ -636,7 +636,7 @@ var Lob = (function () { 'use strict';
         });
     }
 
-    function Display($root) {
+    function Display$1($root) {
         var $flightTime = $root.querySelector("[data-hook~=flight-time]");
         var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
         var $currentReading = $root.querySelector("[data-hook~=current-reading]");
@@ -661,7 +661,7 @@ var Lob = (function () { 'use strict';
         } // Use double equal comparison to catch null and undefined;
         world.getAccelerometer().start();
         var ui = create$3($root, world.actions);
-        var display = Display($root);
+        var display = Display$1($root);
         world.store.register(display.update);
         return {
             display: display,
@@ -670,6 +670,37 @@ var Lob = (function () { 'use strict';
     }
     ;
 
+    function Interface($root, app) {
+        var events = Events($root, null);
+        events.on("click", function (evt) {
+            app.closeNotice();
+        });
+    }
+    function Component($root, world) {
+        if ($root == void 0) {
+            return;
+        } // Use double equal comparison to catch null and undefined;
+        var ui = Interface($root, world.actions);
+        var display = Display($root);
+        world.noticeStore.register(display.update);
+    }
+    function Display($root) {
+        var $display = $root.querySelector("[data-display~=notice]");
+        return {
+            update: function (store) {
+                var message = store.getState();
+                if (message) {
+                    $display.innerHTML = message;
+                    $root.classList.add("active");
+                }
+                else {
+                    $root.classList.remove("active");
+                    $display.innerHTML = "";
+                }
+            }
+        };
+    }
+
     console.log("Starting boot ...");
     var actions = {
         newReading: create(function (a) { return a; }, create$1("New Reading")),
@@ -677,14 +708,50 @@ var Lob = (function () { 'use strict';
         submitFlightLog: create(function () { null; }, create$1("Submit Flight log")),
         failedConnection: create(function (reason) { return reason; }, create$1("Failed Connection")),
         badReading: create(function (reading) { return reading; }, create$1("Bad Reading")),
+        closeNotice: create(function (reading) { return reading; }, create$1("Notice Closed")),
     };
     var store = StateStore();
     actions.resetReadings.register(store.resetReadings);
     actions.newReading.register(store.newReading);
     var accelerometer = Accelerometer(actions);
+    function NoticeStore(logger) {
+        if (logger === void 0) { logger = DefaultLogger; }
+        var BAD_READING = "Could not read the data from this device. Please try again on a mobile with working accelerometer.";
+        var state, store;
+        var dispatcher = create$2(logger);
+        function dispatch(store) {
+            dispatcher.dispatch(store);
+        }
+        function notify(message) {
+            state = message;
+            dispatch(store);
+        }
+        function closeNotice() {
+            state = null;
+            dispatch(store);
+        }
+        store = {
+            badReading: notify.bind({}, BAD_READING),
+            closeNotice: closeNotice,
+            getState: function () {
+                return state;
+            },
+            register: function (callback) {
+                dispatcher = dispatcher.register(callback);
+                dispatch(store);
+                return store;
+            }
+        };
+        store.closeNotice();
+        return store;
+    }
+    var noticeStore = NoticeStore();
+    actions.badReading.register(noticeStore.badReading);
+    actions.closeNotice.register(noticeStore.closeNotice);
     var App = {
         actions: actions,
         store: store,
+        noticeStore: noticeStore,
         getAccelerometer: function () {
             return accelerometer;
         }
@@ -692,6 +759,8 @@ var Lob = (function () { 'use strict';
     ready(function () {
         var $avionics = document.querySelector("[data-interface~=avionics]");
         var avionics = Avionics($avionics, App);
+        var $notice = document.querySelector("[data-component~=notice]");
+        var notice = Component($notice, App);
     });
 
     return App;
