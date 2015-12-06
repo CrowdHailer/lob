@@ -1,4 +1,4 @@
-import { createTranscriptFunction } from "./support.ts";
+import { createTranscriptFunction, createTranscriptLogger } from "./support.ts";
 
 import * as Action from "../assets/scripts/action.ts";
 
@@ -31,15 +31,17 @@ describe("Action", function(){
   });
 
   it("should log error if filter raises exception", function(){
-    var logger = {info: createTranscriptFunction(), error: createTranscriptFunction()};
+    var logger = createTranscriptLogger();
     var action = Action.create(function (any){ throw new Error("bad filter"); }, logger);
     action("any string");
     expect(logger.error.transcript[0]).toEqual([new Error("bad filter")]);
   });
 
   it("should log as info each dispatched action", function(){
-    var logger = {info: createTranscriptFunction(), error: createTranscriptFunction()};
+    var logger = createTranscriptLogger();
+    var handler = createTranscriptFunction();
     var action = Action.create(identityFn, logger);
+    action.register(handler);
     action("some data");
     expect(logger.info.transcript[0]).toEqual(["some data"]);
   });

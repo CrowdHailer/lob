@@ -54,6 +54,10 @@ a.clean {
   text-decoration: none;
   color: inherit; }
 
+.center {
+  text-align: center;
+  font-family: monospace; }
+
 html, body {
   margin: 0; }
 

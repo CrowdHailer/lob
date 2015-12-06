@@ -1,24 +1,5 @@
-export function streak(predicate, collection) {
-  var current_streak = [];
-  var output = [];
-  collection.forEach(function (item) {
-    if (predicate(item)) {
-      current_streak.push(item);
-    } else {
-      if (current_streak.length !== 0) {
-        output.push(current_streak);
-      }
-      current_streak = [];
-    }
-  });
-  if (current_streak.length !== 0) {
-    output.push(current_streak);
-  }
-  return output;
-}
-
 // TODO currently untested
-export function throttle(fn, threshhold, scope) {
+export function throttle(fn, threshhold, scope?) {
   threshhold = threshhold || 250;
   var last,
   deferTimer;
@@ -43,7 +24,7 @@ export function throttle(fn, threshhold, scope) {
 // TODO currently untested
 export function round (precision: number) {
   return function (value: number) {
-    return parseFloat(value.toPrecision(precision));
+    return parseFloat(value.toFixed(precision));
   };
 }
 

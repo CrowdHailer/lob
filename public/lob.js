@@ -12,33 +12,64 @@ var Lob = (function () { 'use strict';
                 var args = Array.prototype.slice.call(arguments);
                 console.info.apply(console, notices.concat(args));
             },
-            error: function () {
+            warn: function () {
                 var _ = [];
                 for (var _i = 0; _i < arguments.length; _i++) {
                     _[_i - 0] = arguments[_i];
                 }
                 var args = Array.prototype.slice.call(arguments);
-                console.error.apply(console, notices.concat(args));
-            }
+                console.warn.apply(console, notices.concat(args));
+            },
+            // error: function(..._){
+            //   var args = Array.prototype.slice.call(arguments);
+            //   console.error.apply(console, notices.concat(args));
+            // }
+            error: function (e) { throw e; }
         };
     }
-    var NullLogger = { info: function () {
+    var DefaultLogger = {
+        info: function () {
             var a = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 a[_i - 0] = arguments[_i];
             }
             null;
-        }, error: function () {
+        },
+        warn: function () {
             var a = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 a[_i - 0] = arguments[_i];
             }
             null;
-        } };
+        },
+        // error logging should be used for errors and in development these should be thrown
+        error: function (e) { throw e; }
+    };
+    var NullLogger = {
+        info: function () {
+            var a = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                a[_i - 0] = arguments[_i];
+            }
+            null;
+        },
+        warn: function () {
+            var a = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                a[_i - 0] = arguments[_i];
+            }
+            null;
+        },
+        error: function () {
+            var a = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                a[_i - 0] = arguments[_i];
+            }
+            null;
+        },
+    };
 
     // Raise Error for circular calls
-    // Pass multiple arguments probably fails with type declaration
-    // warn not log if no handlers
     function Dispatcher(handlers, world) {
         this.dispatch = function () {
             var args = arguments;
@@ -50,7 +81,12 @@ var Lob = (function () { 'use strict';
                     world.error(e);
                 }
             });
-            world.info.apply(world, args);
+            if (handlers.length == 0) {
+                world.warn.apply(world, args);
+            }
+            else {
+                world.info.apply(world, args);
+            }
         };
         this.register = function (handler) {
             return new Dispatcher(handlers.concat(handler), world);
@@ -58,7 +94,7 @@ var Lob = (function () { 'use strict';
     }
     ;
     function create$2(world) {
-        if (world === void 0) { world = NullLogger; }
+        if (world === void 0) { world = DefaultLogger; }
         return new Dispatcher([], world);
     }
     ;
@@ -88,25 +124,74 @@ var Lob = (function () { 'use strict';
     }
     ;
 
-    function streak(predicate, collection) {
-        var current_streak = [];
-        var output = [];
-        collection.forEach(function (item) {
-            if (predicate(item)) {
-                current_streak.push(item);
-            }
-            else {
-                if (current_streak.length !== 0) {
-                    output.push(current_streak);
-                }
-                current_streak = [];
-            }
-        });
-        if (current_streak.length !== 0) {
-            output.push(current_streak);
+    var FREEFALL_LIMIT = 4;
+    var Reading = {
+        freefall: function (reading) {
+            var a = reading.acceleration;
+            var magnitude = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+            return magnitude < FREEFALL_LIMIT;
         }
-        return output;
+    };
+    var DEFAULT = Object.freeze({
+        currentFlightReadings: [],
+        currentReading: null,
+        flightRecords: []
+    });
+    function handleReset(_state) {
+        if (_state === void 0) { _state = DEFAULT; }
+        return DEFAULT;
     }
+    ;
+    function handleNewReading(reading, state) {
+        if (state === void 0) { state = DEFAULT; }
+        var flightRecords = state.flightRecords;
+        var currentFlightReadings = state.currentFlightReadings;
+        if (Reading.freefall(reading)) {
+            currentFlightReadings = currentFlightReadings.concat(reading);
+        }
+        else if (currentFlightReadings[0]) {
+            flightRecords = flightRecords.concat([currentFlightReadings]);
+            currentFlightReadings = [];
+        }
+        return {
+            currentFlightReadings: currentFlightReadings,
+            currentReading: reading,
+            flightRecords: flightRecords
+        };
+    }
+    ;
+
+    function StateStore(logger) {
+        if (logger === void 0) { logger = DefaultLogger; }
+        var state;
+        var dispatcher = create$2(logger);
+        function dispatch(store) {
+            dispatcher.dispatch(store);
+        }
+        var store = {
+            resetReadings: function () {
+                state = handleReset(state);
+                dispatch(store);
+                return store;
+            },
+            newReading: function (reading) {
+                state = handleNewReading(reading, state);
+                dispatch(store);
+                return store;
+            },
+            getState: function () {
+                return state;
+            },
+            register: function (callback) {
+                dispatcher = dispatcher.register(callback);
+                dispatch(store);
+                return store;
+            }
+        };
+        store.resetReadings(); // DEBT untested effect
+        return store;
+    }
+
     // TODO currently untested
     function throttle(fn, threshhold, scope) {
         threshhold = threshhold || 250;
@@ -131,173 +216,28 @@ var Lob = (function () { 'use strict';
     // TODO currently untested
     function round(precision) {
         return function (value) {
-            return parseFloat(value.toPrecision(precision));
+            return parseFloat(value.toFixed(precision));
         };
     }
-    function getParameterByName(name) {
-        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
-        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-    }
 
-    // Uplink represents a single channel
-    var Uplink = (function () {
-        function Uplink(options) {
-            var token = options["token"];
-            var channelName = options["channelName"];
-            var realtime = new Ably.Realtime({ token: token });
-            realtime.connection.on("failed", function () {
-                alert("failed to connect");
-            });
-            this.channel = realtime.channels.get(channelName);
+    var DEVICEMOTION = "devicemotion";
+    var THROTTLE_RATE = 100; function Accelerometer(actions) {
+        function reportDeviceMotionEvent(deviceMotionEvent) {
+            var raw = deviceMotionEvent.accelerationIncludingGravity;
+            if (typeof raw.x === "number") {
+                actions.newReading({ acceleration: { x: raw.x, y: raw.y, z: raw.z }, timestamp: Date.now() });
+            }
+            else {
+                actions.badReading(raw);
+            }
         }
-        Uplink.prototype.publish = function (eventName, vector) {
-            this.channel.publish(eventName, vector, function (err) {
-                if (err) {
-                    console.log("Unable to publish message; err = " + err.message);
-                }
-                else {
-                    console.log("Message successfully sent");
-                }
-            });
-        };
-        Uplink.prototype.subscribe = function (eventName, callback) {
-            this.channel.subscribe(eventName, callback);
-        };
-        Uplink.getUplinkToken = function () {
-            return getParameterByName("token");
-        };
-        ;
-        Uplink.getChannelName = function () {
-            return getParameterByName("channel");
-        };
-        ;
-        return Uplink;
-    })();
-
-    var Readings = (function () {
-        function Readings(readings) {
-            if (readings === void 0) { readings = []; }
-            this.readings = readings;
-        }
-        Object.defineProperty(Readings.prototype, "duration", {
-            get: function () {
-                if (this.readings.length === 0) {
-                    return 0;
-                }
-                var last = this.readings.length;
-                var t0 = this.readings[0].timestamp;
-                var t1 = this.readings[last - 1].timestamp;
-                return (t1 - t0) / 1000;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Readings.prototype, "flightTime", {
-            get: function () {
-                var streaks = streak(function (reading) {
-                    var a = reading.acceleration;
-                    var magnitude = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
-                    return magnitude < 4;
-                }, this.readings);
-                var flightDurations = streaks.map(function (list) {
-                    var last = list.length;
-                    var t0 = list[0].timestamp;
-                    var t1 = list[last - 1].timestamp;
-                    // DEBT remove magic numbers
-                    return (t1 + 250 - t0) / 1000;
-                });
-                var flightDuration = Math.max.apply(null, flightDurations);
-                return Math.max(0, flightDuration);
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Readings.prototype, "length", {
-            get: function () {
-                return this.readings.length;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Readings.prototype.addReading = function (newReading) {
-            return new Readings(this.readings.concat(newReading));
-        };
-        return Readings;
-    })();
-
-    // The data logger is implemented as a flux style store.
-    // It does not have a dispatch method and currently the application knows directly which methods to call on the data logger
-    // Views/Displays are registered with by registerDisplay
-    // At the moment after each change of state action a call to updateDisplays must be made manually.
-    // DEBT uplink untested
-    var DataLogger = (function () {
-        function DataLogger(uplink) {
-            this.displays = [];
-            this.readings = new Readings();
-            this.status = "READY";
-            this.uplink = uplink;
-        }
-        // Responses to external actions
-        DataLogger.prototype.start = function () {
-            this.status = "READING";
-            this.updateDisplays();
-        };
-        DataLogger.prototype.newReading = function (reading) {
-            if (this.status == "READING") {
-                this.readings = this.readings.addReading(reading);
-                this.uplink.publish("accelerometerReading", reading);
-                this.updateDisplays();
+        var throttledReport = throttle(reportDeviceMotionEvent, THROTTLE_RATE);
+        return {
+            start: function () {
+                window.addEventListener(DEVICEMOTION, throttledReport);
             }
         };
-        DataLogger.prototype.stop = function () {
-            this.status = "COMPLETED";
-            this.updateDisplays();
-        };
-        DataLogger.prototype.reset = function () {
-            this.status = "READY";
-            this.readings = new Readings();
-            this.uplink.publish("reset", null);
-            this.updateDisplays();
-        };
-        Object.defineProperty(DataLogger.prototype, "maxAltitude", {
-            get: function () {
-                // Altitude Calculation
-                // SUVAT
-                // s = vt - 0.5 * a * t^2
-                // input
-                // s = s <- desired result
-                // u = ? <- not needed
-                // v = 0 <- stationary at top
-                // a = - 9.81 <- local g
-                // t = flightTime/2 time to top of arc
-                // s = 9.81 * 1/8 t^2
-                if (this.status == "COMPLETED") {
-                    var t = this.readings.flightTime;
-                    return round(2)(9.81 / 8 * t * t);
-                }
-                else {
-                    return 0;
-                }
-            },
-            enumerable: true,
-            configurable: true
-        });
-        DataLogger.prototype.updateDisplays = function () {
-            var self = this;
-            this.displays.forEach(function (view) {
-                view.update(self);
-            });
-        };
-        DataLogger.prototype.registerDisplay = function (display) {
-            this.displays.push(display);
-            display.update(this);
-        };
-        DataLogger.READY = "READY";
-        DataLogger.READING = "READING";
-        DataLogger.COMPLETED = "COMPLETED";
-        return DataLogger;
-    })();
+    }
 
     // All code relating to manipulations requiring a document, element or window node.
     // DEBT untested
@@ -620,203 +560,141 @@ var Lob = (function () { 'use strict';
     // There is only one interface in this application, this one the avionics interface
     // It can therefore be set up to run on the document element
     var AvionicsInterface = (function () {
-        function AvionicsInterface($root, actions) {
+        function AvionicsInterface($root, app) {
             this.$root = $root;
-            this.actions = actions;
+            this.app = app;
             var events = Events($root, null);
-            events.on("click", "[data-command~=start]", function (evt) {
-                actions.startLogging();
-            });
-            events.on("click", "[data-command~=stop]", function (evt) {
-                actions.stopLogging();
-            });
             events.on("click", "[data-command~=reset]", function (evt) {
-                actions.clearDataLog();
+                app.resetReadings();
             });
-            // events.on("submit", "[data-command~=submit]", function (evt: Event) {
-            //   evt.preventDefault();
-            //   var input: any = evt.srcElement.querySelector("input");
-            //   actions.submitFlightLog(input.value);
-            // });
         }
         return AvionicsInterface;
     })();
+    function create$3($root, app) {
+        return new AvionicsInterface($root, app);
+    }
+    // export default AvionicsInterface
 
-    // Display elements are updated with the state of a store when they are registered to the store.
-    // DEBT the data logger display will cause an error if the elements are not present, this error should be caught by the dispatcher when it is registered
-    // TODO currently untested
-    var DataLoggerDisplay = (function () {
-        function DataLoggerDisplay($root) {
-            this.$root = $root;
-            this.$flightTime = $root.querySelector("[data-hook~=flight-time]");
-            this.$maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
-            this.$startButton = $root.querySelector("[data-command~=start]");
-            this.$stopButton = $root.querySelector("[data-command~=stop]");
-            this.$resetButton = $root.querySelector("[data-command~=reset]");
-            this.$submitButton = $root.querySelector("[data-command~=submit]");
-            this.$flightTimeInput = $root.querySelector("[name~=flight-time]");
-            this.$maxAltitudeInput = $root.querySelector("[name~=max-altitude]");
-            var channel = getParameterByName("channel");
-            var $channelName = $root.querySelector("[data-hook~=channel-name]");
-            $channelName.innerHTML = "Watch on channel '" + channel + "'";
+    function readingsDuration(readings) {
+        if (!readings[0]) {
+            return 0;
         }
-        DataLoggerDisplay.prototype.update = function (state) {
-            this.$flightTime.innerHTML = state.readings.flightTime + "s";
-            this.$flightTimeInput.value = state.readings.flightTime;
-            this.$maxAltitude.innerHTML = state.maxAltitude + "m";
-            this.$maxAltitudeInput.value = state.maxAltitude;
-            if (state.status == DataLogger.READY) {
-                this.$startButton.hidden = false;
+        var last = readings.length;
+        var t0 = readings[0].timestamp;
+        var t1 = readings[last - 1].timestamp;
+        // DEBT Magic number that make sense when sample rate is every 250ms
+        return (t1 + 250 - t0) / 1000;
+    }
+    function altitudeForFreefallDuration(duration) {
+        // Altitude Calculation
+        // SUVAT
+        // s = vt - 0.5 * a * t^2
+        // input
+        // s = s <- desired result
+        // u = ? <- not needed
+        // v = 0 <- stationary at top
+        // a = - 9.81 <- local g
+        // t = flightTime/2 time to top of arc
+        // s = 9.81 * 1/8 t^2
+        var t = duration;
+        return round(2)(9.81 / 8 * t * t);
+    }
+    function format(i) {
+        var padding = "00000";
+        var str = i.toFixed(2);
+        return padding.substring(0, padding.length - str.length) + str;
+    }
+    function create$5(state) {
+        return Object.create({}, {
+            maxFlightTime: {
+                get: function () {
+                    var flights = state.flightRecords.concat([state.currentFlightReadings]);
+                    var flightDurations = flights.map(readingsDuration);
+                    return Math.max.apply(null, flightDurations);
+                }
+            },
+            maxAltitude: {
+                get: function () {
+                    var flightDurations = state.flightRecords.map(readingsDuration);
+                    var max = Math.max.apply(null, [0].concat(flightDurations));
+                    return altitudeForFreefallDuration(max);
+                }
+            },
+            currentReading: {
+                get: function () {
+                    if (!state.currentReading) {
+                        return "Waiting.";
+                    }
+                    ;
+                    var acceleration = state.currentReading.acceleration;
+                    var x = acceleration.x;
+                    var y = acceleration.y;
+                    var z = acceleration.z;
+                    return "[" + [format(x), format(y), format(z)].join(", ") + "]";
+                }
             }
-            else {
-                this.$startButton.hidden = true;
-            }
-            if (state.status == DataLogger.READING) {
-                this.$stopButton.hidden = false;
-            }
-            else {
-                this.$stopButton.hidden = true;
-            }
-            if (state.status == DataLogger.COMPLETED) {
-                this.$resetButton.hidden = false;
-                this.$submitButton.style.display = "";
-            }
-            else {
-                this.$resetButton.hidden = true;
-                this.$submitButton.style.display = "none";
+        });
+    }
+
+    function Display($root) {
+        var $flightTime = $root.querySelector("[data-hook~=flight-time]");
+        var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
+        var $currentReading = $root.querySelector("[data-hook~=current-reading]");
+        function render(presentation) {
+            $flightTime.innerHTML = presentation.maxFlightTime + "s";
+            $maxAltitude.innerHTML = presentation.maxAltitude + "m";
+            $currentReading.innerHTML = presentation.currentReading;
+        }
+        ;
+        return {
+            update: function (store) {
+                var state = store.getState();
+                var presenter = create$5(state);
+                render(presenter);
             }
         };
-        return DataLoggerDisplay;
-    })();
+    }
+
+    function Avionics($root, world) {
+        if ($root == void 0) {
+            return;
+        } // Use double equal comparison to catch null and undefined;
+        world.getAccelerometer().start();
+        var ui = create$3($root, world.actions);
+        var display = Display($root);
+        world.store.register(display.update);
+        return {
+            display: display,
+            ui: ui
+        };
+    }
+    ;
 
     console.log("Starting boot ...");
-    // The actions class acts as the dispatcher in a flux architecture
-    // It is the top level interface for the application
-    var Actions = {
-        startLogging: create(function () { null; }, create$1("Start Logging")),
-        stopLogging: create(function () { null; }, create$1("Stop Logging")),
-        newReading: create(function (a) { return a; }, create$1("new Reading")),
-        clearDataLog: create(function () { null; }, create$1("Clear Datalog")),
-        submitFlightLog: create(function () { null; }, create$1("Submit Flight log"))
+    var actions = {
+        newReading: create(function (a) { return a; }, create$1("New Reading")),
+        resetReadings: create(function () { null; }, create$1("Reset")),
+        submitFlightLog: create(function () { null; }, create$1("Submit Flight log")),
+        failedConnection: create(function (reason) { return reason; }, create$1("Failed Connection")),
+        badReading: create(function (reading) { return reading; }, create$1("Bad Reading")),
     };
-    // DEBT will fail if there is no key.
-    // Need to return null uplink and warning if failed
-    if (Uplink.getChannelName()) {
-        var uplink = new Uplink({ token: Uplink.getUplinkToken(), channelName: Uplink.getChannelName() });
-    }
-    var dataLogger = new DataLogger(uplink);
-    Actions.startLogging.register(dataLogger.start.bind(dataLogger));
-    Actions.stopLogging.register(dataLogger.stop.bind(dataLogger));
-    Actions.clearDataLog.register(dataLogger.reset.bind(dataLogger));
-    Actions.newReading.register(dataLogger.newReading.bind(dataLogger));
-    var FlightLogUploader = (function () {
-        function FlightLogUploader(dataLogger) {
-            this.dataLogger = dataLogger;
+    var store = StateStore();
+    actions.resetReadings.register(store.resetReadings);
+    actions.newReading.register(store.newReading);
+    var accelerometer = Accelerometer(actions);
+    var App = {
+        actions: actions,
+        store: store,
+        getAccelerometer: function () {
+            return accelerometer;
         }
-        FlightLogUploader.prototype.submit = function (name) {
-            var request = new XMLHttpRequest();
-            request.open("POST", "/submit", true);
-            request.onload = function () {
-                if (request.status >= 200 && request.status < 400) {
-                    // Success!
-                    var resp = request.responseText;
-                }
-                else {
-                }
-            };
-            request.onerror = function () {
-                console.log("some error");
-                // There was a connection error of some sort
-            };
-            console.log(this.dataLogger.readings);
-            console.log(name);
-            request.send({ name: name, readings: this.dataLogger.readings.readings });
-        };
-        return FlightLogUploader;
-    })();
-    var flightLogUploader = new FlightLogUploader(dataLogger);
-    Actions.submitFlightLog.register(flightLogUploader.submit.bind(flightLogUploader));
-    function reportDeviceMotionEvent(deviceMotionEvent) {
-        var raw = deviceMotionEvent.accelerationIncludingGravity;
-        if (typeof raw.x === "number") {
-            Actions.newReading({ acceleration: { x: raw.x, y: raw.y, z: raw.z }, timestamp: Date.now() });
-        }
-        else {
-            console.warn("Device accelerometer returns null data");
-        }
-    }
-    var throttledReport = throttle(reportDeviceMotionEvent, 250, {});
-    // Accelerometer events are continually fired
-    // DEBT the accelerometer is not isolated as a store that can be observed.
-    // Implementation as a store will be necessary so that it can be observed and error messages when the accelerometer returns improper values can be
-    window.addEventListener("devicemotion", throttledReport);
+    };
     ready(function () {
-        var $dataLoggerDisplay = document.querySelector("[data-display~=data-logger]");
-        if ($dataLoggerDisplay) {
-            var dataLoggerDisplay = new DataLoggerDisplay($dataLoggerDisplay);
-            dataLogger.registerDisplay(dataLoggerDisplay);
-        }
         var $avionics = document.querySelector("[data-interface~=avionics]");
-        var avionicsInterface = new AvionicsInterface($avionics, Actions);
-    });
-    ready(function () {
-        var $tracker = document.querySelector("[data-display~=tracker]");
-        // Procedual handling of canvas drawing
-        if ($tracker) {
-            var canvas = document.querySelector("#myChart");
-            var ctx = canvas.getContext("2d");
-            var myNewChart = new Chart(ctx);
-            var data = {
-                labels: [],
-                datasets: [{
-                        label: "My First dataset",
-                        fillColor: "rgba(220,220,220,0)",
-                        strokeColor: "limegreen",
-                        pointColor: "limegreen",
-                        data: []
-                    }, {
-                        label: "My First dataset",
-                        fillColor: "rgba(220,220,220,0)",
-                        strokeColor: "green",
-                        pointColor: "green",
-                        data: []
-                    }, {
-                        label: "My First dataset",
-                        fillColor: "rgba(220,220,220,0)",
-                        strokeColor: "teal",
-                        pointColor: "teal",
-                        data: []
-                    }, {
-                        label: "My First dataset",
-                        fillColor: "rgba(220,220,220,0)",
-                        strokeColor: "orange",
-                        pointColor: "orange",
-                        data: []
-                    }]
-            };
-            var myLineChart = new Chart(ctx).Line(data, { animation: false, animationSteps: 4, pointDot: false });
-            var i = 0.0;
-            uplink.subscribe("accelerometerReading", function (message) {
-                var x = message.data.acceleration.x;
-                var y = message.data.acceleration.y;
-                var z = message.data.acceleration.z;
-                console.log(message.data);
-                var m = Math.sqrt(x * x + y * y + z * z);
-                myLineChart.addData([x, y, z, m], i);
-                i = i + 0.25;
-            });
-            uplink.subscribe("reset", function (message) {
-                console.log("bananas");
-                myLineChart.destroy();
-                i = 0.0;
-                data.labels = [];
-                // labels array is mutated by adding data.
-                myLineChart = new Chart(ctx).Line(data, { animation: false, animationSteps: 4, pointDot: false });
-            });
-        }
+        var avionics = Avionics($avionics, App);
     });
 
-    return Actions;
+    return App;
 
 })();
 //# sourceMappingURL=lob.js.map
