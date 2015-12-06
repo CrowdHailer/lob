@@ -1,5 +1,5 @@
 // TODO currently untested
-export function throttle(fn, threshhold, scope) {
+export function throttle(fn, threshhold, scope?) {
   threshhold = threshhold || 250;
   var last,
   deferTimer;

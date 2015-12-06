@@ -188,18 +188,8 @@ var Lob = (function () { 'use strict';
                 return store;
             }
         };
+        store.resetReadings(); // DEBT untested effect
         return store;
-    }
-
-    // All code relating to manipulations requiring a document, element or window node.
-    // DEBT untested
-    function ready(fn) {
-        if (document.readyState !== "loading") {
-            fn();
-        }
-        else {
-            document.addEventListener("DOMContentLoaded", fn);
-        }
     }
 
     // TODO currently untested
@@ -228,6 +218,36 @@ var Lob = (function () { 'use strict';
         return function (value) {
             return parseFloat(value.toFixed(precision));
         };
+    }
+
+    var DEVICEMOTION = "devicemotion";
+    var THROTTLE_RATE = 100; function Accelerometer(actions) {
+        function reportDeviceMotionEvent(deviceMotionEvent) {
+            var raw = deviceMotionEvent.accelerationIncludingGravity;
+            if (typeof raw.x === "number") {
+                actions.newReading({ acceleration: { x: raw.x, y: raw.y, z: raw.z }, timestamp: Date.now() });
+            }
+            else {
+                actions.badReading(raw);
+            }
+        }
+        var throttledReport = throttle(reportDeviceMotionEvent, THROTTLE_RATE);
+        return {
+            start: function () {
+                window.addEventListener(DEVICEMOTION, throttledReport);
+            }
+        };
+    }
+
+    // All code relating to manipulations requiring a document, element or window node.
+    // DEBT untested
+    function ready(fn) {
+        if (document.readyState !== "loading") {
+            fn();
+        }
+        else {
+            document.addEventListener("DOMContentLoaded", fn);
+        }
     }
 
     /**
@@ -636,6 +656,7 @@ var Lob = (function () { 'use strict';
     }
 
     function Avionics($root, world) {
+        world.getAccelerometer().start();
         var ui = create$3($root, world.actions);
         var display = Display($root);
         world.store.register(display.update);
@@ -652,33 +673,23 @@ var Lob = (function () { 'use strict';
         resetReadings: create(function () { null; }, create$1("Reset")),
         submitFlightLog: create(function () { null; }, create$1("Submit Flight log")),
         failedConnection: create(function (reason) { return reason; }, create$1("Failed Connection")),
+        badReading: create(function (reading) { return reading; }, create$1("Bad Reading")),
     };
     var store = StateStore();
-    store.resetReadings();
     actions.resetReadings.register(store.resetReadings);
     actions.newReading.register(store.newReading);
+    var accelerometer = Accelerometer(actions);
     var App = {
         actions: actions,
-        store: store
+        store: store,
+        getAccelerometer: function () {
+            return accelerometer;
+        }
     };
     ready(function () {
         var $avionics = document.querySelector("[data-interface~=avionics]");
         var avionics = Avionics($avionics, App);
     });
-    function reportDeviceMotionEvent(deviceMotionEvent) {
-        var raw = deviceMotionEvent.accelerationIncludingGravity;
-        if (typeof raw.x === "number") {
-            App.actions.newReading({ acceleration: { x: raw.x, y: raw.y, z: raw.z }, timestamp: Date.now() });
-        }
-        else {
-            console.warn("Device accelerometer returns null data");
-        }
-    }
-    var throttledReport = throttle(reportDeviceMotionEvent, 50, {});
-    // Accelerometer events are continually fired
-    // DEBT the accelerometer is not isolated as a store that can be observed.
-    // Implementation as a store will be necessary so that it can be observed and error messages when the accelerometer returns improper values can be
-    window.addEventListener("devicemotion", throttledReport);
 
     return App;
 

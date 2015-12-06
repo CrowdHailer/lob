@@ -21,6 +21,7 @@
         "!node_modules/**"
     ],
     "files": [
+        "assets/scripts/accelerometer.ts",
         "assets/scripts/action.ts",
         "assets/scripts/avionics/component.ts",
         "assets/scripts/avionics/display.ts",

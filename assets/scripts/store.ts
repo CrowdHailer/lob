@@ -30,7 +30,7 @@ function StateStore(logger=DefaultLogger){
       return store;
     }
   };
-
+  store.resetReadings(); // DEBT untested effect
   return store;
 }
 
