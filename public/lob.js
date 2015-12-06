@@ -656,6 +656,9 @@ var Lob = (function () { 'use strict';
     }
 
     function Avionics($root, world) {
+        if ($root == void 0) {
+            return;
+        } // Use double equal comparison to catch null and undefined;
         world.getAccelerometer().start();
         var ui = create$3($root, world.actions);
         var display = Display($root);
