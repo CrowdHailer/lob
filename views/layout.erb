@@ -35,6 +35,14 @@
   <script src="/lob.js"></script>
 </head>
 <body>
+  <aside class="notices">
+    <section>
+      <h1>Ooops!</h1>
+      <p>Could not read the data from this device. Please try again on a mobile with working accelerometer.</p>
+      <p class="close">Click to close</p>
+    </section>
+    <div class="sheet"></div>
+  </aside>
   <%= yield %>
   <footer>
     <p>Realtime connection powered by <a href="https://ably.io" target="_blank">Ably.io</a></p>
