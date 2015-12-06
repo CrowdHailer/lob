@@ -695,7 +695,6 @@ var Lob = (function () { 'use strict';
                 }
                 else {
                     $root.classList.remove("active");
-                    $display.innerHTML = "";
                 }
             }
         };

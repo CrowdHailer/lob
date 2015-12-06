@@ -26,7 +26,7 @@ function Display($root){
         $root.classList.add("active");
       } else {
         $root.classList.remove("active");
-        $display.innerHTML = "";
+        // $display.innerHTML = "";
       }
     }
   };
