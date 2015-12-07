@@ -20,6 +20,9 @@ p {
 }
 .center {
   text-align: center;
+}
+.readout {
+  text-align: center;
   font-family: monospace;
 }
 
@@ -33,7 +36,8 @@ body {
   font-family: 'Raleway', sans-serif;
   font-weight: 200;
   background-color: #FFCC00;
-  font-size: 1.8rem;
+  font-size: 1.2rem;
+  // TODO make bigger on large screen
 }
 
 .width-limited {

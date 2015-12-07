@@ -640,10 +640,17 @@ var Lob = (function () { 'use strict';
         var $flightTime = $root.querySelector("[data-hook~=flight-time]");
         var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
         var $currentReading = $root.querySelector("[data-hook~=current-reading]");
+        var $nextAction = $root.querySelector("[data-display~=instruction]");
         function render(presentation) {
             $flightTime.innerHTML = presentation.maxFlightTime + "s";
             $maxAltitude.innerHTML = presentation.maxAltitude + "m";
             $currentReading.innerHTML = presentation.currentReading;
+            if (presentation.maxAltitude == 0) {
+                $nextAction.innerHTML = "Lob phone to get started";
+            }
+            else {
+                $nextAction.innerHTML = "OK! can you lob any higher";
+            }
         }
         ;
         return {
