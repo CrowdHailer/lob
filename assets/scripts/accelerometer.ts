@@ -3,8 +3,8 @@ var THROTTLE_RATE = 100; // ms
 
 import { throttle } from "./utils.ts";
 
-export default function Accelerometer(actions){
-
+export default function Accelerometer(app){
+  var actions = app.actions;
   function reportDeviceMotionEvent (deviceMotionEvent) {
     var raw = deviceMotionEvent.accelerationIncludingGravity;
     if (typeof raw.x === "number") {
