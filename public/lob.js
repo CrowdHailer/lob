@@ -706,9 +706,8 @@ var Lob = (function () { 'use strict';
     var actions = {
         newReading: create(function (a) { return a; }, create$1("New Reading")),
         resetReadings: create(function () { null; }, create$1("Reset")),
-        submitFlightLog: create(function () { null; }, create$1("Submit Flight log")),
-        failedConnection: create(function (reason) { return reason; }, create$1("Failed Connection")),
         badReading: create(function (reading) { return reading; }, create$1("Bad Reading")),
+        failedConnection: create(function (reason) { return reason; }, create$1("Failed Connection")),
         closeNotice: create(function (reading) { return reading; }, create$1("Notice Closed")),
     };
     var store = StateStore();
