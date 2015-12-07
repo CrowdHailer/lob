@@ -636,7 +636,7 @@ var Lob = (function () { 'use strict';
         });
     }
 
-    function Display$1($root) {
+    function Display($root) {
         var $flightTime = $root.querySelector("[data-hook~=flight-time]");
         var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
         var $currentReading = $root.querySelector("[data-hook~=current-reading]");
@@ -661,7 +661,7 @@ var Lob = (function () { 'use strict';
         } // Use double equal comparison to catch null and undefined;
         world.getAccelerometer().start();
         var ui = create$3($root, world.actions);
-        var display = Display$1($root);
+        var display = Display($root);
         world.store.register(display.update);
         return {
             display: display,
@@ -670,21 +670,14 @@ var Lob = (function () { 'use strict';
     }
     ;
 
-    function Interface($root, app) {
+    function Controller($root, app) {
         var events = Events($root, null);
         events.on("click", function (evt) {
             app.closeNotice();
         });
     }
-    function Component($root, world) {
-        if ($root == void 0) {
-            return;
-        } // Use double equal comparison to catch null and undefined;
-        var ui = Interface($root, world.actions);
-        var display = Display($root);
-        world.noticeStore.register(display.update);
-    }
-    function Display($root) {
+
+    function View($root) {
         var $display = $root.querySelector("[data-display~=notice]");
         return {
             update: function (store) {
@@ -698,6 +691,15 @@ var Lob = (function () { 'use strict';
                 }
             }
         };
+    }
+
+    function Component($root, world) {
+        if ($root == void 0) {
+            return;
+        } // Use double equal comparison to catch null and undefined;
+        var controller = Controller($root, world.actions);
+        var display = View($root);
+        world.noticeStore.register(display.update);
     }
 
     console.log("Starting boot ...");

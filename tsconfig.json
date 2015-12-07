@@ -32,6 +32,8 @@
         "assets/scripts/dom.ts",
         "assets/scripts/logger.ts",
         "assets/scripts/notice/component.ts",
+        "assets/scripts/notice/controller.ts",
+        "assets/scripts/notice/view.ts",
         "assets/scripts/state.ts",
         "assets/scripts/store.ts",
         "assets/scripts/uplink.ts",
