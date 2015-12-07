@@ -6,9 +6,9 @@ import * as Logger from "./logger.ts";
 var actions = {
   newReading: Action.create(function(a: any){ return a; }, Logger.create("New Reading")),
   resetReadings: Action.create(function(){ null; }, Logger.create("Reset")),
-  submitFlightLog: Action.create(function(){ null; }, Logger.create("Submit Flight log")),
-  failedConnection: Action.create(function(reason: any){ return reason; }, Logger.create("Failed Connection")),
   badReading: Action.create(function(reading: any){ return reading; }, Logger.create("Bad Reading")),
+
+  failedConnection: Action.create(function(reason: any){ return reason; }, Logger.create("Failed Connection")),
   closeNotice: Action.create(function(reading: any){ return reading; }, Logger.create("Notice Closed")),
 };
 
