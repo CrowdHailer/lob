@@ -12,7 +12,11 @@ class Uplink {
     realtime.connection.on("failed", function(err) {
       actions.failedConnection(err.reason);
     });
-    this.channel = realtime.channels.get(channelName);
+    var uplink = this;
+    realtime.connection.on("connected", function(err) {
+      actions.uplinkAvailable(err.reason);
+      uplink.channel = realtime.channels.get(channelName);
+    });
   }
   publish(eventName, vector){
     this.channel.publish(eventName, vector, function(err) {
