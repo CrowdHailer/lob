@@ -240,7 +240,6 @@ var Lob = (function () { 'use strict';
     }
 
     // All code relating to manipulations requiring a document, element or window node.
-    // DEBT untested
     function ready(fn) {
         if (document.readyState !== "loading") {
             fn();
