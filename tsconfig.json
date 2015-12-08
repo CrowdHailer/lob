@@ -52,6 +52,7 @@
         "test/jasmine.d.ts",
         "test/lob-test.ts",
         "test/state-test.ts",
+        "test/store-test.ts",
         "test/support.ts",
         "typings/object-assign/object-assign.d.ts",
         "typings/tsd.d.ts"

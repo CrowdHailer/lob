@@ -1,7 +1,8 @@
-function GeneralStore<State>(): {
+export interface GeneralStore<State> {
   advance: (evolver: (a: State) => State) => any;
   state: State;
-};
+}
+export function GeneralStore<State>(): GeneralStore<State>
 
 // State will never be assigned if evolver throws error
 // - no need for rollback;
@@ -9,7 +10,7 @@ function GeneralStore<State>(): {
 // - if wanted then the evolver should push errors to logger
 // Advance function to return instance of store?
 // Option to instantiate store with state
-function GeneralStore(){
+export function GeneralStore(){
   var store: any;
   var state = {};
 
