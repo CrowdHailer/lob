@@ -16,7 +16,7 @@ describe("General store", function() {
 
   it("should pass initial state to evolver", function(){
     var evolver = createTranscriptFunction();
-    var store = GeneralStore();
+    var store = GeneralStore<any>();
     store.advance(evolver);
     expect(evolver.transcript[0]).toEqual([{}]);
   });

@@ -1,6 +1,6 @@
-function GeneralStore(): {
-  advance: any;
-  state: any;
+function GeneralStore<State>(): {
+  advance: (evolver: (a: State) => State) => any;
+  state: State;
 };
 
 // State will never be assigned if evolver throws error
@@ -8,6 +8,7 @@ function GeneralStore(): {
 // Handle errors in logger?
 // - if wanted then the evolver should push errors to logger
 // Advance function to return instance of store?
+// Option to instantiate store with state
 function GeneralStore(){
   var store: any;
   var state = {};
