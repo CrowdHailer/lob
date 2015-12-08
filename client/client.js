@@ -11,7 +11,7 @@ import Store from "./store";
 MyApp.registerService("store", function(app){
   var store = Store();
 
-  app.actions.resetReadings.register(store.resetReadings.bind(store));
+  app.actions.resetReadings.register(store.resetReadings);
   return store;
 });
 

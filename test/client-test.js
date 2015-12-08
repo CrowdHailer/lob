@@ -5,7 +5,6 @@ import "./action-test";
 import "./dispatcher-test";
 import "./general-store-test";
 import "./store-test";
-import "./counter-test";
 import "./framework-test";
 
 describe("Client", function() {

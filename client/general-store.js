@@ -6,12 +6,25 @@
 // - if wanted then the evolver should push errors to logger
 // Advance function to return instance of store?
 // Option to instantiate store with state
-export function GeneralStore(state){
+export function GeneralStore(state, handlers){
+  var store = this;
 
-  this.advance = function(evolver){
+  function advance(evolver){
     state = evolver(state);
-    return this;
-  };
+  }
+
+  this.advance = advance;
+
+  function wrapHandler(handler){
+    return function(){
+      var args = Array.prototype.slice.call(arguments);
+      state = handler.apply({}, [state].concat(args));
+    };
+  }
+
+  for (var name in handlers) {
+    this[name] = wrapHandler(handlers[name]);
+  }
 
   Object.defineProperty(this, "state", {
     get: function(){ return state; }
@@ -19,31 +32,14 @@ export function GeneralStore(state){
 
 }
 
-GeneralStore.addReducer = function(name, handler){
-  this.prototype[name] = function(event){
-    var args = Array.prototype.slice.call(arguments);
-    this.advance(function(state){
-      return handler.apply({}, [state].concat(args));
-    });
-    return this;
+export function enhance(handlers){
+  return {
+    start: function(state){
+      return new GeneralStore(state, handlers);
+    }
   };
-};
-
-export function create(state){
-  return new GeneralStore(state);
 }
-export default create;
 
-export function factory(reducers){
-  var Constructor = function my(initialState){
-    GeneralStore.call(this, initialState);
-  };
-
-  for (var name in reducers) {
-    GeneralStore.addReducer.call(Constructor, name, reducers[name]);
-  }
-
-  return function(initialState){
-    return new Constructor(initialState);
-  };
+export function start(state){
+  return new GeneralStore(state, {});
 }

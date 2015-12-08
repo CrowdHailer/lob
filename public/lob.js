@@ -158,18 +158,15 @@ var Lob = (function () { 'use strict';
             }
         });
     }
-    Function.I = function (a) {
-        return a;
-    };
 
     var Actions = {
-        newReading: create$3(Function.I, create("New Reading")),
-        resetReadings: create$3(Function.I, create("Reset")),
-        badReading: create$3(Function.I, create("Bad Reading")),
-        uplinkAvailable: create$3(Function.I, create("Uplink Available")),
-        startTransmitting: create$3(Function.I, create("Start Transmitting")),
-        failedConnection: create$3(Function.I, create("Failed Connection")),
-        closeNotice: create$3(Function.I, create("Notice Closed")),
+        newReading: create$3(function (a) { return a; }, create("New Reading")),
+        resetReadings: create$3(function (a) { return a; }, create("Reset")),
+        badReading: create$3(function (a) { return a; }, create("Bad Reading")),
+        uplinkAvailable: create$3(function (a) { return a; }, create("Uplink Available")),
+        startTransmitting: create$3(function (a) { return a; }, create("Start Transmitting")),
+        failedConnection: create$3(function (a) { return a; }, create("Failed Connection")),
+        closeNotice: create$3(function (a) { return a; }, create("Notice Closed")),
     };
 
     function App(actions, logger) {
@@ -658,7 +655,7 @@ var Lob = (function () { 'use strict';
     var MyApp = App(Actions, Development({ prefix: "Lob" }, window.console));
     MyApp.registerService("store", function (app) {
         var store = create$1();
-        app.actions.resetReadings.register(store.resetReadings.bind(store));
+        app.actions.resetReadings.register(store.resetReadings);
         return store;
     });
     MyApp.registerService("accelerometer", function (app) {
