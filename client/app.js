@@ -10,9 +10,11 @@ export default function App(actions){
 
   return {
     registerService: function(name, factory){
+      // TODO throw error if preRegistered
       services[name] ={factory: factory};
     },
     fetchService: function(name){
+      // TODO throw error if not present
       var service = services[name];
       if (service.instance) { return service.instance; }
 
