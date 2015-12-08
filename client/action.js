@@ -6,7 +6,6 @@ import { Logger, NullLogger } from "./utils/logger";
 
 
 export function create(filter, logger){
-  console.log(filter)
   if (logger == void 0) {
     logger = NullLogger;
   }
@@ -18,7 +17,6 @@ export function create(filter, logger){
       if (noDetailWithAction) {
         dispatcher.dispatch();
       } else {
-        console.log(filter)
         dispatcher.dispatch(filter(minutiae));
       }
     }

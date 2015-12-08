@@ -103,7 +103,6 @@ var Lob = (function () { 'use strict';
     ;
 
     function create$2(filter, logger) {
-        console.log(filter);
         if (logger == void 0) {
             logger = NullLogger;
         }
@@ -116,7 +115,6 @@ var Lob = (function () { 'use strict';
                     dispatcher.dispatch();
                 }
                 else {
-                    console.log(filter);
                     dispatcher.dispatch(filter(minutiae));
                 }
             }
@@ -169,7 +167,7 @@ var Lob = (function () { 'use strict';
         resetReadings: create$2(Function.I, create("Reset")),
         badReading: create$2(Function.I, create("Bad Reading")),
         uplinkAvailable: create$2(Function.I, create("Uplink Available")),
-        startStreaming: create$2(Function.I, create("Start Streaming")),
+        startTransmitting: create$2(Function.I, create("Start Transmitting")),
         failedConnection: create$2(Function.I, create("Failed Connection")),
         closeNotice: create$2(Function.I, create("Notice Closed")),
     };
@@ -215,6 +213,15 @@ var Lob = (function () { 'use strict';
             },
             actions: actions,
             logger: logger
+        };
+    }
+
+    /* jshint esnext: true */
+    function default_1(app) {
+        return {
+            startTransmission: function () {
+                app.logger.debug("Started Transmission");
+            }
         };
     }
 
@@ -529,6 +536,9 @@ var Lob = (function () { 'use strict';
         events.on("click", "[data-command~=reset]", function (evt) {
             app.resetReadings();
         });
+        events.on("click", "[data-command~=start-transmitting]", function (evt) {
+            app.startTransmitting();
+        });
     }
     function create$1($root, app) {
         app.fetchService("accelerometer").start();
@@ -557,13 +567,7 @@ var Lob = (function () { 'use strict';
             }
         };
     });
-    MyApp.registerService("uplink", function (app) {
-        return {
-            startTransmission: function () {
-                app.logger.debug("Started Transmission");
-            }
-        };
-    });
+    MyApp.registerService("uplink", default_1);
     MyApp.registerComponent("avionics", create$1);
     ready(function () {
         var $avionics = document.querySelector("[data-interface]");

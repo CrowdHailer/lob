@@ -9,7 +9,7 @@ export default {
   badReading: Action.create(Function.I, Logger.create("Bad Reading")),
 
   uplinkAvailable: Action.create(Function.I, Logger.create("Uplink Available")),
-  startStreaming: Action.create(Function.I, Logger.create("Start Streaming")),
+  startTransmitting: Action.create(Function.I, Logger.create("Start Transmitting")),
   failedConnection: Action.create(Function.I, Logger.create("Failed Connection")),
 
   closeNotice: Action.create(Function.I, Logger.create("Notice Closed")),

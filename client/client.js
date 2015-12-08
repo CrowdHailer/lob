@@ -15,13 +15,8 @@ MyApp.registerService("accelerometer", function(app){
   };
 });
 
-MyApp.registerService("uplink", function(app){
-  return {
-    startTransmission: function(){
-      app.logger.debug("Started Transmission");
-    }
-  };
-});
+import Uplink from "./uplink";
+MyApp.registerService("uplink", Uplink);
 
 import Avionics from "./avionics/avionics";
 MyApp.registerComponent("avionics", Avionics);

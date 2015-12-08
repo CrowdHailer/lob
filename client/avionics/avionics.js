@@ -7,6 +7,9 @@ function Controller($root, app){
   events.on("click", "[data-command~=reset]", function(evt){
     app.resetReadings();
   });
+  events.on("click", "[data-command~=start-transmitting]", function(evt){
+    app.startTransmitting();
+  });
 }
 
 export default function create($root, app){
