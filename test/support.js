@@ -7,6 +7,11 @@ export function createTranscriptFunction(){
     transcript.push(Array.prototype.slice.call(arguments));
   };
   f.transcript = transcript;
+  Object.defineProperty(f, "lastCall", {
+    get: function(){
+      return transcript[0];
+    }
+  });
   func = f;
   return func;
 }

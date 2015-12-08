@@ -4,6 +4,7 @@ import "../client/polyfill";
 import "./general-store-test";
 import "./store-test";
 import "./counter-test";
+import "./framework-test";
 
 describe("Client", function() {
 

@@ -3,7 +3,7 @@
 import typescript from 'rollup-plugin-typescript';
 
 export default {
-  entry: 'client/boot.ts',
+  entry: 'client/client.js',
   format: "iife",
   moduleName: "Lob",
   dest: "public/lob.js",

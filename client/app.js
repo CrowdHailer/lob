@@ -1,11 +1,12 @@
-import Store from "./store.ts";
+/* jshint esnext: true */
+// import Store from "./store";
 
 export default function App(actions){
   var services = {};
   var components = {};
-  var store = Store();
-  actions.newReading.register(store.newReading);
-  actions.startStreaming.register(store.startStreaming);
+  // var store = Store();
+  // actions.newReading.register(store.newReading);
+  // actions.startStreaming.register(store.startStreaming);
 
   return {
     registerService: function(name, factory){
@@ -19,11 +20,12 @@ export default function App(actions){
     registerComponent: function(name, factory){
       components[name] ={factory: factory};
     },
-    getComponent: function(name, element){
+    // name optional get from element data attribute
+    getComponent: function(element, name){
       var component = components[name];
       return component.factory(element, this);
     },
     actions: actions,
-    store: store
+    // store: store
   };
 }
