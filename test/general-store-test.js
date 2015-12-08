@@ -1,5 +1,7 @@
-import GeneralStore from "../client/general-store.ts";
-import { createTranscriptFunction } from "./support.ts";
+/* jshint esnext: true */
+
+import GeneralStore from "../client/general-store";
+import { createTranscriptFunction } from "./support";
 
 describe("General store", function() {
 
@@ -16,7 +18,7 @@ describe("General store", function() {
 
   it("should pass initial state to evolver", function(){
     var evolver = createTranscriptFunction();
-    var store = GeneralStore<any>();
+    var store = GeneralStore();
     store.advance(evolver);
     expect(evolver.transcript[0]).toEqual([{}]);
   });

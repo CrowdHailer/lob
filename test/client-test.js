@@ -1,6 +1,8 @@
-/// <reference path="./jasmine.d.ts" />
-import "./general-store-test.ts";
-import "./store-test.ts";
+/* jshint esnext: true */
+
+import "../client/polyfill";
+import "./general-store-test";
+import "./store-test";
 
 describe("Client", function() {
 

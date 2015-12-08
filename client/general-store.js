@@ -1,8 +1,4 @@
-export interface GeneralStore<State> {
-  advance: (evolver: (a: State) => State) => any;
-  state: State;
-}
-export function GeneralStore<State>(): GeneralStore<State>
+/* jshint esnext: true */
 
 // State will never be assigned if evolver throws error
 // - no need for rollback;
@@ -11,7 +7,7 @@ export function GeneralStore<State>(): GeneralStore<State>
 // Advance function to return instance of store?
 // Option to instantiate store with state
 export function GeneralStore(){
-  var store: any;
+  var store;
   var state = {};
 
   function advance(evolver){
@@ -29,4 +25,4 @@ export function GeneralStore(){
   return store;
 }
 
-export default GeneralStore
+export default GeneralStore;

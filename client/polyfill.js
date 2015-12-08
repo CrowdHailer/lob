@@ -1,13 +1,4 @@
-/// <reference path="../typings/tsd.d.ts"/>
-import { GeneralStore}  from "../client/general-store.ts";
-import { createTranscriptFunction } from "./support.ts";
-interface ObjectConstructor2 extends ObjectConstructor{
-  assign: any;
-}
-var tmp: any = Object;
-var O: ObjectConstructor2 = tmp;
-
-if (!O.assign) {
+if (!Object.assign) {
   Object.defineProperty(Object, 'assign', {
     enumerable: false,
     configurable: true,
@@ -39,36 +30,3 @@ if (!O.assign) {
     }
   });
 }
-interface Store extends GeneralStore<any> {
-  resetReadings(): Store;
-}
-function Store(): Store
-
-function Store(){
-  var store: Store = Object.create(GeneralStore());
-
-  store.resetReadings = function(){
-    store.advance(resetReadings);
-    return this;
-  };
-  return store;
-}
-
-
-function resetReadings(state){
-  var emptyReadings = {
-    current: null,
-    currentFlight: [],
-    flightRecords: [],
-  };
-  return O.assign(state, {readings: emptyReadings});
-}
-
-describe("store", function() {
-
-  it("should have no current reading after reset", function() {
-    var store = Store().resetReadings();
-    expect(store.state.readings).toEqual({});
-  });
-
-});
