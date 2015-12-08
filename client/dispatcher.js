@@ -1,4 +1,6 @@
-import { DefaultLogger } from "./logger.ts";
+/* jshint esnext: true */
+
+import { DEFAULT } from "./utils/logger";
 
 // Raise Error for circular calls
 function Dispatcher(handlers, world){
@@ -12,7 +14,7 @@ function Dispatcher(handlers, world){
       }
     });
 
-    if (handlers.length == 0) {
+    if (handlers.length === 0) {
       world.warn.apply(world, args);
     } else {
       world.info.apply(world, args);
@@ -23,7 +25,10 @@ function Dispatcher(handlers, world){
   };
 };
 
-export function create(world=DefaultLogger){
+export function create(world){
+  if (world == void 0) {
+    world = DEFAULT;
+  }
   return new Dispatcher([], world);
 };
 export default Dispatcher;

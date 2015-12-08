@@ -1,8 +1,10 @@
-import { createTranscriptFunction, createTranscriptLogger } from "./support.ts";
+/* jshint esnext: true */
 
-import * as Dispatcher from "../assets/scripts/dispatcher.ts";
+import { createTranscriptFunction, createTranscriptLogger } from "./support";
 
-import { NullLogger } from "../assets/scripts/logger.ts";
+import * as Dispatcher from "../client/dispatcher";
+
+import { NullLogger } from "../client/utils/logger";
 
 describe("Dispatcher", function(){
   it("should pass the minutiae (precise details) to a registered listener", function(){

@@ -1,6 +1,8 @@
-import { createTranscriptFunction, createTranscriptLogger } from "./support.ts";
+/* jshint esnext: true */
 
-import * as Action from "../assets/scripts/action.ts";
+import { createTranscriptFunction, createTranscriptLogger } from "./support";
+
+import * as Action from "../client/action";
 
 
 describe("Action", function(){
@@ -15,7 +17,7 @@ describe("Action", function(){
   });
 
   it("should dispatcher event with no details", function(){
-    var action = Action.create(function(){ null; });
+    var action = Action.create(function(){  });
     var handler = createTranscriptFunction();
     action.register(handler);
     action();
@@ -23,7 +25,7 @@ describe("Action", function(){
   });
 
   it("should pass details through filter", function(){
-    var action = Action.create(function(_string: string){ return "some extended data"; });
+    var action = Action.create(function(_string){ return "some extended data"; });
     var handler = createTranscriptFunction();
     action.register(handler);
     action("some data");
