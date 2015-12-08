@@ -1,5 +1,33 @@
-(function () { 'use strict';
+var Lob = (function () { 'use strict';
 
+    /* jshint esnext: true */
+    function create(prefix) {
+        prefix = "[" + prefix + "]";
+        var notices = [prefix];
+        return {
+            info: function () {
+                var _ = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    _[_i - 0] = arguments[_i];
+                }
+                var args = Array.prototype.slice.call(arguments);
+                console.info.apply(console, notices.concat(args));
+            },
+            warn: function () {
+                var _ = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    _[_i - 0] = arguments[_i];
+                }
+                var args = Array.prototype.slice.call(arguments);
+                console.warn.apply(console, notices.concat(args));
+            },
+            // error: function(..._){
+            //   var args = Array.prototype.slice.call(arguments);
+            //   console.error.apply(console, notices.concat(args));
+            // }
+            error: function (e) { throw e; }
+        };
+    }
     function Development(options, logger) {
         var prefix;
         var notices = [];
@@ -35,6 +63,115 @@
         warn: function () { },
         // error logging should be used for errors and in development these should be thrown
         error: function (e) { throw e; }
+    };
+    var NullLogger = {
+        info: function (a) { },
+        warn: function (a) { },
+        error: function (a) { },
+    };
+
+    // Raise Error for circular calls
+    function Dispatcher(handlers, world) {
+        this.dispatch = function () {
+            var args = arguments;
+            handlers.forEach(function (handler) {
+                try {
+                    handler.apply({}, args);
+                }
+                catch (e) {
+                    world.error(e);
+                }
+            });
+            if (handlers.length === 0) {
+                world.warn.apply(world, args);
+            }
+            else {
+                world.info.apply(world, args);
+            }
+        };
+        this.register = function (handler) {
+            return new Dispatcher(handlers.concat(handler), world);
+        };
+    }
+    ;
+    function create$3(world) {
+        if (world == void 0) {
+            world = DEFAULT;
+        }
+        return new Dispatcher([], world);
+    }
+    ;
+
+    function create$2(filter, logger) {
+        console.log(filter);
+        if (logger == void 0) {
+            logger = NullLogger;
+        }
+        var action;
+        var dispatcher = create$3(logger);
+        action = function (minutiae) {
+            var noDetailWithAction = arguments.length === 0;
+            try {
+                if (noDetailWithAction) {
+                    dispatcher.dispatch();
+                }
+                else {
+                    console.log(filter);
+                    dispatcher.dispatch(filter(minutiae));
+                }
+            }
+            catch (e) {
+                logger.error(e);
+            }
+        };
+        action.register = function (handler) {
+            dispatcher = dispatcher.register(handler);
+        };
+        return action;
+    }
+
+    if (!Object.assign) {
+        Object.defineProperty(Object, 'assign', {
+            enumerable: false,
+            configurable: true,
+            writable: true,
+            value: function (target) {
+                'use strict';
+                if (target === undefined || target === null) {
+                    throw new TypeError('Cannot convert first argument to object');
+                }
+                var to = Object(target);
+                for (var i = 1; i < arguments.length; i++) {
+                    var nextSource = arguments[i];
+                    if (nextSource === undefined || nextSource === null) {
+                        continue;
+                    }
+                    nextSource = Object(nextSource);
+                    var keysArray = Object.keys(nextSource);
+                    for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
+                        var nextKey = keysArray[nextIndex];
+                        var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
+                        if (desc !== undefined && desc.enumerable) {
+                            to[nextKey] = nextSource[nextKey];
+                        }
+                    }
+                }
+                return to;
+            }
+        });
+    }
+    Function.I = function (a) {
+        return a;
+    };
+
+    var Actions = {
+        newReading: create$2(Function.I, create("New Reading")),
+        resetReadings: create$2(Function.I, create("Reset")),
+        badReading: create$2(Function.I, create("Bad Reading")),
+        uplinkAvailable: create$2(Function.I, create("Uplink Available")),
+        startStreaming: create$2(Function.I, create("Start Streaming")),
+        failedConnection: create$2(Function.I, create("Failed Connection")),
+        closeNotice: create$2(Function.I, create("Notice Closed")),
     };
 
     function App(actions, logger) {
@@ -412,7 +549,7 @@
 
     /* jshint esnext: true */
     console.log("starting Client");
-    var MyApp = App({}, Development({ prefix: "Lob" }, window.console));
+    var MyApp = App(Actions, Development({ prefix: "Lob" }, window.console));
     MyApp.registerService("accelerometer", function (app) {
         return {
             start: function () {
@@ -432,6 +569,8 @@
         var $avionics = document.querySelector("[data-interface]");
         var avionics = MyApp.startComponent($avionics, "avionics");
     });
+
+    return MyApp;
 
 })();
 //# sourceMappingURL=lob.js.map

@@ -1,10 +1,12 @@
 /* jshint esnext: true */
 console.log("starting Client");
 
+import "./polyfill";
 import App from "./app";
 import { Development } from "./utils/logger";
+import Actions from "./actions";
 
-var MyApp = App({}, Development({prefix: "Lob"}, window.console));
+var MyApp = App(Actions, Development({prefix: "Lob"}, window.console));
 MyApp.registerService("accelerometer", function(app){
   return {
     start: function(){
@@ -30,3 +32,5 @@ ready(function(){
   var $avionics = document.querySelector("[data-interface]");
   var avionics = MyApp.startComponent($avionics, "avionics");
 });
+
+export default MyApp;
