@@ -1,7 +1,10 @@
 /* jshint esnext: true */
 // import Store from "./store";
 
+import { DEFAULT } from "./utils/logger";
+
 export default function App(actions, logger){
+  if (logger == void 0){ logger = DEFAULT; }
   var services = {};
   var components = {};
   // var store = Store();
@@ -40,6 +43,7 @@ export default function App(actions, logger){
       return component.factory(element, this);
     },
     actions: actions,
+    logger: logger
     // store: store
   };
 }

@@ -2,8 +2,16 @@
 console.log("starting Client");
 
 import App from "./app";
+import { Development } from "./utils/logger";
 
-var MyApp = App();
+var MyApp = App({}, Development({prefix: "Lob"}, window.console));
+MyApp.registerService("accelerometer", function(app){
+  return {
+    start: function(){
+      app.logger.warn("accelerometer");
+    }
+  };
+});
 MyApp.registerComponent("avionics", function(element, enviroment){
   // could pass on reading / on error into start
   enviroment.fetchService("accelerometer").start();
