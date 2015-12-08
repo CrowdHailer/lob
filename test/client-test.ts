@@ -1,4 +1,5 @@
 /// <reference path="./jasmine.d.ts" />
+import "./general-store-test.ts";
 
 describe("Client", function() {
 
