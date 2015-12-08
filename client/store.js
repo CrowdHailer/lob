@@ -1,29 +1,45 @@
 /* jshint esnext: true */
 
-import { GeneralStore}  from "./general-store";
-
-function resetReadings(state){
-  var emptyReadings = {
-    current: null,
-    currentFlight: [],
-    flightRecords: [],
+function lens(key){
+  return function(func){
+    return function(obj){
+      obj = obj || key;
+      var update = {};
+      update[key] = func(obj[key]);
+      return Object.assign({}, obj, update);
+    };
   };
-  return Object.assign(state, {readings: emptyReadings});
 }
 
-function Store(){
-  GeneralStore.call(this, {});
-}
+var compose = function () {
+  var fns = arguments;
 
-Store.prototype = Object.create(GeneralStore.prototype);
-Store.prototype.constructor = Store;
+  return function (result) {
+    for (var i = fns.length - 1; i > -1; i--) {
+      result = fns[i].call(this, result);
+    }
 
-Store.prototype.resetReadings = function(){
-  this.advance(resetReadings);
-  return this;
+    return result;
+  };
 };
 
+import * as GeneralStore from "./general-store";
+
+var EMPTY_READINGS = {
+  current: null,
+  currentFlight: [],
+  flightRecords: [],
+};
+
+export function resetReadings(state){
+  return EMPTY_READINGS;
+}
+
+var Store = GeneralStore.factory({
+  resetReadings: lens("readings")(resetReadings)
+});
+
 export function create(){
-  return new Store();
+  return new Store({});
 }
 export default create;

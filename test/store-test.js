@@ -6,7 +6,8 @@ import Store from "../client/store";
 describe("store", function() {
 
   it("should have no current reading after reset", function() {
-    var store = Store().resetReadings();
+    var store = Store();
+    store.resetReadings();
     expect(store.state.readings).toEqual({
       current: null,
       currentFlight: [],
