@@ -3,6 +3,7 @@
 import "../client/polyfill";
 import "./general-store-test";
 import "./store-test";
+import "./counter-test";
 
 describe("Client", function() {
 

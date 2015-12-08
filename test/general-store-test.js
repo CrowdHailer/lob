@@ -28,7 +28,8 @@ describe("General store", function() {
     // For the time being a bit unnecessarily advanced.
     var Store = factory({a: function aye(state, x){ console.log(x, state); return state + x; }});
     var store = Store(0);
-    console.log("initial", Store.advance);
+    console.log("initial", store.advance);
+    console.log("i", store.state);
     store.a(2);
     console.log("after", store.state);
     store.a(-1);
