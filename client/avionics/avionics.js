@@ -14,7 +14,8 @@ function Controller($root, app){
 
 export default function create($root, app){
   app.fetchService("accelerometer").start();
-  app.fetchService("uplink").startTransmission();
+  // fetch uplink so that it starts connecting;
+  app.fetchService("uplink");
   console.log("mounting avionics component");
   var controller = Controller($root, app.actions);
 }

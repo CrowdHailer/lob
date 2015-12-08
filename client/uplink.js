@@ -1,9 +1,12 @@
 /* jshint esnext: true */
 
 export default function(app){
-  return {
+  var uplink = {
     startTransmission: function(){
-      app.logger.debug("Started Transmission");
     }
   };
+
+  app.actions.startTransmitting.register(uplink.startTransmission);
+
+  return uplink;
 }

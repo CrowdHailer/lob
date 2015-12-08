@@ -218,11 +218,12 @@ var Lob = (function () { 'use strict';
 
     /* jshint esnext: true */
     function default_1(app) {
-        return {
+        var uplink = {
             startTransmission: function () {
-                app.logger.debug("Started Transmission");
             }
         };
+        app.actions.startTransmitting.register(uplink.startTransmission);
+        return uplink;
     }
 
     /**
@@ -542,7 +543,8 @@ var Lob = (function () { 'use strict';
     }
     function create$1($root, app) {
         app.fetchService("accelerometer").start();
-        app.fetchService("uplink").startTransmission();
+        // fetch uplink so that it starts connecting;
+        app.fetchService("uplink");
         console.log("mounting avionics component");
         var controller = Controller($root, app.actions);
     }
