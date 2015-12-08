@@ -2,6 +2,7 @@
 
 import GeneralStore from "../client/general-store";
 import { createTranscriptFunction } from "./support";
+import { factory } from "../client/general-store";
 
 describe("General store", function() {
 
@@ -21,6 +22,17 @@ describe("General store", function() {
     var store = GeneralStore({type: "initial state"});
     store.advance(evolver);
     expect(evolver.transcript[0]).toEqual([{type: "initial state"}]);
+  });
+
+  xit("other", function(){
+    // For the time being a bit unnecessarily advanced.
+    var Store = factory({a: function aye(state, x){ console.log(x, state); return state + x; }});
+    var store = Store(0);
+    console.log("initial", Store.advance);
+    store.a(2);
+    console.log("after", store.state);
+    store.a(-1);
+    console.log("after", store.state);
   });
 
 });
