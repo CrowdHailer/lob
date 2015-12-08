@@ -12,17 +12,20 @@ export default function App(actions){
     registerService: function(name, factory){
       services[name] ={factory: factory};
     },
-    getService: function(name){
+    fetchService: function(name){
       var service = services[name];
       if (service.instance) { return service.instance; }
-      return service.instance = service.factory(this);
+
+      service.instance = service.factory(this);
+      return service.instance;
     },
     registerComponent: function(name, factory){
       components[name] ={factory: factory};
     },
     // name optional get from element data attribute
-    getComponent: function(element, name){
+    startComponent: function(element, name){
       var component = components[name];
+      console.log(components)
       return component.factory(element, this);
     },
     actions: actions,

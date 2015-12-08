@@ -1,10 +1,13 @@
 /* jshint esnext: true */
 
-export function createTranscriptFunction(){
+export function createTranscriptFunction(fn){
   var transcript = [];
   var func;
   var f = function(){
     transcript.push(Array.prototype.slice.call(arguments));
+    if (fn){
+      return fn.apply(this, Array.prototype.slice.call(arguments));
+    }
   };
   f.transcript = transcript;
   Object.defineProperty(f, "lastCall", {

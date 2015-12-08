@@ -10,4 +10,9 @@ MyApp.registerComponent("avionics", function(element, enviroment){
   console.log("mounting avionics component");
 });
 
-var avionics = MyApp.getComponent("avionics");
+import { ready } from "./utils/dom";
+
+ready(function(){
+  var $avionics = document.querySelector("[data-interface]");
+  var avionics = MyApp.startComponent($avionics, "avionics");
+});

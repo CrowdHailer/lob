@@ -1,52 +1,11 @@
 (function () { 'use strict';
 
-    // Abstract store
-    function AStore() {
-        var state = {};
-        return {
-            advance: function (evolver) {
-                console.log("advance");
-                state = evolver(state);
-            },
-            getState: function () {
-                return state;
-            }
-        };
-    }
-    ;
-    var o;
-    o = Object;
-    function newReading(state) {
-        console.log(state);
-        var i = state.i || 0;
-        return o.assign({}, state, { i: i + 1 });
-    }
-    ;
-    function startStreaming(state) {
-        if (state.isTransmitting) {
-            return state;
-        }
-        return o.assign({}, state, { isTransmitting: true });
-    }
-    function MyStore() {
-        var myStore = this;
-        this.newReading = function () {
-            myStore.advance(newReading);
-        };
-        this.startStreaming = function () {
-            myStore.advance(startStreaming);
-        };
-    }
-    var a = AStore();
-    MyStore.prototype = a;
-    function default_1() {
-        return new MyStore();
-    }
-
+    /* jshint esnext: true */
+    // import Store from "./store";
     function App(actions) {
         var services = {};
         var components = {};
-        var store = default_1();
+        // var store = Store();
         // actions.newReading.register(store.newReading);
         // actions.startStreaming.register(store.startStreaming);
         return {
@@ -64,13 +23,23 @@
                 components[name] = { factory: factory };
             },
             // name optional get from element data attribute
-            getComponent: function (element, name) {
+            startComponent: function (element, name) {
                 var component = components[name];
+                console.log(components);
                 return component.factory(element, this);
             },
             actions: actions,
-            store: store
         };
+    }
+
+    /* jshint esnext: true */
+    function ready(fn) {
+        if (document.readyState !== "loading") {
+            fn();
+        }
+        else {
+            document.addEventListener("DOMContentLoaded", fn);
+        }
     }
 
     /* jshint esnext: true */
@@ -81,7 +50,10 @@
         enviroment.getService("accelerometer").start();
         console.log("mounting avionics component");
     });
-    var avionics = MyApp.getComponent("avionics");
+    ready(function () {
+        var $avionics = document.querySelector("[data-interface]");
+        var avionics = MyApp.startComponent($avionics, "avionics");
+    });
 
 })();
 //# sourceMappingURL=lob.js.map

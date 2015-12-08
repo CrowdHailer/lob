@@ -13,13 +13,33 @@ describe("App", function() {
   });
 
   describe("fetching a service", function(){
-    it("should start a service when it is fetched", function(){
-      var app = App();
-      var factory = createTranscriptFunction();
-      app.registerService("transcript", factory);
+    var app, factory;
 
-      app.getService("transcript");
+    beforeEach(function(){
+      app = App();
+      factory = createTranscriptFunction(function(){
+        return {type: "myService"};
+      });
+      app.registerService("myService", factory);
+    });
+
+    it("should start a service when it is fetched", function(){
+      app.fetchService("myService");
+
       expect(factory.lastCall).toEqual([app]);
+    });
+
+    it("should return service instance", function(){
+      var service = app.fetchService("myService");
+
+      expect(service.type).toEqual("myService");
+    });
+
+    it("should use exisiting service if fetched a second time", function(){
+      app.fetchService("myService");
+      app.fetchService("myService");
+
+      expect(factory.transcript.length).toBe(1);
     });
   });
 });
