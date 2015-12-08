@@ -1,7 +1,7 @@
 /* jshint esnext: true */
 // import Store from "./store";
 
-export default function App(actions){
+export default function App(actions, logger){
   var services = {};
   var components = {};
   // var store = Store();
@@ -10,12 +10,22 @@ export default function App(actions){
 
   return {
     registerService: function(name, factory){
-      // TODO throw error if preRegistered
-      services[name] ={factory: factory};
+      if (services[name]) {
+        logger.error(new TypeError("Service name already registered: " + name));
+        return;
+      }
+
+      services[name] = {
+        factory: factory
+      };
     },
     fetchService: function(name){
-      // TODO throw error if not present
       var service = services[name];
+      if (!service){
+        logger.error(new TypeError("Service not found: " + name));
+        return;
+      }
+
       if (service.instance) { return service.instance; }
 
       service.instance = service.factory(this);
@@ -27,7 +37,6 @@ export default function App(actions){
     // name optional get from element data attribute
     startComponent: function(element, name){
       var component = components[name];
-      console.log(components)
       return component.factory(element, this);
     },
     actions: actions,

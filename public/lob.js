@@ -10,14 +10,17 @@
         // actions.startStreaming.register(store.startStreaming);
         return {
             registerService: function (name, factory) {
+                // TODO throw error if preRegistered
                 services[name] = { factory: factory };
             },
-            getService: function (name) {
+            fetchService: function (name) {
+                // TODO throw error if not present
                 var service = services[name];
                 if (service.instance) {
                     return service.instance;
                 }
-                return service.instance = service.factory(this);
+                service.instance = service.factory(this);
+                return service.instance;
             },
             registerComponent: function (name, factory) {
                 components[name] = { factory: factory };
@@ -47,7 +50,7 @@
     var MyApp = App();
     MyApp.registerComponent("avionics", function (element, enviroment) {
         // could pass on reading / on error into start
-        enviroment.getService("accelerometer").start();
+        enviroment.fetchService("accelerometer").start();
         console.log("mounting avionics component");
     });
     ready(function () {

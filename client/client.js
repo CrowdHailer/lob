@@ -6,7 +6,7 @@ import App from "./app";
 var MyApp = App();
 MyApp.registerComponent("avionics", function(element, enviroment){
   // could pass on reading / on error into start
-  enviroment.getService("accelerometer").start();
+  enviroment.fetchService("accelerometer").start();
   console.log("mounting avionics component");
 });
 
