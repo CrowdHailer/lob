@@ -12,9 +12,19 @@ MyApp.registerService("accelerometer", function(app){
     }
   };
 });
+
+MyApp.registerService("uplink", function(app){
+  return {
+    startTransmission: function(){
+      app.logger.debug("Started Transmission");
+    }
+  };
+});
+
 MyApp.registerComponent("avionics", function(element, enviroment){
   // could pass on reading / on error into start
   enviroment.fetchService("accelerometer").start();
+  enviroment.fetchService("uplink").startTransmission();
   console.log("mounting avionics component");
 });
 
