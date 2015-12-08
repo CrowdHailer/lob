@@ -22,3 +22,24 @@ var compose = function () {
     return result;
   };
 };
+
+// import * as GeneralStore from "./generalstore";
+//
+// var EMPTY_READINGS = {
+//   current: null,
+//   currentFlight: [],
+//   flightRecords: [],
+// };
+//
+// export function resetReadings(state){
+//   return EMPTY_READINGS;
+// }
+//
+// var Store = GeneralStore.factory({
+//   resetReadings: lens("readings")(resetReadings)
+// });
+//
+// export function create(){
+//   return new Store({});
+// }
+// export default create;
