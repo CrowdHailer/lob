@@ -1,25 +1,7 @@
-import { GeneralStore}  from "../client/general-store";
+/* jshint esnext: true */
+
 import { createTranscriptFunction } from "./support";
-
-function Store(){
-  var store = Object.create(GeneralStore());
-
-  store.resetReadings = function(){
-    store.advance(resetReadings);
-    return this;
-  };
-  return store;
-}
-
-
-function resetReadings(state){
-  var emptyReadings = {
-    current: null,
-    currentFlight: [],
-    flightRecords: [],
-  };
-  return Object.assign(state, {readings: emptyReadings});
-}
+import Store from "../client/store";
 
 describe("store", function() {
 

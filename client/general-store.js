@@ -6,23 +6,19 @@
 // - if wanted then the evolver should push errors to logger
 // Advance function to return instance of store?
 // Option to instantiate store with state
-export function GeneralStore(){
-  var store;
-  var state = {};
+export function GeneralStore(state){
 
-  function advance(evolver){
+  this.advance = function(evolver){
     state = evolver(state);
-  }
-
-  store = {
-    advance: advance
+    return this;
   };
 
-  Object.defineProperty(store, "state", {
+  Object.defineProperty(this, "state", {
     get: function(){ return state; }
   });
-
-  return store;
 }
 
-export default GeneralStore;
+export function create(state){
+  return new GeneralStore(state);
+}
+export default create;

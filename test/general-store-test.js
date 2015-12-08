@@ -6,7 +6,7 @@ import { createTranscriptFunction } from "./support";
 describe("General store", function() {
 
   it("should start with an empty object state", function() {
-    var store = GeneralStore();
+    var store = GeneralStore({});
     expect(store.state).toEqual({});
   });
 
@@ -18,9 +18,9 @@ describe("General store", function() {
 
   it("should pass initial state to evolver", function(){
     var evolver = createTranscriptFunction();
-    var store = GeneralStore();
+    var store = GeneralStore({type: "initial state"});
     store.advance(evolver);
-    expect(evolver.transcript[0]).toEqual([{}]);
+    expect(evolver.transcript[0]).toEqual([{type: "initial state"}]);
   });
 
 });
