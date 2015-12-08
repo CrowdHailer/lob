@@ -30,8 +30,3 @@ if (!Object.assign) {
     }
   });
 }
-
-
-Function.I = function(a){
-  return a;
-};

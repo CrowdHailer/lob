@@ -94,7 +94,7 @@ var Lob = (function () { 'use strict';
         };
     }
     ;
-    function create$3(world) {
+    function create$5(world) {
         if (world == void 0) {
             world = DEFAULT;
         }
@@ -102,12 +102,12 @@ var Lob = (function () { 'use strict';
     }
     ;
 
-    function create$2(filter, logger) {
+    function create$3(filter, logger) {
         if (logger == void 0) {
             logger = NullLogger;
         }
         var action;
-        var dispatcher = create$3(logger);
+        var dispatcher = create$5(logger);
         action = function (minutiae) {
             var noDetailWithAction = arguments.length === 0;
             try {
@@ -163,13 +163,13 @@ var Lob = (function () { 'use strict';
     };
 
     var Actions = {
-        newReading: create$2(Function.I, create("New Reading")),
-        resetReadings: create$2(Function.I, create("Reset")),
-        badReading: create$2(Function.I, create("Bad Reading")),
-        uplinkAvailable: create$2(Function.I, create("Uplink Available")),
-        startTransmitting: create$2(Function.I, create("Start Transmitting")),
-        failedConnection: create$2(Function.I, create("Failed Connection")),
-        closeNotice: create$2(Function.I, create("Notice Closed")),
+        newReading: create$3(Function.I, create("New Reading")),
+        resetReadings: create$3(Function.I, create("Reset")),
+        badReading: create$3(Function.I, create("Bad Reading")),
+        uplinkAvailable: create$3(Function.I, create("Uplink Available")),
+        startTransmitting: create$3(Function.I, create("Start Transmitting")),
+        failedConnection: create$3(Function.I, create("Failed Connection")),
+        closeNotice: create$3(Function.I, create("Notice Closed")),
     };
 
     function App(actions, logger) {
@@ -180,7 +180,7 @@ var Lob = (function () { 'use strict';
         var components = {};
         // var store = Store();
         // actions.newReading.register(store.newReading);
-        // actions.startStreaming.register(store.startStreaming);
+        // actions.startTransmitting.register(store.startStreaming);
         return {
             registerService: function (name, factory) {
                 if (services[name]) {
@@ -212,7 +212,7 @@ var Lob = (function () { 'use strict';
                 return component.factory(element, this);
             },
             actions: actions,
-            logger: logger
+            logger: logger,
         };
     }
 
@@ -246,9 +246,14 @@ var Lob = (function () { 'use strict';
         var uplink = {
             startTransmission: function () {
                 console.log("opening");
+            },
+            newReading: function (r) {
+                console.log("what is the new reading", r);
+                console.log("what is the state", app.fetchService("store").state.uplink.transmitting);
             }
         };
         app.actions.startTransmitting.register(uplink.startTransmission);
+        app.actions.newReading.register(uplink.newReading);
         return uplink;
     }
 
@@ -567,7 +572,7 @@ var Lob = (function () { 'use strict';
             app.startTransmitting();
         });
     }
-    function create$1($root, app) {
+    function create$2($root, app) {
         app.fetchService("accelerometer").start();
         // fetch uplink so that it starts connecting;
         app.fetchService("uplink");
@@ -586,8 +591,76 @@ var Lob = (function () { 'use strict';
     }
 
     /* jshint esnext: true */
+    // State will never be assigned if evolver throws error
+    // - no need for rollback;
+    // Handle errors in logger?
+    // - if wanted then the evolver should push errors to logger
+    // Advance function to return instance of store?
+    // Option to instantiate store with state
+    function GeneralStore(state) {
+        this.advance = function (evolver) {
+            state = evolver(state);
+            return this;
+        };
+        Object.defineProperty(this, "state", {
+            get: function () { return state; }
+        });
+    }
+    GeneralStore.addReducer = function (name, handler) {
+        this.prototype[name] = function (event) {
+            var args = Array.prototype.slice.call(arguments);
+            this.advance(function (state) {
+                return handler.apply({}, [state].concat(args));
+            });
+            return this;
+        };
+    };
+    function factory(reducers) {
+        var Constructor = function my(initialState) {
+            GeneralStore.call(this, initialState);
+        };
+        for (var name in reducers) {
+            GeneralStore.addReducer.call(Constructor, name, reducers[name]);
+        }
+        return function (initialState) {
+            return new Constructor(initialState);
+        };
+    }
+
+    /* jshint esnext: true */
+    function lens(key) {
+        return function (func) {
+            return function (obj) {
+                obj = obj || key;
+                var update = {};
+                update[key] = func(obj[key]);
+                return Object.assign({}, obj, update);
+            };
+        };
+    }
+    var EMPTY_READINGS = {
+        current: null,
+        currentFlight: [],
+        flightRecords: [],
+    };
+    function resetReadings(state) {
+        return EMPTY_READINGS;
+    }
+    var Store = factory({
+        resetReadings: lens("readings")(resetReadings)
+    });
+    function create$1() {
+        return new Store({});
+    }
+
+    /* jshint esnext: true */
     console.log("starting Client");
     var MyApp = App(Actions, Development({ prefix: "Lob" }, window.console));
+    MyApp.registerService("store", function (app) {
+        var store = create$1();
+        app.actions.resetReadings.register(store.resetReadings.bind(store));
+        return store;
+    });
     MyApp.registerService("accelerometer", function (app) {
         return {
             start: function () {
@@ -596,7 +669,7 @@ var Lob = (function () { 'use strict';
         };
     });
     MyApp.registerService("uplink", default_1);
-    MyApp.registerComponent("avionics", create$1);
+    MyApp.registerComponent("avionics", create$2);
     ready(function () {
         var $avionics = document.querySelector("[data-interface]");
         var avionics = MyApp.startComponent($avionics, "avionics");

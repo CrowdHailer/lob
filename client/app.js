@@ -1,6 +1,6 @@
 /* jshint esnext: true */
-// import Store from "./store";
 
+import Store from "./store";
 import { DEFAULT } from "./utils/logger";
 
 export default function App(actions, logger){
@@ -9,7 +9,7 @@ export default function App(actions, logger){
   var components = {};
   // var store = Store();
   // actions.newReading.register(store.newReading);
-  // actions.startStreaming.register(store.startStreaming);
+  // actions.startTransmitting.register(store.startStreaming);
 
   return {
     registerService: function(name, factory){
@@ -43,7 +43,7 @@ export default function App(actions, logger){
       return component.factory(element, this);
     },
     actions: actions,
-    logger: logger
+    logger: logger,
     // store: store
   };
 }

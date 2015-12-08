@@ -7,6 +7,14 @@ import { Development } from "./utils/logger";
 import Actions from "./actions";
 
 var MyApp = App(Actions, Development({prefix: "Lob"}, window.console));
+import Store from "./store";
+MyApp.registerService("store", function(app){
+  var store = Store();
+
+  app.actions.resetReadings.register(store.resetReadings.bind(store));
+  return store;
+});
+
 MyApp.registerService("accelerometer", function(app){
   return {
     start: function(){

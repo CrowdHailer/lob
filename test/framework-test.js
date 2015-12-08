@@ -49,7 +49,7 @@ describe("App", function() {
       expect(logger.error.lastCall[0]).toEqual(new TypeError("Service name already registered: myService"));
     });
 
-    it("should raise an exception if trying to fetc a non-existant service", function(){
+    it("should raise an exception if trying to fetch a non-existant service", function(){
       app.fetchService("otherService", function(){  });
 
       expect(logger.error.lastCall[0]).toEqual(new TypeError("Service not found: otherService"));

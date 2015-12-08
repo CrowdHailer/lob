@@ -28,10 +28,15 @@ export default function(app){
   var uplink = {
     startTransmission: function(){
       console.log("opening");
+    },
+    newReading: function(r){
+      console.log("what is the new reading", r);
+      console.log("what is the state", app.fetchService("store").state.uplink.transmitting);
     }
   };
 
   app.actions.startTransmitting.register(uplink.startTransmission);
+  app.actions.newReading.register(uplink.newReading);
 
   return uplink;
 }
