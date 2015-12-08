@@ -21,12 +21,8 @@ MyApp.registerService("uplink", function(app){
   };
 });
 
-MyApp.registerComponent("avionics", function(element, enviroment){
-  // could pass on reading / on error into start
-  enviroment.fetchService("accelerometer").start();
-  enviroment.fetchService("uplink").startTransmission();
-  console.log("mounting avionics component");
-});
+import Avionics from "./avionics/avionics";
+MyApp.registerComponent("avionics", Avionics);
 
 import { ready } from "./utils/dom";
 
