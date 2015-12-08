@@ -45,6 +45,7 @@
         "client/store.ts",
         "test/action-test.ts",
         "test/avionics-presenter-test.ts",
+        "test/client-test.ts",
         "test/dispatcher-test.ts",
         "test/jasmine.d.ts",
         "test/lob-test.ts",

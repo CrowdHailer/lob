@@ -3,7 +3,7 @@
 import typescript from 'rollup-plugin-typescript';
 
 export default {
-  entry: 'test/lob-test.ts',
+  entry: 'test/client-test.ts',
   format: "iife",
   moduleName: "test",
   dest: "tmp/test-bundle.js",
