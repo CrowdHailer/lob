@@ -1,7 +1,7 @@
 /* jshint esnext: true */
 
 import "../client/polyfill";
-import "./action-test";
+import "./event-test";
 import "./dispatcher-test";
 import "./general-store-test";
 import "./store-test";
