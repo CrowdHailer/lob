@@ -32,8 +32,7 @@ describe("Client", function() {
       expect(client.flightHistory).toEqual([]);
     });
     it("should have logged the reset event", function(){
-      // DEBT will be info with listener
-      expect(console.warn.lastCall).toEqual(["[Reset readings]"]);
+      expect(console.info.lastCall).toEqual(["[Reset readings]"]);
     });
   });
 

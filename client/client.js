@@ -7,13 +7,13 @@ function Client(world){
   var logger = world.console;
   var events = {
     resetReadings: Event.start(Logger.wrap(logger, {prefix: "Reset readings"}))
+    // resetReadings: Event.start(Logger.wrap(logger, {prefix: "New reading"}))
   };
 
   var store = Store.start();
-  store.resetReadings();
+  events.resetReadings.register(store.resetReadings);
 
   this.resetReadings = function(){
-    store.resetReadings();
     events.resetReadings();
   };
   this.newReading = function(reading){
@@ -36,6 +36,7 @@ function Client(world){
       return store.state.readings.flightHistory;
     }
   });
+  events.resetReadings();
 }
 
 export function start(world){
