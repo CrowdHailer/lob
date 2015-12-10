@@ -1,5 +1,6 @@
 /* jshint esnext: true */
 
+import "./avionics-test";
 import "./framework-test";
 import "./client-test";
 import "./state-test";

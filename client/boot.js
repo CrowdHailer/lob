@@ -15,8 +15,22 @@ var client = Client.start({
   console: Logger.wrap(logger, {prefix: "Lob client"})
 });
 
-var avionics = Avionics.start($root, client);
-client.onNewReading(avionic.update);
-client.onResetReadings(avionic.update);
+function Avionics($root, app){
+  var presenter = Presenter(app);
+  var controller = Controller($root);
+  var display = Display($root)
+  return {
+    refresh: function(){
+      display.keys.forEach(function(){
+        // display.set checks if exists
+        // presenter.fetch checks if exists
+        display[key] = presenter[key];
+      });
+    }
+  };
+}
+// var avionics = Avionics.start($root, client);
+// client.onNewReading(avionic.update);
+// client.onResetReadings(avionic.update);
 
 export default client;
