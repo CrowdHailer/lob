@@ -3,7 +3,7 @@
 import * as State from "../client/state";
 import { freefallReading, stationaryReading } from "./support.js";
 
-describe("Client State", function(){
+describe("Random State", function(){
   var state, oldState;
   beforeEach(function(){
     oldState = {readings: "anything", other: "app state"};
@@ -26,34 +26,99 @@ describe("Client State", function(){
       expect(state.other).toEqual("app state");
     });
   });
+});
 
-  // xdescribe("new reading", function(){
-  //   it("should add reading as currentReading", function(){
-  //     var reading = stationaryReading();
-  //     var newState = State.handleNewReading(reading, State.DEFAULT);
-  //
-  //     expect(newState.currentReading).toEqual(reading);
-  //     expect(newState.currentFlightReadings).toEqual([]);
-  //     expect(newState.flightRecords).toEqual([]);
-  //   });
-  //
-  //   it("should add to current flight if in freefall", function(){
-  //     var reading = freefallReading();
-  //     var newState = State.handleNewReading(reading, State.DEFAULT);
-  //     expect(newState.currentFlightReadings[0]).toEqual(reading);
-  //   });
-  //
-  //   it("should should move current flight to past flightS", function(){
-  //     var readings = [freefallReading(), freefallReading()];
-  //     var reading = stationaryReading();
-  //     var state = {
-  //       currentFlightReadings: readings,
-  //       flightRecords: [],
-  //       currentReading: null
-  //     };
-  //     var newState = State.handleNewReading(reading, state);
-  //     expect(newState.currentFlightReadings).toEqual([]);
-  //     expect(newState.flightRecords[0]).toEqual(readings);
-  //   });
-  // });
+describe("Grounded State", function(){
+  var state, oldState;
+  beforeEach(function(){
+    oldState = {
+      readings: {
+        current: {acceleration: {x: 0, y: 0, z: 10}, timestamp: 1600},
+        currentFlight: [],
+        flightHistory: [
+          {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1000},
+          {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1200},
+          {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1400}
+        ]
+      },
+      other: "app state"
+    };
+  });
+
+  describe("after new grounded reading", function(){
+    var reading = {acceleration: {x: 0, y: 0, z: 10}, timestamp: 1800};
+    beforeEach(function(){
+      state = State.newReading(oldState, reading);
+    });
+    it("should have new current value", function(){
+      expect(state.readings.current).toBe(reading);
+    });
+    it("should have an empty current flight", function(){
+      expect(state.readings.currentFlight).toEqual([]);
+    });
+    it("should have existing flight history", function(){
+      expect(state.readings.flightHistory).toEqual(oldState.readings.flightHistory);
+    });
+    it("should leave the remaining app state intact", function(){
+      expect(state.other).toEqual("app state");
+    });
+  });
+
+});
+
+describe("Flying State", function(){
+  var state, oldState;
+  beforeEach(function(){
+    oldState = {
+      readings: {
+        current: {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1400},
+        currentFlight: [
+          {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1000},
+          {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1200},
+          {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1400}
+        ],
+        flightHistory: []
+      },
+      other: "app state"
+    };
+  });
+
+  describe("after new grounded reading", function(){
+    var reading = {acceleration: {x: 0, y: 0, z: 10}, timestamp: 1600};
+    beforeEach(function(){
+      state = State.newReading(oldState, reading);
+    });
+    it("should have new current value", function(){
+      expect(state.readings.current).toBe(reading);
+    });
+    it("should have an empty current flight", function(){
+      expect(state.readings.currentFlight).toEqual([]);
+    });
+    it("should have new flight in history", function(){
+      expect(state.readings.flightHistory[0]).toEqual(oldState.readings.currentFlight);
+    });
+    it("should leave the remaining app state intact", function(){
+      expect(state.other).toEqual("app state");
+    });
+  });
+
+  describe("after new flying reading", function(){
+    var reading = {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1600};
+    beforeEach(function(){
+      state = State.newReading(oldState, reading);
+    });
+    it("should have new current value", function(){
+      expect(state.readings.current).toBe(reading);
+    });
+    it("should add reading to currentFlight", function(){
+      expect(state.readings.currentFlight).toEqual(oldState.readings.currentFlight.concat(reading));
+    });
+    it("should have existing flight history", function(){
+      expect(state.readings.flightHistory).toEqual(oldState.readings.flightHistory);
+    });
+    it("should leave the remaining app state intact", function(){
+      expect(state.other).toEqual("app state");
+    });
+  });
+
 });

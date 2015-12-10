@@ -24,6 +24,15 @@ var compose = function () {
   };
 };
 
+var FREEFALL_LIMIT = 4;
+
+var Reading = {
+  freefall: function(reading){
+    var a = reading.acceleration;
+    var magnitude = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+    return magnitude < FREEFALL_LIMIT;
+  }
+};
 
 var EMPTY_READINGS = Object.freeze({
   currentFlight: [],
@@ -32,9 +41,25 @@ var EMPTY_READINGS = Object.freeze({
 });
 
 var readings = {
-  reset: function(_state){
+  reset: function(_readings){
     return EMPTY_READINGS;
-  }
+  },
+  // new: function(readings, reading){
+  //   return Object.assign({}, readings, {current: reading});
+  // }
 };
 
 export var resetReadings = lens("readings")(readings.reset);
+export function newReading(state, current){
+  var readings = state.readings;
+  var currentFlight = readings.currentFlight;
+  var flightHistory = readings.flightHistory;
+  if (Reading.freefall(current)) {
+    currentFlight = currentFlight.concat(current);
+  } else if(currentFlight[0]) {
+    flightHistory = flightHistory.concat([currentFlight]);
+    currentFlight = [];
+  }
+  readings = {current: current, currentFlight: currentFlight, flightHistory: flightHistory};
+  return Object.assign({}, state, {readings: readings});
+}
