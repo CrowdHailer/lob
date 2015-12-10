@@ -37,7 +37,7 @@ describe("Client", function() {
     });
   });
 
-  xdescribe("recording flights", function(){
+  describe("recording flights", function(){
     beforeEach(function(){
       client.resetReadings();
       client.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1000});
@@ -48,7 +48,7 @@ describe("Client", function() {
       client.newReading({acceleration: {x: 0, y: 0, z: 1}, timestamp: 2000});
     });
     it("should have a current reading", function(){
-      expect(client.currentReading).toBe({acceleration: {x: 0, y: 0, z: 1}, timestamp: 2000});
+      expect(client.currentReading).toEqual({acceleration: {x: 0, y: 0, z: 1}, timestamp: 2000});
     });
     it("should have a current flight", function(){
       expect(client.currentFlight).toEqual([

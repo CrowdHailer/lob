@@ -50,6 +50,7 @@ var readings = {
 };
 
 export var resetReadings = lens("readings")(readings.reset);
+
 export function newReading(state, current){
   var readings = state.readings;
   var currentFlight = readings.currentFlight;
