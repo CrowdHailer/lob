@@ -3,32 +3,32 @@
 import { DEFAULT } from "../utils/logger";
 
 // Raise Error for circular calls
-function Dispatcher(handlers, world){
+function Dispatcher(handlers, console){
   this.dispatch = function(){
     var args = arguments;
     handlers.forEach(function(handler){
       try {
         handler.apply({}, args);
       } catch(e) {
-        world.error(e);
+        console.error(e);
       }
     });
 
     if (handlers.length === 0) {
-      world.warn.apply(world, args);
+      console.warn.apply(console, args);
     } else {
-      world.info.apply(world, args);
+      console.info.apply(console, args);
     }
   };
   this.register = function(handler){
-    return new Dispatcher(handlers.concat(handler), world);
+    return new Dispatcher(handlers.concat(handler), console);
   };
 };
 
-export function create(world){
-  if (world == void 0) {
-    world = DEFAULT;
+export function create(console){
+  if (console == void 0) {
+    console = DEFAULT;
   }
-  return new Dispatcher([], world);
+  return new Dispatcher([], console);
 };
 export default Dispatcher;

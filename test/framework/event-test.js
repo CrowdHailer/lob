@@ -9,7 +9,7 @@ describe("Event", function(){
   var identityFn = function(a) { return a; };
 
   it("should pass minutiae to dispatcher", function(){
-    var action = Event.create();
+    var action = Event.start();
     var handler = createTranscriptFunction();
     action.register(handler);
     action("some data");
@@ -17,7 +17,7 @@ describe("Event", function(){
   });
 
   it("should pass multiple minutiae to dispatcher", function(){
-    var action = Event.create();
+    var action = Event.start();
     var handler = createTranscriptFunction();
     action.register(handler);
     action(1, 2);
@@ -25,7 +25,7 @@ describe("Event", function(){
   });
 
   it("should dispatch event with no details", function(){
-    var action = Event.create();
+    var action = Event.start();
     var handler = createTranscriptFunction();
     action.register(handler);
     action();

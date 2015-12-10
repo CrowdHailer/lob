@@ -1,5 +1,7 @@
 /* jshint esnext: true */
 
+import { createTranscriptLogger } from "./support";
+
 import * as Client from "../client/client";
 
 // READING -> single acceleration vector and timestamp in milliseconds
@@ -7,11 +9,18 @@ import * as Client from "../client/client";
 // FLIGHT HISTORY -> Array of flights not including the current flight
 
 describe("Client", function() {
+  var client, console;
 
+  beforeEach(function(){
+    console = createTranscriptLogger();
+    client = Client.start({
+      console: console
+    });
+  });
   describe("after reset", function(){
-    var client = Client.start();
-
-    client.resetReadings();
+    beforeEach(function(){
+      client.resetReadings();
+    });
 
     it("should have a null current reading", function(){
       expect(client.currentReading).toBe(null);
@@ -21,6 +30,9 @@ describe("Client", function() {
     });
     it("should have an empty flight history", function(){
       expect(client.flightHistory).toEqual([]);
+    });
+    it("should have logged the reset event", function(){
+      expect(console.warn.lastCall).toEqual(["[Reset readings]"]);
     });
   });
 

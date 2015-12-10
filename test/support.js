@@ -21,6 +21,7 @@ export function createTranscriptFunction(fn){
 
 export function createTranscriptLogger(){
   return {
+    debug: createTranscriptFunction(),
     info: createTranscriptFunction(),
     warn: createTranscriptFunction(),
     error: createTranscriptFunction()

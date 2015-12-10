@@ -6,7 +6,8 @@ import { argsToArray } from "../utils/utils";
 
 
 // Simply a stateful dispatcher
-export function create(logger){
+// DEBT should be start not create
+export function start(logger){
   if (logger == void 0) { logger = DEFAULT; }
 
   var dispatcher = Dispatcher.create(logger);
