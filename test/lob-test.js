@@ -2,6 +2,7 @@
 
 import "./framework-test";
 import "./client-test";
+import "./state-test";
 
 describe("Lob", function() {
 

@@ -11,6 +11,10 @@ function Client(world){
   this.resetReadings = function(){
     events.resetReadings();
   };
+  this.newReading = function(reading){
+
+  };
+  // onNewReading
 
   Object.defineProperty(this, "currentReading", {
     get: function(){

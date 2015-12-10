@@ -32,7 +32,36 @@ describe("Client", function() {
       expect(client.flightHistory).toEqual([]);
     });
     it("should have logged the reset event", function(){
+      // DEBT will be info with listener
       expect(console.warn.lastCall).toEqual(["[Reset readings]"]);
+    });
+  });
+
+  xdescribe("recording flights", function(){
+    beforeEach(function(){
+      client.resetReadings();
+      client.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1000});
+      client.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1200});
+      client.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1400});
+      client.newReading({acceleration: {x: 0, y: 0, z: 10}, timestamp: 1600});
+      client.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1800});
+      client.newReading({acceleration: {x: 0, y: 0, z: 1}, timestamp: 2000});
+    });
+    it("should have a current reading", function(){
+      expect(client.currentReading).toBe({acceleration: {x: 0, y: 0, z: 1}, timestamp: 2000});
+    });
+    it("should have a current flight", function(){
+      expect(client.currentFlight).toEqual([
+        {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1800},
+        {acceleration: {x: 0, y: 0, z: 1}, timestamp: 2000}
+      ]);
+    });
+    it("should have a flight history", function(){
+      expect(client.flightHistory).toEqual([[
+        {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1000},
+        {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1200},
+        {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1400}
+      ]]);
     });
   });
 
