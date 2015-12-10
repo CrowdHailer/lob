@@ -25,10 +25,12 @@ function altitudeForFreefallDuration(duration){
   return round(2)(9.81/8 * t * t);
 }
 
-function format(i){
-  var padding = "00000";
-  var str = i.toFixed(2);
-  return padding.substring(0, padding.length - str.length) + str;
+export function format(i){
+  var fixed = i.toFixed(2);
+  var signed = i < 0 ? fixed : "+" + fixed;
+  var short = "+00.00".length - signed.length;
+  var padded = (short == 1) ? signed.replace(/[\+\-]/, function(sign){ return sign + "0"; }) : signed;
+  return padded;
 }
 
 function Presenter(raw){
@@ -50,7 +52,14 @@ function Presenter(raw){
 
   Object.defineProperty(this, "currentReadout", {
     get: function(){
-      return "Waiting.";
+      if (!raw.currentReading) {
+        return "Waiting.";
+      }
+      var acceleration = raw.currentReading.acceleration;
+      var x = acceleration.x;
+      var y = acceleration.y;
+      var z = acceleration.z;
+      return "[" + [format(x), format(y), format(z)].join(", ") + "]";
     }
   });
 }

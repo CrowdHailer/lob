@@ -2,8 +2,18 @@
 
 import { freefallReading, stationaryReading } from "../support";
 import Presenter from "../../client/avionics/presenter";
+import { format } from "../../client/avionics/presenter";
 
 describe("Avionics Presenter", function(){
+  describe("formatting numbers", function(){
+    it("should format 0 as '+00.00'", function(){
+      expect(format(0)).toBe("+00.00");
+    });
+    it("should format -1 as '-01.00'", function(){
+      expect(format(-1)).toBe("-01.00");
+    });
+  });
+
   describe("of refreshed app", function (){
     var appState = {
       currentReading: null,
@@ -39,7 +49,7 @@ describe("Avionics Presenter", function(){
       expect(presenter.maxAltitude).toBe("0.00 m");
     });
     it("should have a current Reading of with details", function(){
-      expect(presenter.currentReadout).toEqual("[+00.00,  +00.00, -01.00]");
+      expect(presenter.currentReadout).toEqual("[+00.00, +00.00, -01.00]");
     });
   });
   // describe("in mid flight state", function(){
