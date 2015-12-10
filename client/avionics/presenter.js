@@ -22,7 +22,7 @@ function altitudeForFreefallDuration(duration){
 
   // s = 9.81 * 1/8 t^2
   var t = duration;
-  return round(2)(9.81/8 * t * t);
+  return 9.81/8 * t * t;
 }
 
 export function format(i){
@@ -46,7 +46,9 @@ function Presenter(raw){
 
   Object.defineProperty(this, "maxAltitude", {
     get: function(){
-      return "0.00 m";
+      var flightDurations = raw.flightHistory.map(readingsDuration);
+      var max = Math.max.apply(null, [0].concat(flightDurations));
+      return altitudeForFreefallDuration(max).toFixed(2) + " m";
     }
   });
 
