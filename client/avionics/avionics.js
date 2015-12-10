@@ -19,3 +19,21 @@ export default function create($root, app){
   console.log("mounting avionics component");
   var controller = Controller($root, app.actions);
 }
+
+
+
+function Co(element, app){
+
+
+
+  return {
+    update: function(_ignore){
+      var p = Presenter.create(app)
+      for (var attribute in p) {
+        if (object.hasOwnProperty(attribute)) {
+          view[attribute] = p[attribute];
+        }
+      }
+    }
+  }
+}

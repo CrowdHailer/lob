@@ -15,4 +15,8 @@ var client = Client.start({
   console: Logger.wrap(logger, {prefix: "Lob client"})
 });
 
+var avionics = Avionics.start($root, client);
+client.onNewReading(avionic.update);
+client.onResetReadings(avionic.update);
+
 export default client;
