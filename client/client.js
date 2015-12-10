@@ -4,9 +4,8 @@ console.log("starting Client");
 import "./polyfill";
 import App from "./app";
 import { Development } from "./utils/logger";
-import Actions from "./actions";
 
-var MyApp = App(Actions, Development({prefix: "Lob"}, window.console));
+var MyApp = App("Actions", Development({prefix: "Lob"}, window.console));
 import Store from "./store";
 MyApp.registerService("store", function(app){
   var store = Store();
