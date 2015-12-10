@@ -211,17 +211,18 @@ var Lob = (function () { 'use strict';
     function Client(world) {
         var logger = world.console;
         var events = {
-            resetReadings: start$1(wrap(logger, { prefix: "Reset readings" }))
+            resetReadings: start$1(wrap(logger, { prefix: "Reset readings" })),
+            newReading: start$1(wrap(logger, { prefix: "New reading" }))
         };
         var store = Store.start();
         events.resetReadings.register(store.resetReadings);
-        store.resetReadings();
-        events.resetReadings();
+        events.newReading.register(store.newReading);
         this.resetReadings = function () {
             events.resetReadings();
         };
         this.newReading = function (reading) {
-            store.newReading(reading);
+            // Validate here
+            events.newReading(reading);
         };
         Object.defineProperty(this, "currentReading", {
             get: function () {
@@ -238,13 +239,20 @@ var Lob = (function () { 'use strict';
                 return store.state.readings.flightHistory;
             }
         });
+        // events.resetReadings();
     }
     function start(world) {
         return new Client(world);
     }
 
+    var logger = Object.assign({}, window.console, { error: function (e) {
+            var args = argsToArray(arguments);
+            var error = args[args.length - 1];
+            console.info.apply(console, args);
+            throw error;
+        } });
     var client = start({
-        console: wrap(window.console, { prefix: "Lob client" })
+        console: wrap(logger, { prefix: "Lob client" })
     });
 
     return client;

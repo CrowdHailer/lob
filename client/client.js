@@ -6,18 +6,20 @@ import Store from "./store";
 function Client(world){
   var logger = world.console;
   var events = {
-    resetReadings: Event.start(Logger.wrap(logger, {prefix: "Reset readings"}))
-    // resetReadings: Event.start(Logger.wrap(logger, {prefix: "New reading"}))
+    resetReadings: Event.start(Logger.wrap(logger, {prefix: "Reset readings"})),
+    newReading: Event.start(Logger.wrap(logger, {prefix: "New reading"}))
   };
 
   var store = Store.start();
   events.resetReadings.register(store.resetReadings);
+  events.newReading.register(store.newReading);
 
   this.resetReadings = function(){
     events.resetReadings();
   };
   this.newReading = function(reading){
-    store.newReading(reading);
+    // Validate here
+    events.newReading(reading);
   };
 
   Object.defineProperty(this, "currentReading", {
@@ -36,7 +38,7 @@ function Client(world){
       return store.state.readings.flightHistory;
     }
   });
-  events.resetReadings();
+  // events.resetReadings();
 }
 
 export function start(world){

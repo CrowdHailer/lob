@@ -62,6 +62,9 @@ describe("Client", function() {
         {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1400}
       ]]);
     });
+    it("should have logged the reading events", function(){
+      expect(console.info.transcript.length).toEqual(7);
+    });
   });
 
 });
