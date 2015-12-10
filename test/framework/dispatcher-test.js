@@ -4,7 +4,7 @@ import { createTranscriptFunction, createTranscriptLogger } from "../support";
 
 import * as Dispatcher from "../../client/framework/dispatcher";
 
-import { NullLogger } from "../../client/utils/logger";
+import { NullLogger } from "../../client/framework/logger";
 
 describe("Dispatcher", function(){
   it("should pass the minutiae (precise details) to a registered listener", function(){

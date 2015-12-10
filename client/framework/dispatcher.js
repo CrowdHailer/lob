@@ -1,6 +1,6 @@
 /* jshint esnext: true */
 
-import { DEFAULT } from "../utils/logger";
+import { DEFAULT } from "./logger";
 
 // Raise Error for circular calls
 function Dispatcher(handlers, console){
@@ -23,12 +23,12 @@ function Dispatcher(handlers, console){
   this.register = function(handler){
     return new Dispatcher(handlers.concat(handler), console);
   };
-};
+}
 
 export function create(console){
   if (console == void 0) {
     console = DEFAULT;
   }
   return new Dispatcher([], console);
-};
+}
 export default Dispatcher;

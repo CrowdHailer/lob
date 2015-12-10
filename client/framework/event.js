@@ -1,7 +1,7 @@
 /* jshint esnext: true */
 
 import * as Dispatcher from "./dispatcher";
-import { DEFAULT } from "../utils/logger";
+import { DEFAULT } from "./logger";
 import { argsToArray } from "../utils/utils";
 
 
