@@ -32,6 +32,14 @@ export function wrap(console, settings){
   };
 }
 
+export var silent = {
+  debug: function(){  },
+  info: function(){  },
+  warn: function(){  },
+  // error logging should be used for errors and in development these should be thrown
+  error: function(e){ throw e; }
+};
+
 
 export var DEFAULT = {
   info: function(){  },
