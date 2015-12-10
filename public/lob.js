@@ -94,7 +94,7 @@ var Lob = (function () { 'use strict';
         };
     }
     ;
-    function create$5(world) {
+    function create$3(world) {
         if (world == void 0) {
             world = DEFAULT;
         }
@@ -102,12 +102,12 @@ var Lob = (function () { 'use strict';
     }
     ;
 
-    function create$3(filter, logger) {
+    function create$2(filter, logger) {
         if (logger == void 0) {
             logger = NullLogger;
         }
         var action;
-        var dispatcher = create$5(logger);
+        var dispatcher = create$3(logger);
         action = function (minutiae) {
             var noDetailWithAction = arguments.length === 0;
             try {
@@ -160,13 +160,13 @@ var Lob = (function () { 'use strict';
     }
 
     var Actions = {
-        newReading: create$3(function (a) { return a; }, create("New Reading")),
-        resetReadings: create$3(function (a) { return a; }, create("Reset")),
-        badReading: create$3(function (a) { return a; }, create("Bad Reading")),
-        uplinkAvailable: create$3(function (a) { return a; }, create("Uplink Available")),
-        startTransmitting: create$3(function (a) { return a; }, create("Start Transmitting")),
-        failedConnection: create$3(function (a) { return a; }, create("Failed Connection")),
-        closeNotice: create$3(function (a) { return a; }, create("Notice Closed")),
+        newReading: create$2(function (a) { return a; }, create("New Reading")),
+        resetReadings: create$2(function (a) { return a; }, create("Reset")),
+        badReading: create$2(function (a) { return a; }, create("Bad Reading")),
+        uplinkAvailable: create$2(function (a) { return a; }, create("Uplink Available")),
+        startTransmitting: create$2(function (a) { return a; }, create("Start Transmitting")),
+        failedConnection: create$2(function (a) { return a; }, create("Failed Connection")),
+        closeNotice: create$2(function (a) { return a; }, create("Notice Closed")),
     };
 
     function App(actions, logger) {
@@ -569,7 +569,7 @@ var Lob = (function () { 'use strict';
             app.startTransmitting();
         });
     }
-    function create$2($root, app) {
+    function create$1($root, app) {
         app.fetchService("accelerometer").start();
         // fetch uplink so that it starts connecting;
         app.fetchService("uplink");
@@ -594,33 +594,30 @@ var Lob = (function () { 'use strict';
     // - if wanted then the evolver should push errors to logger
     // Advance function to return instance of store?
     // Option to instantiate store with state
-    function GeneralStore(state) {
-        this.advance = function (evolver) {
+    function GeneralStore(state, handlers) {
+        var store = this;
+        function advance(evolver) {
             state = evolver(state);
-            return this;
-        };
+        }
+        this.advance = advance;
+        function wrapHandler(handler) {
+            return function () {
+                var args = Array.prototype.slice.call(arguments);
+                state = handler.apply({}, [state].concat(args));
+            };
+        }
+        for (var name in handlers) {
+            this[name] = wrapHandler(handlers[name]);
+        }
         Object.defineProperty(this, "state", {
             get: function () { return state; }
         });
     }
-    GeneralStore.addReducer = function (name, handler) {
-        this.prototype[name] = function (event) {
-            var args = Array.prototype.slice.call(arguments);
-            this.advance(function (state) {
-                return handler.apply({}, [state].concat(args));
-            });
-            return this;
-        };
-    };
-    function factory(reducers) {
-        var Constructor = function my(initialState) {
-            GeneralStore.call(this, initialState);
-        };
-        for (var name in reducers) {
-            GeneralStore.addReducer.call(Constructor, name, reducers[name]);
-        }
-        return function (initialState) {
-            return new Constructor(initialState);
+    function enhance(handlers) {
+        return {
+            start: function (state) {
+                return new GeneralStore(state, handlers);
+            }
         };
     }
 
@@ -643,18 +640,15 @@ var Lob = (function () { 'use strict';
     function resetReadings(state) {
         return EMPTY_READINGS;
     }
-    var Store = factory({
+    var Store = enhance({
         resetReadings: lens("readings")(resetReadings)
     });
-    function create$1() {
-        return new Store({});
-    }
 
     /* jshint esnext: true */
     console.log("starting Client");
     var MyApp = App(Actions, Development({ prefix: "Lob" }, window.console));
     MyApp.registerService("store", function (app) {
-        var store = create$1();
+        var store = Store();
         app.actions.resetReadings.register(store.resetReadings);
         return store;
     });
@@ -666,7 +660,7 @@ var Lob = (function () { 'use strict';
         };
     });
     MyApp.registerService("uplink", default_1);
-    MyApp.registerComponent("avionics", create$2);
+    MyApp.registerComponent("avionics", create$1);
     ready(function () {
         var $avionics = document.querySelector("[data-interface]");
         var avionics = MyApp.startComponent($avionics, "avionics");
