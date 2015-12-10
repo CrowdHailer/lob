@@ -1,8 +1,8 @@
 /* jshint esnext: true */
 
 import * as Dispatcher from "./dispatcher";
-import { DEFAULT } from "./utils/logger";
-import { argsToArray } from "./utils/utils";
+import { DEFAULT } from "../utils/logger";
+import { argsToArray } from "../utils/utils";
 
 
 // Simply a stateful dispatcher
@@ -18,6 +18,6 @@ export function create(logger){
   action.register = function(handler){
     dispatcher = dispatcher.register(handler);
   };
-  
+
   return action;
 }

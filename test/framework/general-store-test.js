@@ -1,7 +1,7 @@
 /* jshint esnext: true */
 
-import * as GeneralStore from "../client/general-store";
-import { createTranscriptFunction } from "./support";
+import * as GeneralStore from "../../client/framework/general-store";
+import { createTranscriptFunction } from "../support";
 
 describe("General store", function() {
 

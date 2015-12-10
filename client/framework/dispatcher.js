@@ -1,6 +1,6 @@
 /* jshint esnext: true */
 
-import { DEFAULT } from "./utils/logger";
+import { DEFAULT } from "../utils/logger";
 
 // Raise Error for circular calls
 function Dispatcher(handlers, world){

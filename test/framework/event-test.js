@@ -1,8 +1,8 @@
 /* jshint esnext: true */
 
-import { createTranscriptFunction, createTranscriptLogger } from "./support";
+import { createTranscriptFunction, createTranscriptLogger } from "../support";
 
-import * as Event from "../client/event";
+import * as Event from "../../client/framework/event";
 
 
 describe("Event", function(){
