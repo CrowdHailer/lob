@@ -1,38 +1,29 @@
 /* jshint esnext: true */
-console.log("starting Client");
 
-import "./polyfill";
-import App from "./app";
-import { Development } from "./utils/logger";
+function Client(){
 
-var MyApp = App("Actions", Development({prefix: "Lob"}, window.console));
-import Store from "./store";
-MyApp.registerService("store", function(app){
-  var store = Store();
+  this.resetReadings = function(){
 
-  app.actions.resetReadings.register(store.resetReadings);
-  return store;
-});
-
-MyApp.registerService("accelerometer", function(app){
-  return {
-    start: function(){
-      app.logger.warn("accelerometer");
-    }
   };
-});
 
-import Uplink from "./uplink";
-MyApp.registerService("uplink", Uplink);
+  Object.defineProperty(this, "currentReading", {
+    get: function(){
+      return null;
+    }
+  });
 
-import Avionics from "./avionics/avionics";
-MyApp.registerComponent("avionics", Avionics);
+  Object.defineProperty(this, "currentFlight", {
+    get: function(){
+      return [];
+    }
+  });
+  Object.defineProperty(this, "flightHistory", {
+    get: function(){
+      return [];
+    }
+  });
+}
 
-import { ready } from "./utils/dom";
-
-ready(function(){
-  var $avionics = document.querySelector("[data-interface]");
-  var avionics = MyApp.startComponent($avionics, "avionics");
-});
-
-export default MyApp;
+export function start(){
+  return new Client();
+}
