@@ -238,10 +238,7 @@ var Lob = (function () { 'use strict';
     }
     function badReading(state) {
         var MESSAGE = "Could not read the data from this device. Please try again on a mobile with working accelerometer.";
-        state = state || {};
-        var notices = state.notices || [];
-        notices = notices.concat(MESSAGE);
-        return Object.assign({}, state, { notices: notices });
+        return showAlert(state, MESSAGE);
     }
     function showAlert(state, message) {
         state = state || {};
