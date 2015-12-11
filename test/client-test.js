@@ -76,4 +76,16 @@ describe("Client", function() {
     });
   });
 
+  describe("notification", function(){
+    it("should have a message after a bad reading", function(){
+      client.badReading();
+      expect(client.notices).toEqual(["Could not read the data from this device. Please try again on a mobile with working accelerometer."]);
+    });
+    it("should notify listeners of a bad reading", function(){
+      client.onBadReading(listener);
+      client.badReading();
+      expect(listener.lastCall).toEqual([]);
+    });
+  });
+
 });

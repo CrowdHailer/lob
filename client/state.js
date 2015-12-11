@@ -65,3 +65,11 @@ export function newReading(state, current){
   readings = {current: current, currentFlight: currentFlight, flightHistory: flightHistory};
   return Object.assign({}, state, {readings: readings});
 }
+
+export function badReading(state){
+  var MESSAGE = "Could not read the data from this device. Please try again on a mobile with working accelerometer.";
+  state = state || {};
+  var notices = state.notices || [];
+  notices = notices.concat(MESSAGE);
+  return Object.assign({}, state, {notices: notices});
+}
