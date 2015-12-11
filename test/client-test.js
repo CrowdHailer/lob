@@ -99,4 +99,24 @@ describe("Client", function() {
     });
   });
 
+  describe("uplink", function(){
+    it("should start with an unknown uplink status", function(){
+      expect(client.uplinkStatus).toEqual("UNKNOWN");
+    });
+    it("should have ready status after uplinkAvailable", function(){
+      client.uplinkAvailable();
+      expect(client.uplinkStatus).toEqual("AVAILABLE");
+    });
+    it("should have transmitting status after startTransmitting", function(){
+      client.uplinkAvailable();
+      client.startTransmitting();
+      expect(client.uplinkStatus).toEqual("TRANSMITTING");
+    });
+    it("should have failed status after uplinkFailed", function(){
+      client.uplinkFailed();
+      expect(client.uplinkStatus).toEqual("FAILED");
+    });
+    // test combinations to -> from state in state tests
+  });
+
 });

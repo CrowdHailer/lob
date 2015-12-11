@@ -79,3 +79,19 @@ export function closeNotices(state){
   var notices = [];
   return Object.assign({}, state, {notices: notices});
 }
+
+export function uplinkAvailable(state){
+  state = state || {};
+  var uplink = state.uplink || {};
+  return Object.assign({}, state, {uplink: {status: "AVAILABLE"}});
+}
+export function startTransmitting(state){
+  state = state || {};
+  var uplink = state.uplink || {};
+  return Object.assign({}, state, {uplink: {status: "TRANSMITTING"}});
+}
+export function uplinkFailed(state){
+  state = state || {};
+  var uplink = state.uplink || {};
+  return Object.assign({}, state, {uplink: {status: "FAILED"}});
+}

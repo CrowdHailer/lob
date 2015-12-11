@@ -11,13 +11,19 @@ function Client(world){
     resetReadings: Event.start(Logger.wrap(logger, {prefix: "Reset readings"})),
     newReading: Event.start(Logger.wrap(logger, {prefix: "New reading"})),
     badReading: Event.start(Logger.wrap(logger, {prefix: "Bad reading"})),
+    uplinkAvailable: Event.start(Logger.wrap(logger, {prefix: "Uplink available"})),
+    startTransmitting: Event.start(Logger.wrap(logger, {prefix: "Start transmitting"})),
+    uplinkFailed: Event.start(Logger.wrap(logger, {prefix: "Uplink failed"})),
     closeNotices: Event.start(Logger.wrap(logger, {prefix: "Close Notices"}))
   };
 
-  var store = Store.start();
+  var store = Store.start({});
   events.resetReadings.register(store.resetReadings);
   events.newReading.register(store.newReading);
   events.badReading.register(store.badReading);
+  events.uplinkAvailable.register(store.uplinkAvailable);
+  events.startTransmitting.register(store.startTransmitting);
+  events.uplinkFailed.register(store.uplinkFailed);
   events.closeNotices.register(store.closeNotices);
 
   this.accelerometer = Accelerometer(this);
@@ -42,6 +48,13 @@ function Client(world){
   this.onBadReading = function(listener){
     events.badReading.register(listener);
   };
+  this.uplinkAvailable = function(){
+    events.uplinkAvailable();
+  };
+  this.startTransmitting = function(){
+    events.startTransmitting();
+  };
+  this.uplinkFailed = events.uplinkFailed;
   this.closeNotices = function(){
     events.closeNotices();
   };
@@ -68,6 +81,13 @@ function Client(world){
   Object.defineProperty(this, "notices", {
     get: function(){
       return store.state.notices;
+    }
+  });
+
+  Object.defineProperty(this, "uplinkStatus", {
+    get: function(){
+      var uplink = store.state.uplink || {status: "UNKNOWN"};
+      return uplink.status;
     }
   });
   // DEBT do not start here or enuse that components read first time on starting.
