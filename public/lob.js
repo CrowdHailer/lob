@@ -248,13 +248,31 @@ var Lob = (function () { 'use strict';
         var notices = [];
         return Object.assign({}, state, { notices: notices });
     }
+    function uplinkAvailable(state) {
+        state = state || {};
+        var uplink = state.uplink || {};
+        return Object.assign({}, state, { uplink: { status: "AVAILABLE" } });
+    }
+    function startTransmitting(state) {
+        state = state || {};
+        var uplink = state.uplink || {};
+        return Object.assign({}, state, { uplink: { status: "TRANSMITTING" } });
+    }
+    function uplinkFailed(state) {
+        state = state || {};
+        var uplink = state.uplink || {};
+        return Object.assign({}, state, { uplink: { status: "FAILED" } });
+    }
 
 
     var StateUpdates = Object.freeze({
         resetReadings: resetReadings,
         newReading: newReading,
         badReading: badReading,
-        closeNotices: closeNotices
+        closeNotices: closeNotices,
+        uplinkAvailable: uplinkAvailable,
+        startTransmitting: startTransmitting,
+        uplinkFailed: uplinkFailed
     });
 
     var Store = enhance(StateUpdates);
@@ -330,12 +348,18 @@ var Lob = (function () { 'use strict';
             resetReadings: start$1(wrap(logger, { prefix: "Reset readings" })),
             newReading: start$1(wrap(logger, { prefix: "New reading" })),
             badReading: start$1(wrap(logger, { prefix: "Bad reading" })),
+            uplinkAvailable: start$1(wrap(logger, { prefix: "Uplink available" })),
+            startTransmitting: start$1(wrap(logger, { prefix: "Start transmitting" })),
+            uplinkFailed: start$1(wrap(logger, { prefix: "Uplink failed" })),
             closeNotices: start$1(wrap(logger, { prefix: "Close Notices" }))
         };
-        var store = Store.start();
+        var store = Store.start({});
         events.resetReadings.register(store.resetReadings);
         events.newReading.register(store.newReading);
         events.badReading.register(store.badReading);
+        events.uplinkAvailable.register(store.uplinkAvailable);
+        events.startTransmitting.register(store.startTransmitting);
+        events.uplinkFailed.register(store.uplinkFailed);
         events.closeNotices.register(store.closeNotices);
         this.accelerometer = Accelerometer(this);
         this.uplink = default_1(this);
@@ -358,6 +382,13 @@ var Lob = (function () { 'use strict';
         this.onBadReading = function (listener) {
             events.badReading.register(listener);
         };
+        this.uplinkAvailable = function () {
+            events.uplinkAvailable();
+        };
+        this.startTransmitting = function () {
+            events.startTransmitting();
+        };
+        this.uplinkFailed = events.uplinkFailed;
         this.closeNotices = function () {
             events.closeNotices();
         };
@@ -382,6 +413,12 @@ var Lob = (function () { 'use strict';
         Object.defineProperty(this, "notices", {
             get: function () {
                 return store.state.notices;
+            }
+        });
+        Object.defineProperty(this, "uplinkStatus", {
+            get: function () {
+                var uplink = store.state.uplink || { status: "UNKNOWN" };
+                return uplink.status;
             }
         });
         // DEBT do not start here or enuse that components read first time on starting.
@@ -826,7 +863,7 @@ var Lob = (function () { 'use strict';
 
     function create($root, app) {
         app.accelerometer.start();
-        // app.uplink.start();
+        app.uplink.start();
         var controller = Controller($root, app);
         var display = Display($root);
         var presenter = present(app);
@@ -898,7 +935,7 @@ var Lob = (function () { 'use strict';
     }
 
     var client = start({
-        console: wrap(development, { prefix: "Lob client" })
+        console: wrap(development, { prefix: "LOB" })
     });
     ready(function () {
         var $avionics = document.querySelector("[data-interface~=avionics]");

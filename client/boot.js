@@ -5,7 +5,7 @@ import * as Logger from "./framework/logger";
 import { argsToArray } from "./utils/utils";
 
 var client = Client.start({
-  console: Logger.wrap(Logger.development, {prefix: "Lob client"})
+  console: Logger.wrap(Logger.development, {prefix: "LOB"})
 });
 
 import { ready } from "./utils/dom";
