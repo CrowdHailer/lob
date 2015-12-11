@@ -13,13 +13,18 @@ export default function create($root, app){
 
   var display = Display($root);
   var presenter = Presenter(app);
-  return {
-    update: function(){
-      for (var attribute in display) {
-        if (display.hasOwnProperty(attribute)) {
-          display[attribute] = presenter[attribute];
-        }
+
+  function update(){
+    for (var attribute in display) {
+      if (display.hasOwnProperty(attribute)) {
+        display[attribute] = presenter[attribute];
       }
     }
+  }
+
+  app.onResetReadings(update);
+  app.onNewReading(update);
+  return {
+    update: update
   };
 }

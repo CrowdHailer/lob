@@ -12,7 +12,8 @@ export function createTranscriptFunction(fn){
   f.transcript = transcript;
   Object.defineProperty(f, "lastCall", {
     get: function(){
-      return transcript[0];
+      var idx = transcript.length - 1;
+      return transcript[idx];
     }
   });
   func = f;

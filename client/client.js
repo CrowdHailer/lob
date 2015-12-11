@@ -17,9 +17,15 @@ function Client(world){
   this.resetReadings = function(){
     events.resetReadings();
   };
+  this.onResetReadings = function(listener){
+    events.resetReadings.register(listener);
+  };
   this.newReading = function(reading){
     // Validate here
     events.newReading(reading);
+  };
+  this.onNewReading = function(listener){
+    events.newReading.register(listener);
   };
 
   Object.defineProperty(this, "currentReading", {

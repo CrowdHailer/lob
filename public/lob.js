@@ -237,9 +237,15 @@ var Lob = (function () { 'use strict';
         this.resetReadings = function () {
             events.resetReadings();
         };
+        this.onResetReadings = function (listener) {
+            events.resetReadings.register(listener);
+        };
         this.newReading = function (reading) {
             // Validate here
             events.newReading(reading);
+        };
+        this.onNewReading = function (listener) {
+            events.newReading.register(listener);
         };
         Object.defineProperty(this, "currentReading", {
             get: function () {
@@ -578,6 +584,16 @@ var Lob = (function () { 'use strict';
     }
     var Events = Gator;
 
+    function Controller($root, app) {
+        var events = Events($root);
+        events.on("click", "[data-command~=reset]", function (evt) {
+            app.resetReadings();
+        });
+        events.on("click", "[data-command~=start-transmitting]", function (evt) {
+            app.startTransmitting();
+        });
+    }
+
     /* jshint esnext: true */
     function Display($root) {
         var $maxFlightTime = $root.querySelector("[data-hook~=flight-time]");
@@ -685,15 +701,6 @@ var Lob = (function () { 'use strict';
         return new Presenter(app);
     }
 
-    function Controller($root, app) {
-        var events = Events($root);
-        events.on("click", "[data-command~=reset]", function (evt) {
-            app.resetReadings();
-        });
-        events.on("click", "[data-command~=start-transmitting]", function (evt) {
-            app.startTransmitting();
-        });
-    }
     function create($root, app) {
         // app.fetchService("accelerometer").start();
         // fetch uplink so that it starts connecting;
@@ -702,14 +709,17 @@ var Lob = (function () { 'use strict';
         var controller = Controller($root, app);
         var display = Display($root);
         var presenter = present(app);
-        return {
-            update: function () {
-                for (var attribute in display) {
-                    if (display.hasOwnProperty(attribute)) {
-                        display[attribute] = presenter[attribute];
-                    }
+        function update() {
+            for (var attribute in display) {
+                if (display.hasOwnProperty(attribute)) {
+                    display[attribute] = presenter[attribute];
                 }
             }
+        }
+        app.onResetReadings(update);
+        app.onNewReading(update);
+        return {
+            update: update
         };
     }
 

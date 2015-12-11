@@ -2,7 +2,7 @@
 
 import Events from "../vendor/gator.js";
 
-function Controller($root, app){
+export default function Controller($root, app){
   var events = Events($root);
   events.on("click", "[data-command~=reset]", function(evt){
     app.resetReadings();

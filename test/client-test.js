@@ -1,6 +1,6 @@
 /* jshint esnext: true */
 
-import { createTranscriptLogger } from "./support";
+import { createTranscriptLogger, createTranscriptFunction } from "./support";
 
 import * as Client from "../client/client";
 
@@ -9,16 +9,18 @@ import * as Client from "../client/client";
 // FLIGHT HISTORY -> Array of flights not including the current flight
 
 describe("Client", function() {
-  var client, console;
+  var client, console, listener;
 
   beforeEach(function(){
     console = createTranscriptLogger();
+    listener = createTranscriptFunction();
     client = Client.start({
       console: console
     });
   });
   describe("after reset", function(){
     beforeEach(function(){
+      client.onResetReadings(listener);
       client.resetReadings();
     });
 
@@ -34,10 +36,14 @@ describe("Client", function() {
     it("should have logged the reset event", function(){
       expect(console.info.lastCall).toEqual(["[Reset readings]"]);
     });
+    it("should have notified the listener", function(){
+      expect(listener.lastCall).toEqual([]);
+    });
   });
 
   describe("recording flights", function(){
     beforeEach(function(){
+      client.onNewReading(listener);
       client.resetReadings();
       client.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1000});
       client.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1200});
@@ -64,6 +70,9 @@ describe("Client", function() {
     });
     it("should have logged the reading events", function(){
       expect(console.info.transcript.length).toEqual(7);
+    });
+    it("should have notified the listener", function(){
+      expect(listener.lastCall).toEqual([{acceleration: {x: 0, y: 0, z: 1}, timestamp: 2000}]);
     });
   });
 
