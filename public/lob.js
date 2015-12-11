@@ -323,26 +323,28 @@ var Lob = (function () { 'use strict';
                 app.uplinkFailed(err.reason);
             });
             app.onStartTransmitting(uplink.startTransmitting);
+            app.onNewReading(uplink.newReading);
         }
-        // channel.publish("new Reading", "reading", function(err) {
-        //   if(err) {
-        //     console.warn("Unable to publish message; err = " + err.message);
-        //   } else {
-        //     console.info("Message successfully sent");
-        //   }
-        // });
         var uplink = {
             startTransmitting: function () {
-                console.log(app.uplinkStatus);
+                // console.log(app.uplinkStatus);
             },
             newReading: function (r) {
-                console.log("what is the new reading", r);
-                console.log("what is the state", app.fetchService("store").state.uplink.transmitting);
+                var doTransmit = app.uplinkStatus == "TRANSMITTING";
+                if (doTransmit) {
+                    channel.publish("new Reading", "reading", function (err) {
+                        if (err) {
+                            console.warn("Unable to publish message; err = " + err.message);
+                        }
+                        else {
+                            console.info("Message successfully sent");
+                        }
+                    });
+                }
             },
             // TODO start should be callable once
             start: start
         };
-        // app.actions.newReading.register(uplink.newReading);
         return uplink;
     }
 
