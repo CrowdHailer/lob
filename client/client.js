@@ -2,6 +2,7 @@
 import * as Event from "./framework/event";
 import * as Logger from "./framework/logger";
 import Store from "./store";
+import Accelerometer from "./accelerometer";
 
 function Client(world){
   var logger = world.console;
@@ -17,6 +18,8 @@ function Client(world){
   events.newReading.register(store.newReading);
   events.badReading.register(store.badReading);
   events.closeNotices.register(store.closeNotices);
+
+  this.accelerometer = Accelerometer(this);
 
   this.resetReadings = function(){
     events.resetReadings();
@@ -65,6 +68,7 @@ function Client(world){
       return store.state.notices;
     }
   });
+  // DEBT do not start here or enuse that components read first time on starting.
   // events.resetReadings();
 }
 

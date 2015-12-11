@@ -4,6 +4,26 @@ var Lob = (function () { 'use strict';
     function argsToArray(args) {
         return Array.prototype.slice.call(args);
     }
+    function throttle(fn, threshhold, scope) {
+        threshhold = threshhold || 250;
+        var last, deferTimer;
+        return function () {
+            var context = scope || this;
+            var now = Date.now(), args = arguments;
+            if (last && now < last + threshhold) {
+                // hold on to it
+                clearTimeout(deferTimer);
+                deferTimer = setTimeout(function () {
+                    last = now;
+                    fn.apply(context, args);
+                }, threshhold);
+            }
+            else {
+                last = now;
+                fn.apply(context, args);
+            }
+        };
+    }
 
     function wrap(logger, settings) {
         var prefix;
@@ -239,6 +259,26 @@ var Lob = (function () { 'use strict';
 
     var Store = enhance(StateUpdates);
 
+    /* jshint esnext: true */
+    var DEVICEMOTION = "devicemotion";
+    var THROTTLE_RATE = 100; function Accelerometer(app) {
+        function reportDeviceMotionEvent(deviceMotionEvent) {
+            var raw = deviceMotionEvent.accelerationIncludingGravity;
+            if (typeof raw.x === "number") {
+                app.newReading({ acceleration: { x: raw.x, y: raw.y, z: raw.z }, timestamp: Date.now() });
+            }
+            else {
+                app.badReading(raw);
+            }
+        }
+        var throttledReport = throttle(reportDeviceMotionEvent, THROTTLE_RATE);
+        return {
+            start: function () {
+                window.addEventListener(DEVICEMOTION, throttledReport);
+            }
+        };
+    }
+
     function Client(world) {
         var logger = world.console;
         var events = {
@@ -252,6 +292,7 @@ var Lob = (function () { 'use strict';
         events.newReading.register(store.newReading);
         events.badReading.register(store.badReading);
         events.closeNotices.register(store.closeNotices);
+        this.accelerometer = Accelerometer(this);
         this.resetReadings = function () {
             events.resetReadings();
         };
@@ -297,6 +338,7 @@ var Lob = (function () { 'use strict';
                 return store.state.notices;
             }
         });
+        // DEBT do not start here or enuse that components read first time on starting.
         // events.resetReadings();
     }
     function start(world) {
@@ -737,10 +779,9 @@ var Lob = (function () { 'use strict';
     }
 
     function create($root, app) {
-        // app.fetchService("accelerometer").start();
+        app.accelerometer.start();
         // fetch uplink so that it starts connecting;
         // app.fetchService("uplink");
-        console.log("mounting avionics component");
         var controller = Controller($root, app);
         var display = Display($root);
         var presenter = present(app);

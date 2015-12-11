@@ -5,10 +5,9 @@ import Display from "./display";
 import Presenter from "./presenter";
 
 export default function create($root, app){
-  // app.fetchService("accelerometer").start();
+  app.accelerometer.start();
   // fetch uplink so that it starts connecting;
   // app.fetchService("uplink");
-  console.log("mounting avionics component");
   var controller = Controller($root, app);
 
   var display = Display($root);
