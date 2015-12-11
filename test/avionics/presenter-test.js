@@ -28,6 +28,9 @@ describe("Avionics Presenter", function(){
     it("should have a maxAltitude of 0", function(){
       expect(presenter.maxAltitude).toBe("0.00 m");
     });
+    it("should instruct user to lob", function(){
+      expect(presenter.instruction).toBe("Lob phone to get started");
+    });
     it("should have a current Reading of waiting", function(){
       expect(presenter.currentReadout).toEqual("Waiting.");
     });
@@ -80,8 +83,11 @@ describe("Avionics Presenter", function(){
     it("should have a maxFlightTime of .450", function(){
       expect(presenter.maxFlightTime).toBe("0.45 s");
     });
-    it("should have a maxAltitude of 0", function(){
+    it("should have a maxAltitude of 0.25", function(){
       expect(presenter.maxAltitude).toBe("0.25 m");
+    });
+    it("should instruct user to lob", function(){
+      expect(presenter.instruction).toBe("OK! can you lob any higher");
     });
   });
 });

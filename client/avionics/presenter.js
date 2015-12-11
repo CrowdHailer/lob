@@ -64,6 +64,15 @@ function Presenter(raw){
       return "[" + [format(x), format(y), format(z)].join(", ") + "]";
     }
   });
+
+  Object.defineProperty(this, "instruction", {
+    get: function(){
+      if (this.maxAltitude == "0.00 m") {
+        return "Lob phone to get started";
+      }
+      return "OK! can you lob any higher";
+    }
+  });
 }
 
 export function present(app){

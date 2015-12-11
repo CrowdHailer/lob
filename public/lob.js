@@ -580,17 +580,29 @@ var Lob = (function () { 'use strict';
 
     /* jshint esnext: true */
     function Display($root) {
-        var $flightTime = $root.querySelector("[data-hook~=flight-time]");
+        var $maxFlightTime = $root.querySelector("[data-hook~=flight-time]");
         var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
-        var $currentReading = $root.querySelector("[data-hook~=current-reading]");
+        var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
         var $nextAction = $root.querySelector("[data-display~=instruction]");
         return Object.create({}, {
             maxFlightTime: {
                 set: function (maxFlightTime) {
-                    $flightTime.innerHTML = maxFlightTime;
+                    $maxFlightTime.innerHTML = maxFlightTime;
                 },
                 enumerable: true
-            }
+            },
+            maxAltitude: {
+                set: function (maxAltitude) {
+                    $maxAltitude.innerHTML = maxAltitude;
+                },
+                enumerable: true
+            },
+            currentReadout: {
+                set: function (currentReadout) {
+                    $currentReadout.innerHTML = currentReadout;
+                },
+                enumerable: true
+            },
         });
         // function render(presentation){
         //   $flightTime.innerHTML = presentation.maxFlightTime + "s";
