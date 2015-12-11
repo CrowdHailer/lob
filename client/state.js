@@ -52,7 +52,8 @@ var readings = {
 export var resetReadings = lens("readings")(readings.reset);
 
 export function newReading(state, current){
-  var readings = state.readings;
+  state = state || {};
+  var readings = state.readings || EMPTY_READINGS;
   var currentFlight = readings.currentFlight;
   var flightHistory = readings.flightHistory;
   if (Reading.freefall(current)) {

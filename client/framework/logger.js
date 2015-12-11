@@ -1,6 +1,6 @@
 /* jshint esnext: true */
 
-export function wrap(console, settings){
+export function wrap(logger, settings){
   var prefix;
   var notices = [];
   if (settings.prefix){
@@ -11,18 +11,19 @@ export function wrap(console, settings){
     return Array.prototype.slice.call(args);
   };
   function debug(){
-    console.debug.apply(console, notices.concat(argsToArray(arguments)));
+    logger.debug.apply(logger, notices.concat(argsToArray(arguments)));
   }
   function info(){
-    console.info.apply(console, notices.concat(argsToArray(arguments)));
+    console.log(logger)
+    logger.info.apply(logger, notices.concat(argsToArray(arguments)));
   }
   function warn(a){
     var args = argsToArray(arguments);
-    console.warn.apply(console, notices.concat(args));
+    logger.warn.apply(logger, notices.concat(args));
   }
   function error(e){
     var args = argsToArray(arguments);
-    console.error.apply(console, notices.concat(args));
+    logger.error.apply(logger, notices.concat(args));
   }
   return {
     debug: debug,
