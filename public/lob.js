@@ -794,6 +794,8 @@ var Lob = (function () { 'use strict';
         }
         app.onResetReadings(update);
         app.onNewReading(update);
+        // Needs to reset state before implementation
+        // update();
         return {
             update: update
         };
