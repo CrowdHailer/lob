@@ -6,8 +6,8 @@ import Presenter from "./presenter";
 
 export default function create($root, app){
   app.accelerometer.start();
-  // fetch uplink so that it starts connecting;
-  // app.fetchService("uplink");
+  app.uplink.start();
+
   var controller = Controller($root, app);
 
   var display = Display($root);

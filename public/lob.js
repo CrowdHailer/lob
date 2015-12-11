@@ -279,6 +279,51 @@ var Lob = (function () { 'use strict';
         };
     }
 
+    function getQueryParameter(name) {
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
+    function default_1(app) {
+        // TODO should be from location object fetched from context;
+        var channelName = getQueryParameter("channel");
+        var token = getQueryParameter("token");
+        var channel;
+        function start() {
+            console.debug("initializing uplink on channel " + channelName);
+            var realtime = new Ably.Realtime({ token: token });
+            channel = realtime.channels.get(channelName);
+            realtime.connection.on("connected", function (err) {
+                app.uplinkAvailable();
+            });
+            realtime.connection.on("failed", function (err) {
+                app.uplinkFailed(err.reason);
+            });
+        }
+        // channel.publish("new Reading", "reading", function(err) {
+        //   if(err) {
+        //     console.warn("Unable to publish message; err = " + err.message);
+        //   } else {
+        //     console.info("Message successfully sent");
+        //   }
+        // });
+        var uplink = {
+            startTransmission: function () {
+                console.log("opening");
+            },
+            newReading: function (r) {
+                console.log("what is the new reading", r);
+                console.log("what is the state", app.fetchService("store").state.uplink.transmitting);
+            },
+            // TODO start should be callable once
+            start: start
+        };
+        // app.actions.startTransmitting.register(uplink.startTransmission);
+        // app.actions.newReading.register(uplink.newReading);
+        return uplink;
+    }
+
     function Client(world) {
         var logger = world.console;
         var events = {
@@ -293,6 +338,7 @@ var Lob = (function () { 'use strict';
         events.badReading.register(store.badReading);
         events.closeNotices.register(store.closeNotices);
         this.accelerometer = Accelerometer(this);
+        this.uplink = default_1(this);
         this.resetReadings = function () {
             events.resetReadings();
         };
@@ -780,8 +826,7 @@ var Lob = (function () { 'use strict';
 
     function create($root, app) {
         app.accelerometer.start();
-        // fetch uplink so that it starts connecting;
-        // app.fetchService("uplink");
+        // app.uplink.start();
         var controller = Controller($root, app);
         var display = Display($root);
         var presenter = present(app);

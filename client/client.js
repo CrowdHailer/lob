@@ -3,6 +3,7 @@ import * as Event from "./framework/event";
 import * as Logger from "./framework/logger";
 import Store from "./store";
 import Accelerometer from "./accelerometer";
+import Uplink from "./uplink";
 
 function Client(world){
   var logger = world.console;
@@ -20,6 +21,7 @@ function Client(world){
   events.closeNotices.register(store.closeNotices);
 
   this.accelerometer = Accelerometer(this);
+  this.uplink = Uplink(this);
 
   this.resetReadings = function(){
     events.resetReadings();

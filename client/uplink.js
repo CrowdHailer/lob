@@ -7,24 +7,27 @@ export default function(app){
   var channelName = getQueryParameter("channel");
   var token = getQueryParameter("token");
 
-  app.logger.debug("initializing uplink on channel " + channelName);
+  var channel;
+  function start(){
+    console.debug("initializing uplink on channel " + channelName);
 
-  var realtime = new Ably.Realtime({ token: token });
-  var channel = realtime.channels.get(channelName);
-  realtime.connection.on("connected", function(err) {
-    app.actions.uplinkAvailable();
-  });
-  realtime.connection.on("failed", function(err) {
-    app.actions.failedConnection(err.reason);
-  });
+    var realtime = new Ably.Realtime({ token: token });
+    channel = realtime.channels.get(channelName);
+    realtime.connection.on("connected", function(err) {
+      app.uplinkAvailable();
+    });
+    realtime.connection.on("failed", function(err) {
+      app.uplinkFailed(err.reason);
+    });
+  }
 
-  channel.publish("new Reading", "reading", function(err) {
-    if(err) {
-      console.warn("Unable to publish message; err = " + err.message);
-    } else {
-      console.info("Message successfully sent");
-    }
-  });
+  // channel.publish("new Reading", "reading", function(err) {
+  //   if(err) {
+  //     console.warn("Unable to publish message; err = " + err.message);
+  //   } else {
+  //     console.info("Message successfully sent");
+  //   }
+  // });
   var uplink = {
     startTransmission: function(){
       console.log("opening");
@@ -32,11 +35,13 @@ export default function(app){
     newReading: function(r){
       console.log("what is the new reading", r);
       console.log("what is the state", app.fetchService("store").state.uplink.transmitting);
-    }
+    },
+    // TODO start should be callable once
+    start: start
   };
 
-  app.actions.startTransmitting.register(uplink.startTransmission);
-  app.actions.newReading.register(uplink.newReading);
+  // app.actions.startTransmitting.register(uplink.startTransmission);
+  // app.actions.newReading.register(uplink.newReading);
 
   return uplink;
 }
