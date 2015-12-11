@@ -11,9 +11,14 @@ var client = Client.start({
 import { ready } from "./utils/dom";
 
 import Avionics from "./avionics/avionics";
+import Notices from "./notices/notices";
 
 ready(function(){
-  window.display = Avionics(document, client);
+  var $avionics = document.querySelector("[data-interface~=avionics]");
+  window.avionics = Avionics($avionics, client);
+
+  var $notices = document.querySelector("[data-component~=notices]");
+  window.notices = Notices($notices, client);
 });
 
 export default client;

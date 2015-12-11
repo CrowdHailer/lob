@@ -216,11 +216,25 @@ var Lob = (function () { 'use strict';
         readings = { current: current, currentFlight: currentFlight, flightHistory: flightHistory };
         return Object.assign({}, state, { readings: readings });
     }
+    function badReading(state) {
+        var MESSAGE = "Could not read the data from this device. Please try again on a mobile with working accelerometer.";
+        state = state || {};
+        var notices = state.notices || [];
+        notices = notices.concat(MESSAGE);
+        return Object.assign({}, state, { notices: notices });
+    }
+    function closeNotices(state) {
+        state = state || {};
+        var notices = [];
+        return Object.assign({}, state, { notices: notices });
+    }
 
 
     var StateUpdates = Object.freeze({
         resetReadings: resetReadings,
-        newReading: newReading
+        newReading: newReading,
+        badReading: badReading,
+        closeNotices: closeNotices
     });
 
     var Store = enhance(StateUpdates);
@@ -229,11 +243,15 @@ var Lob = (function () { 'use strict';
         var logger = world.console;
         var events = {
             resetReadings: start$1(wrap(logger, { prefix: "Reset readings" })),
-            newReading: start$1(wrap(logger, { prefix: "New reading" }))
+            newReading: start$1(wrap(logger, { prefix: "New reading" })),
+            badReading: start$1(wrap(logger, { prefix: "Bad reading" })),
+            closeNotices: start$1(wrap(logger, { prefix: "Close Notices" }))
         };
         var store = Store.start();
         events.resetReadings.register(store.resetReadings);
         events.newReading.register(store.newReading);
+        events.badReading.register(store.badReading);
+        events.closeNotices.register(store.closeNotices);
         this.resetReadings = function () {
             events.resetReadings();
         };
@@ -246,6 +264,18 @@ var Lob = (function () { 'use strict';
         };
         this.onNewReading = function (listener) {
             events.newReading.register(listener);
+        };
+        this.badReading = function () {
+            events.badReading();
+        };
+        this.onBadReading = function (listener) {
+            events.badReading.register(listener);
+        };
+        this.closeNotices = function () {
+            events.closeNotices();
+        };
+        this.onCloseNotices = function (listener) {
+            events.closeNotices.register(listener);
         };
         Object.defineProperty(this, "currentReading", {
             get: function () {
@@ -260,6 +290,11 @@ var Lob = (function () { 'use strict';
         Object.defineProperty(this, "flightHistory", {
             get: function () {
                 return store.state.readings.flightHistory;
+            }
+        });
+        Object.defineProperty(this, "notices", {
+            get: function () {
+                return store.state.notices;
             }
         });
         // events.resetReadings();
@@ -723,11 +758,65 @@ var Lob = (function () { 'use strict';
         };
     }
 
+    function Controller$1($root, app) {
+        var events = Events($root);
+        events.on("click", function (evt) {
+            app.closeNotices();
+        });
+    }
+
+    /* jshint esnext: true */
+    function Display$1($root) {
+        var $message = $root.querySelector("[data-display~=message]");
+        return Object.create({}, {
+            active: {
+                set: function (active) {
+                    var ACTIVE = "active";
+                    if (active) {
+                        $root.classList.add(ACTIVE);
+                    }
+                    else {
+                        $root.classList.remove(ACTIVE);
+                    }
+                },
+                enumerable: true
+            },
+            message: {
+                set: function (message) {
+                    $message.innerHTML = message;
+                }
+            }
+        });
+    }
+
+    function Notice($root, app) {
+        var display = Display$1($root);
+        var controller = Controller$1($root, app);
+        function update() {
+            var message = app.notices[0];
+            if (message) {
+                display.message = message;
+                display.active = true;
+            }
+            else {
+                display.active = false;
+            }
+        }
+        app.onBadReading(update);
+        app.onCloseNotices(update);
+        return {
+            update: update
+        };
+    }
+
     var client = start({
         console: wrap(development, { prefix: "Lob client" })
     });
     ready(function () {
-        window.display = create(document, client);
+        var $avionics = document.querySelector("[data-interface~=avionics]");
+        window.avionics = create($avionics, client);
+        var $notices = document.querySelector("[data-component~=notices]");
+        window.notices = Notice($notices, client);
     });
 
     return client;
