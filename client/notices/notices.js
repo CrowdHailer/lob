@@ -19,6 +19,7 @@ export default function Notice($root, app){
 
   app.onBadReading(update);
   app.onCloseNotices(update);
+  app.onShowAlert(update);
   return {
     update: update
   };

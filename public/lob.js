@@ -243,6 +243,12 @@ var Lob = (function () { 'use strict';
         notices = notices.concat(MESSAGE);
         return Object.assign({}, state, { notices: notices });
     }
+    function showAlert(state, message) {
+        state = state || {};
+        var notices = state.notices || [];
+        notices = notices.concat(message);
+        return Object.assign({}, state, { notices: notices });
+    }
     function closeNotices(state) {
         state = state || {};
         var notices = [];
@@ -269,6 +275,7 @@ var Lob = (function () { 'use strict';
         resetReadings: resetReadings,
         newReading: newReading,
         badReading: badReading,
+        showAlert: showAlert,
         closeNotices: closeNotices,
         uplinkAvailable: uplinkAvailable,
         startTransmitting: startTransmitting,
@@ -318,6 +325,7 @@ var Lob = (function () { 'use strict';
             realtime.connection.on("failed", function (err) {
                 app.uplinkFailed(err.reason);
             });
+            app.onStartTransmitting(uplink.startTransmitting);
         }
         // channel.publish("new Reading", "reading", function(err) {
         //   if(err) {
@@ -327,8 +335,8 @@ var Lob = (function () { 'use strict';
         //   }
         // });
         var uplink = {
-            startTransmission: function () {
-                console.log("opening");
+            startTransmitting: function () {
+                console.log(app.uplinkStatus);
             },
             newReading: function (r) {
                 console.log("what is the new reading", r);
@@ -337,7 +345,6 @@ var Lob = (function () { 'use strict';
             // TODO start should be callable once
             start: start
         };
-        // app.actions.startTransmitting.register(uplink.startTransmission);
         // app.actions.newReading.register(uplink.newReading);
         return uplink;
     }
@@ -351,6 +358,7 @@ var Lob = (function () { 'use strict';
             uplinkAvailable: start$1(wrap(logger, { prefix: "Uplink available" })),
             startTransmitting: start$1(wrap(logger, { prefix: "Start transmitting" })),
             uplinkFailed: start$1(wrap(logger, { prefix: "Uplink failed" })),
+            showAlert: start$1(wrap(logger, { prefix: "Show alert" })),
             closeNotices: start$1(wrap(logger, { prefix: "Close Notices" }))
         };
         var store = Store.start({});
@@ -360,6 +368,7 @@ var Lob = (function () { 'use strict';
         events.uplinkAvailable.register(store.uplinkAvailable);
         events.startTransmitting.register(store.startTransmitting);
         events.uplinkFailed.register(store.uplinkFailed);
+        events.showAlert.register(store.showAlert);
         events.closeNotices.register(store.closeNotices);
         this.accelerometer = Accelerometer(this);
         this.uplink = default_1(this);
@@ -386,9 +395,20 @@ var Lob = (function () { 'use strict';
             events.uplinkAvailable();
         };
         this.startTransmitting = function () {
-            events.startTransmitting();
+            if (store.state.uplink.status == "AVAILABLE") {
+                events.startTransmitting();
+            }
+            else {
+                events.showAlert("Could not start a connection. Please refresh the page to try again.");
+            }
+        };
+        this.onStartTransmitting = function (listener) {
+            events.startTransmitting.register(listener);
         };
         this.uplinkFailed = events.uplinkFailed;
+        this.onShowAlert = function (listener) {
+            events.showAlert.register(listener);
+        };
         this.closeNotices = function () {
             events.closeNotices();
         };
@@ -929,6 +949,7 @@ var Lob = (function () { 'use strict';
         }
         app.onBadReading(update);
         app.onCloseNotices(update);
+        app.onShowAlert(update);
         return {
             update: update
         };

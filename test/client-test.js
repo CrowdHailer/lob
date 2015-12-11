@@ -117,6 +117,12 @@ describe("Client", function() {
       expect(client.uplinkStatus).toEqual("FAILED");
     });
     // test combinations to -> from state in state tests
+    it("should show notice of failed connection", function(){
+      client.uplinkFailed();
+      client.startTransmitting();
+      expect(client.notices).toEqual(["Could not start a connection. Please refresh the page to try again."]);
+    });
   });
+
 
 });

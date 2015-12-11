@@ -14,6 +14,7 @@ function Client(world){
     uplinkAvailable: Event.start(Logger.wrap(logger, {prefix: "Uplink available"})),
     startTransmitting: Event.start(Logger.wrap(logger, {prefix: "Start transmitting"})),
     uplinkFailed: Event.start(Logger.wrap(logger, {prefix: "Uplink failed"})),
+    showAlert: Event.start(Logger.wrap(logger, {prefix: "Show alert"})),
     closeNotices: Event.start(Logger.wrap(logger, {prefix: "Close Notices"}))
   };
 
@@ -24,9 +25,11 @@ function Client(world){
   events.uplinkAvailable.register(store.uplinkAvailable);
   events.startTransmitting.register(store.startTransmitting);
   events.uplinkFailed.register(store.uplinkFailed);
+  events.showAlert.register(store.showAlert);
   events.closeNotices.register(store.closeNotices);
 
   this.accelerometer = Accelerometer(this);
+
   this.uplink = Uplink(this);
 
   this.resetReadings = function(){
@@ -52,9 +55,19 @@ function Client(world){
     events.uplinkAvailable();
   };
   this.startTransmitting = function(){
-    events.startTransmitting();
+    if (store.state.uplink.status == "AVAILABLE") {
+      events.startTransmitting();
+    } else {
+      events.showAlert("Could not start a connection. Please refresh the page to try again.");
+    }
+  };
+  this.onStartTransmitting = function(listener){
+    events.startTransmitting.register(listener);
   };
   this.uplinkFailed = events.uplinkFailed;
+  this.onShowAlert = function(listener){
+    events.showAlert.register(listener);
+  };
   this.closeNotices = function(){
     events.closeNotices();
   };

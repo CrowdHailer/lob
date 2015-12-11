@@ -19,6 +19,7 @@ export default function(app){
     realtime.connection.on("failed", function(err) {
       app.uplinkFailed(err.reason);
     });
+    app.onStartTransmitting(uplink.startTransmitting);
   }
 
   // channel.publish("new Reading", "reading", function(err) {
@@ -29,8 +30,8 @@ export default function(app){
   //   }
   // });
   var uplink = {
-    startTransmission: function(){
-      console.log("opening");
+    startTransmitting: function(){
+      console.log(app.uplinkStatus);
     },
     newReading: function(r){
       console.log("what is the new reading", r);
@@ -40,7 +41,6 @@ export default function(app){
     start: start
   };
 
-  // app.actions.startTransmitting.register(uplink.startTransmission);
   // app.actions.newReading.register(uplink.newReading);
 
   return uplink;
