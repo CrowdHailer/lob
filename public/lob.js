@@ -583,7 +583,7 @@ var Lob = (function () { 'use strict';
         var $maxFlightTime = $root.querySelector("[data-hook~=flight-time]");
         var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
         var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
-        var $nextAction = $root.querySelector("[data-display~=instruction]");
+        var $instruction = $root.querySelector("[data-display~=instruction]");
         return Object.create({}, {
             maxFlightTime: {
                 set: function (maxFlightTime) {
@@ -603,24 +603,13 @@ var Lob = (function () { 'use strict';
                 },
                 enumerable: true
             },
+            instruction: {
+                set: function (instruction) {
+                    $instruction.innerHTML = instruction;
+                },
+                enumerable: true
+            },
         });
-        // function render(presentation){
-        //   $flightTime.innerHTML = presentation.maxFlightTime + "s";
-        //   $maxAltitude.innerHTML = presentation.maxAltitude + "m";
-        //   $currentReading.innerHTML = presentation.currentReading;
-        //   if (presentation.maxAltitude == 0){
-        //     $nextAction.innerHTML = "Lob phone to get started";
-        //   } else {
-        //     $nextAction.innerHTML = "OK! can you lob any higher";
-        //   }
-        // };
-        // return {
-        //   update: function(store){
-        //     var state = store.getState();
-        //     var presenter = AvionicsPresenter.create(state);
-        //     render(presenter);
-        //   }
-        // };
     }
 
     /* jshint esnext: true */
@@ -683,6 +672,14 @@ var Lob = (function () { 'use strict';
                 return "[" + [format(x), format(y), format(z)].join(", ") + "]";
             }
         });
+        Object.defineProperty(this, "instruction", {
+            get: function () {
+                if (this.maxAltitude == "0.00 m") {
+                    return "Lob phone to get started";
+                }
+                return "OK! can you lob any higher";
+            }
+        });
     }
     function present(app) {
         return new Presenter(app);
@@ -702,7 +699,7 @@ var Lob = (function () { 'use strict';
         // fetch uplink so that it starts connecting;
         // app.fetchService("uplink");
         console.log("mounting avionics component");
-        var controller = Controller($root, app.actions);
+        var controller = Controller($root, app);
         var display = Display($root);
         var presenter = present(app);
         return {
