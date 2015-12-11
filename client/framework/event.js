@@ -1,14 +1,13 @@
 /* jshint esnext: true */
 
 import * as Dispatcher from "./dispatcher";
-import { DEFAULT } from "./logger";
+import { silent } from "./logger";
 import { argsToArray } from "../utils/utils";
 
 
 // Simply a stateful dispatcher
-// DEBT should be start not create
 export function start(logger){
-  if (logger == void 0) { logger = DEFAULT; }
+  if (logger == void 0) { logger = silent; }
 
   var dispatcher = Dispatcher.create(logger);
 

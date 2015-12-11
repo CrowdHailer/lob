@@ -1,6 +1,10 @@
 var Lob = (function () { 'use strict';
 
     /* jshint esnext: true */
+    function argsToArray(args) {
+        return Array.prototype.slice.call(args);
+    }
+
     function wrap(logger, settings) {
         var prefix;
         var notices = [];
@@ -8,14 +12,10 @@ var Lob = (function () { 'use strict';
             prefix = "[" + settings.prefix + "]";
             notices = notices.concat(prefix);
         }
-        var argsToArray = function (args) {
-            return Array.prototype.slice.call(args);
-        };
         function debug() {
             logger.debug.apply(logger, notices.concat(argsToArray(arguments)));
         }
         function info() {
-            console.log(logger);
             logger.info.apply(logger, notices.concat(argsToArray(arguments)));
         }
         function warn(a) {
@@ -33,11 +33,32 @@ var Lob = (function () { 'use strict';
             error: error,
         };
     }
-    var DEFAULT = {
+    var silent = {
+        debug: function () { },
         info: function () { },
         warn: function () { },
         // error logging should be used for errors and in development these should be thrown
         error: function (e) { throw e; }
+    };
+    var development = {
+        debug: function () {
+            var args = argsToArray(arguments);
+            console.debug.apply(console, args);
+        },
+        info: function () {
+            var args = argsToArray(arguments);
+            console.info.apply(console, args);
+        },
+        warn: function () {
+            var args = argsToArray(arguments);
+            console.warn.apply(console, args);
+        },
+        error: function (e) {
+            var args = argsToArray(arguments);
+            var error = args[args.length - 1];
+            console.info.apply(console, args);
+            throw error;
+        }
     };
 
     // Raise Error for circular calls
@@ -65,21 +86,15 @@ var Lob = (function () { 'use strict';
     }
     function create$2(logger) {
         if (logger == void 0) {
-            logger = DEFAULT;
+            logger = silent;
         }
         return new Dispatcher([], logger);
     }
 
-    /* jshint esnext: true */
-    function argsToArray(args) {
-        return Array.prototype.slice.call(args);
-    }
-
     // Simply a stateful dispatcher
-    // DEBT should be start not create
     function start$1(logger) {
         if (logger == void 0) {
-            logger = DEFAULT;
+            logger = silent;
         }
         var dispatcher = create$2(logger);
         var action = function () {
@@ -689,29 +704,8 @@ var Lob = (function () { 'use strict';
         };
     }
 
-    var logger = {
-        debug: function () {
-            var args = argsToArray(arguments);
-            console.debug.apply(console, args);
-        },
-        info: function () {
-            var args = argsToArray(arguments);
-            console.info.apply(console, args);
-        },
-        warn: function () {
-            var args = argsToArray(arguments);
-            console.warn.apply(console, args);
-        },
-        error: function (e) {
-            var args = argsToArray(arguments);
-            var error = args[args.length - 1];
-            console.info.apply(console, args);
-            throw error;
-        }
-    };
-    console.log(logger.info);
     var client = start({
-        console: wrap(logger, { prefix: "Lob client" })
+        console: wrap(development, { prefix: "Lob client" })
     });
     ready(function () {
         window.display = create(document, client);
