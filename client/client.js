@@ -8,13 +8,15 @@ function Client(world){
   var events = {
     resetReadings: Event.start(Logger.wrap(logger, {prefix: "Reset readings"})),
     newReading: Event.start(Logger.wrap(logger, {prefix: "New reading"})),
-    badReading: Event.start(Logger.wrap(logger, {prefix: "Bad reading"}))
+    badReading: Event.start(Logger.wrap(logger, {prefix: "Bad reading"})),
+    closeNotices: Event.start(Logger.wrap(logger, {prefix: "Close Notices"}))
   };
 
   var store = Store.start();
   events.resetReadings.register(store.resetReadings);
   events.newReading.register(store.newReading);
   events.badReading.register(store.badReading);
+  events.closeNotices.register(store.closeNotices);
 
   this.resetReadings = function(){
     events.resetReadings();
@@ -34,6 +36,12 @@ function Client(world){
   };
   this.onBadReading = function(listener){
     events.badReading.register(listener);
+  };
+  this.closeNotices = function(){
+    events.closeNotices();
+  };
+  this.onCloseNotices = function(listener){
+    events.closeNotices.register(listener);
   };
 
   Object.defineProperty(this, "currentReading", {

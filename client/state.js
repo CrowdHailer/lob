@@ -73,3 +73,9 @@ export function badReading(state){
   notices = notices.concat(MESSAGE);
   return Object.assign({}, state, {notices: notices});
 }
+
+export function closeNotices(state){
+  state = state || {};
+  var notices = [];
+  return Object.assign({}, state, {notices: notices});
+}

@@ -86,6 +86,17 @@ describe("Client", function() {
       client.badReading();
       expect(listener.lastCall).toEqual([]);
     });
+    it("should have no notices after a call to close notices", function(){
+      client.badReading();
+      client.closeNotices();
+      expect(client.notices).toEqual([]);
+    });
+    it("should notify listeners of close notice command", function(){
+      client.onCloseNotices(listener);
+      client.badReading();
+      client.closeNotices();
+      expect(listener.lastCall).toEqual([]);
+    });
   });
 
 });
