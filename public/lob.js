@@ -311,6 +311,8 @@ var Lob = (function () { 'use strict';
         // TODO should be from location object fetched from context;
         var channelName = getQueryParameter("channel");
         var token = getQueryParameter("token");
+        // TODO move to state
+        app.channelName = channelName;
         var channel;
         function start() {
             console.debug("initializing uplink on channel " + channelName);
@@ -789,6 +791,7 @@ var Lob = (function () { 'use strict';
         var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
         var $instruction = $root.querySelector("[data-display~=instruction]");
         var $uplink = $root.querySelector("[data-display~=uplink]");
+        var $channel = $root.querySelector("[data-display~=channel]");
         return Object.create({}, {
             maxFlightTime: {
                 set: function (maxFlightTime) {
@@ -811,6 +814,13 @@ var Lob = (function () { 'use strict';
             instruction: {
                 set: function (instruction) {
                     $instruction.innerHTML = instruction;
+                },
+                enumerable: true
+            },
+            channelName: {
+                set: function (channel) {
+                    var content = "Watch on channel '" + channel + "'";
+                    $channel.innerHTML = content;
                 },
                 enumerable: true
             },
@@ -899,6 +909,11 @@ var Lob = (function () { 'use strict';
         Object.defineProperty(this, "uplinkStatus", {
             get: function () {
                 return raw.uplinkStatus.toLowerCase();
+            }
+        });
+        Object.defineProperty(this, "channelName", {
+            get: function () {
+                return raw.channelName;
             }
         });
     }

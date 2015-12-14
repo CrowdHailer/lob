@@ -6,6 +6,7 @@ function Display($root){
   var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
   var $instruction = $root.querySelector("[data-display~=instruction]");
   var $uplink = $root.querySelector("[data-display~=uplink]");
+  var $channel = $root.querySelector("[data-display~=channel]");
 
   return Object.create({}, {
     maxFlightTime: {
@@ -29,6 +30,13 @@ function Display($root){
     instruction: {
       set: function(instruction){
         $instruction.innerHTML = instruction;
+      },
+      enumerable: true
+    },
+    channelName: {
+      set: function(channel){
+        var content = "Watch on channel '" + channel + "'";
+        $channel.innerHTML = content;
       },
       enumerable: true
     },

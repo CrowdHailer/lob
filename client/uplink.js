@@ -6,6 +6,8 @@ export default function(app){
   // TODO should be from location object fetched from context;
   var channelName = getQueryParameter("channel");
   var token = getQueryParameter("token");
+  // TODO move to state
+  app.channelName = channelName;
 
   var channel;
   function start(){

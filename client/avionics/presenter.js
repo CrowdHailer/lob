@@ -79,6 +79,11 @@ function Presenter(raw){
       return raw.uplinkStatus.toLowerCase();
     }
   });
+  Object.defineProperty(this, "channelName", {
+    get: function(){
+      return raw.channelName;
+    }
+  });
 }
 
 export function present(app){
