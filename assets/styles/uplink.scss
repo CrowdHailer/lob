@@ -1,0 +1,34 @@
+
+#uplink.unknown {
+  #starting-uplink {
+    display: block;
+  }
+  #uplink-available {
+    display: none;
+  }
+  #uplink-transmitting {
+    display: none;
+  }
+}
+#uplink.available {
+  #starting-uplink {
+    display: none;
+  }
+  #uplink-available {
+    display: block;
+  }
+  #uplink-transmitting {
+    display: none;
+  }
+}
+#uplink.transmitting {
+  #starting-uplink {
+    display: none;
+  }
+  #uplink-available {
+    display: none;
+  }
+  #uplink-transmitting {
+    display: block;
+  }
+}

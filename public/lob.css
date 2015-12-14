@@ -35,6 +35,33 @@
   .notices.active section {
     transform: translateY(0%); }
 
+#uplink.unknown #starting-uplink {
+  display: block; }
+
+#uplink.unknown #uplink-available {
+  display: none; }
+
+#uplink.unknown #uplink-transmitting {
+  display: none; }
+
+#uplink.available #starting-uplink {
+  display: none; }
+
+#uplink.available #uplink-available {
+  display: block; }
+
+#uplink.available #uplink-transmitting {
+  display: none; }
+
+#uplink.transmitting #starting-uplink {
+  display: none; }
+
+#uplink.transmitting #uplink-available {
+  display: none; }
+
+#uplink.transmitting #uplink-transmitting {
+  display: block; }
+
 html {
   box-sizing: border-box; }
 
