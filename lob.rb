@@ -9,7 +9,13 @@ History = [["Peter", "2", "12"]];
 def create_channel_name
   (1...(36 ** 4)).to_a.sample.to_s(36).upcase
 end
+module MyHelpers
+  def base_url
+    @base_url ||= "#{request.env['rack.url_scheme']}://#{request.env['HTTP_HOST']}"
+  end
+end
 
+helpers MyHelpers
 
 get '/' do
   erb :index
@@ -27,8 +33,16 @@ post '/join' do
   redirect "/tracker?channel=#{channel}&token=#{token}"
 end
 
+get '/track/:channel' do
+  channel = params[:channel].upcase
+  token = client.auth.request_token.token
+  redirect "/tracker?channel=#{channel}&token=#{token}"
+end
+
 get '/flyer' do
-  erb :flyer
+  channel = request.GET["channel"]
+  twitter_link = "https://twitter.com/home?status=Watch%20my%20awesome%20#{base_url}/track/#{channel}"
+  erb :flyer, locals: {twitter_link: twitter_link}
 end
 
 get '/tracker' do
