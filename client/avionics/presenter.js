@@ -73,6 +73,12 @@ function Presenter(raw){
       return "OK! can you lob any higher";
     }
   });
+
+  Object.defineProperty(this, "uplinkStatus", {
+    get: function(){
+      return raw.uplinkStatus.toLowerCase();
+    }
+  });
 }
 
 export function present(app){

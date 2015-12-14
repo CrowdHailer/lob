@@ -393,6 +393,9 @@ var Lob = (function () { 'use strict';
         this.uplinkAvailable = function () {
             events.uplinkAvailable();
         };
+        this.onUplinkAvailable = function (listener) {
+            events.uplinkAvailable.register(listener);
+        };
         this.startTransmitting = function () {
             if (store.state.uplink.status == "AVAILABLE") {
                 events.startTransmitting();
@@ -405,6 +408,9 @@ var Lob = (function () { 'use strict';
             events.startTransmitting.register(listener);
         };
         this.uplinkFailed = events.uplinkFailed;
+        this.onUplinkFailed = function (listener) {
+            events.uplinkFailed.register(listener);
+        };
         this.onShowAlert = function (listener) {
             events.showAlert.register(listener);
         };
@@ -416,17 +422,20 @@ var Lob = (function () { 'use strict';
         };
         Object.defineProperty(this, "currentReading", {
             get: function () {
-                return store.state.readings.current;
+                var readings = store.state.readings || {};
+                return readings.current;
             }
         });
         Object.defineProperty(this, "currentFlight", {
             get: function () {
-                return store.state.readings.currentFlight;
+                var readings = store.state.readings || {};
+                return readings.currentFlight || [];
             }
         });
         Object.defineProperty(this, "flightHistory", {
             get: function () {
-                return store.state.readings.flightHistory;
+                var readings = store.state.readings || {};
+                return readings.flightHistory || [];
             }
         });
         Object.defineProperty(this, "notices", {
@@ -779,6 +788,7 @@ var Lob = (function () { 'use strict';
         var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
         var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
         var $instruction = $root.querySelector("[data-display~=instruction]");
+        var $uplink = $root.querySelector("[data-display~=uplink]");
         return Object.create({}, {
             maxFlightTime: {
                 set: function (maxFlightTime) {
@@ -804,6 +814,17 @@ var Lob = (function () { 'use strict';
                 },
                 enumerable: true
             },
+            uplinkStatus: {
+                set: function (status) {
+                    console.log("setting status");
+                    $uplink.classList.remove("unknown");
+                    $uplink.classList.remove("available");
+                    $uplink.classList.remove("transmitting");
+                    $uplink.classList.remove("failed");
+                    $uplink.classList.add(status);
+                },
+                enumerable: true
+            }
         });
     }
 
@@ -875,6 +896,11 @@ var Lob = (function () { 'use strict';
                 return "OK! can you lob any higher";
             }
         });
+        Object.defineProperty(this, "uplinkStatus", {
+            get: function () {
+                return raw.uplinkStatus.toLowerCase();
+            }
+        });
     }
     function present(app) {
         return new Presenter(app);
@@ -895,6 +921,9 @@ var Lob = (function () { 'use strict';
         }
         app.onResetReadings(update);
         app.onNewReading(update);
+        app.onUplinkAvailable(update);
+        app.onUplinkFailed(update);
+        app.onStartTransmitting(update);
         // Needs to reset state before implementation
         // update();
         return {

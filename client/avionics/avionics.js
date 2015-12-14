@@ -23,6 +23,9 @@ export default function create($root, app){
 
   app.onResetReadings(update);
   app.onNewReading(update);
+  app.onUplinkAvailable(update);
+  app.onUplinkFailed(update);
+  app.onStartTransmitting(update);
   // Needs to reset state before implementation
   // update();
   return {

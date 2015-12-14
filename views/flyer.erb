@@ -14,10 +14,19 @@
   <p class="readout" data-hook="current-reading">
     starting
   </p>
-  <form class="" action="index.html" method="post" data-command="start-transmitting">
-    <button type="button" data-display="status">Click to stream flight</button>
-  </form>
-  <form class="" action="index.html" method="post">
+  <div class="unknown" data-display="uplink">
+    <form class="" action="#" method="post">
+      <button type="button" data-display="status">Looking for connection</button>
+    </form>
+    <form class="" action="#" method="post" data-command="start-transmitting">
+      <button type="button" data-display="status">Click to share flight</button>
+    </form>
+    <form class="" action="#" method="post">
+      <button type="button" data-display="status">Watch on channel '????'</button>
+    </form>
+
+  </div>
+  <form class="" action="#" method="post" data-command="reset">
     <button type="button" data-command="reset">Reset</button>
   </form>
   <form class="" action="/submit" method="post" data-command="submit">

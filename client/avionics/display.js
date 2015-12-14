@@ -5,6 +5,7 @@ function Display($root){
   var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
   var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
   var $instruction = $root.querySelector("[data-display~=instruction]");
+  var $uplink = $root.querySelector("[data-display~=uplink]");
 
   return Object.create({}, {
     maxFlightTime: {
@@ -31,6 +32,17 @@ function Display($root){
       },
       enumerable: true
     },
+    uplinkStatus: {
+      set: function(status){
+        console.log("setting status");
+        $uplink.classList.remove("unknown");
+        $uplink.classList.remove("available");
+        $uplink.classList.remove("transmitting");
+        $uplink.classList.remove("failed");
+        $uplink.classList.add(status);
+      },
+      enumerable: true
+    }
   });
 
 }

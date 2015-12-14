@@ -54,6 +54,9 @@ function Client(world){
   this.uplinkAvailable = function(){
     events.uplinkAvailable();
   };
+  this.onUplinkAvailable = function(listener){
+    events.uplinkAvailable.register(listener);
+  };
   this.startTransmitting = function(){
     if (store.state.uplink.status == "AVAILABLE") {
       events.startTransmitting();
@@ -65,6 +68,9 @@ function Client(world){
     events.startTransmitting.register(listener);
   };
   this.uplinkFailed = events.uplinkFailed;
+  this.onUplinkFailed = function(listener){
+    events.uplinkFailed.register(listener);
+  };
   this.onShowAlert = function(listener){
     events.showAlert.register(listener);
   };
@@ -77,18 +83,21 @@ function Client(world){
 
   Object.defineProperty(this, "currentReading", {
     get: function(){
-      return store.state.readings.current;
+      var readings = store.state.readings || {};
+      return readings.current;
     }
   });
 
   Object.defineProperty(this, "currentFlight", {
     get: function(){
-      return store.state.readings.currentFlight;
+      var readings = store.state.readings || {};
+      return readings.currentFlight || [];
     }
   });
   Object.defineProperty(this, "flightHistory", {
     get: function(){
-      return store.state.readings.flightHistory;
+      var readings = store.state.readings || {};
+      return readings.flightHistory || [];
     }
   });
   Object.defineProperty(this, "notices", {

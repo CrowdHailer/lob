@@ -90,4 +90,20 @@ describe("Avionics Presenter", function(){
       expect(presenter.instruction).toBe("OK! can you lob any higher");
     });
   });
+  describe("uplink", function(){
+    it("should have a uplinkStatus of unknown", function(){
+      var appState = {
+          uplinkStatus: "UNKNOWN"
+      };
+      var presenter = Presenter(appState);
+      expect(presenter.uplinkStatus).toEqual("unknown");
+    });
+    it("should have a uplinkStatus of unknown", function(){
+      var appState = {
+          uplinkStatus: "AVAILABLE"
+      };
+      var presenter = Presenter(appState);
+      expect(presenter.uplinkStatus).toEqual("available");
+    });
+  });
 });
