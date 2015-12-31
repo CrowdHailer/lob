@@ -176,6 +176,9 @@
 	  function updateProjection(state){
 	    tracker.projection.update(state);
 	  }
+	  this.watchProjection = function(view){
+	    tracker.projection.watch(view);
+	  }
 	  this.applyState = function(newState){
 	    state = newState;
 	    updateProjection(state);
@@ -215,7 +218,7 @@
 	tracker.applyState(State.fromUri(uri));
 
 	var consoleView = new ConsoleView(window.console);
-	tracker.projection.watch(consoleView.render)
+	app.watchProjection(consoleView.render)
 
 })();
 //# sourceMappingURL=tracker.js.map
