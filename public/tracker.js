@@ -173,18 +173,19 @@
 	function Tracker(){
 	  var state;
 	  var tracker = this;
-	  function render(projection){
-	    tracker.display.render(projection);
+	  function updateProjection(state){
+	    tracker.projection.update(state);
 	  }
 	  this.applyState = function(newState){
 	    state = newState;
-	    render(state);
+	    updateProjection(state);
 	  }
 	}
 
-	function ConsoleDisplay(logger){
+	function ConsoleView(logger){
 	  function wrap(projection){
-	    return "listening on: " + projection.channelName 
+	    return "listening on: " + projection.channel + " with token: " + projection.token
+	    // returns presentation
 	  }
 
 	  this.render = function(projection){
@@ -192,9 +193,29 @@
 	  }
 	}
 
+	function Projection(){
+	  // Could be past console
+	  var views = [];
+	  var projection;
+	  this.update = function(state){
+	    // return projection
+	    projection = {
+	      channel: state.channelName,
+	      token: state.token.slice(0, 4) + "..."
+	    }
+	  }
+	  this.watch = function(view){
+	    view(projection);
+	    views.push(view);
+	  }
+	}
+
 	var tracker = new Tracker();
-	tracker.display = new ConsoleDisplay(window.console);
+	tracker.projection = new Projection();
 	tracker.applyState(State.fromUri(uri));
+
+	var consoleView = new ConsoleView(window.console);
+	tracker.projection.watch(consoleView.render)
 
 })();
 //# sourceMappingURL=tracker.js.map
