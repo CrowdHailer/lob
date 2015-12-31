@@ -1,22 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Lob</title>
-  <link rel="stylesheet" href="/lob.css" media="screen" title="no title" charset="utf-8">
-  <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" > </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
-  <script src="/lob.js"></script>
-</head>
-<body>
-  <main id="tracker-page">
-    <a href="/">
-      <h1>Lob</h1>
-    </a>
-    <div id="orientation-tracker" data-display="tracker">
-      <canvas id="myChart" width="960" height="800" style="background-color:#EEE"></canvas>
-    </div>
-    <p>Realtime connection powered by <a href="https://ably.io" target="_blank">Ably.io</a></p>
-  </main>
-</body>
-</html>
+<main id="tracker-page">
+  <a href="/">
+    <h1>Lob</h1>
+  </a>
+  <div id="orientation-tracker" data-display="tracker">
+    <canvas id="myChart" width="960" height="800" style="background-color:#EEE"></canvas>
+  </div>
+  <p>Realtime connection powered by <a href="https://ably.io" target="_blank">Ably.io</a></p>
+</main>
+<script type="text/javascript" src="/tracker.js"></script>
