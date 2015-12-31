@@ -1,6 +1,6 @@
 /* jshint esnext: true*/
-
-import typescript from 'rollup-plugin-typescript';
+import commonjs from 'rollup-plugin-commonjs';
+import npm from 'rollup-plugin-npm';
 
 export default {
   entry: 'client/boot.js',
@@ -8,10 +8,8 @@ export default {
   moduleName: "Lob",
   dest: "public/lob.js",
   sourceMap: true,
-
   plugins: [
-    typescript({
-      sourceMap: true
-    })
+    npm({ jsnext: true, main: true }),
+    commonjs()
   ]
 };

@@ -40,7 +40,12 @@
     "node-sass": "~3.4.2",
     "phantomjs": "~1.9.18",
     "rollup": "~0.20.5",
+    "rollup-plugin-commonjs": "^2.1.0",
+    "rollup-plugin-npm": "^1.2.0",
     "rollup-plugin-typescript": "^0.2.1",
     "tsd": "^0.6.5"
+  },
+  "dependencies": {
+    "query-string": "^3.0.0"
   }
 }
