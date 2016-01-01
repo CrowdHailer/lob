@@ -97,28 +97,28 @@ describe("Flyer", function() {
     });
   });
 
-  xdescribe("uplink", function(){
+  describe("uplink", function(){
     it("should start with an unknown uplink status", function(){
-      expect(client.uplinkStatus).toEqual("UNKNOWN");
+      expect(flyer.state.uplinkStatus).toEqual("UNKNOWN");
     });
     it("should have ready status after uplinkAvailable", function(){
-      client.uplinkAvailable();
-      expect(client.uplinkStatus).toEqual("AVAILABLE");
+      flyer.uplinkAvailable();
+      expect(flyer.state.uplinkStatus).toEqual("AVAILABLE");
     });
     it("should have transmitting status after startTransmitting", function(){
-      client.uplinkAvailable();
-      client.startTransmitting();
-      expect(client.uplinkStatus).toEqual("TRANSMITTING");
+      flyer.uplinkAvailable();
+      flyer.startTransmitting();
+      expect(flyer.state.uplinkStatus).toEqual("TRANSMITTING");
     });
     it("should have failed status after uplinkFailed", function(){
-      client.uplinkFailed();
-      expect(client.uplinkStatus).toEqual("FAILED");
+      flyer.uplinkFailed();
+      expect(flyer.state.uplinkStatus).toEqual("FAILED");
     });
     // test combinations to -> from state in state tests
-    it("should show notice of failed connection", function(){
-      client.uplinkFailed();
-      client.startTransmitting();
-      expect(client.notices).toEqual(["Could not start a connection. Please refresh the page to try again."]);
+    xit("should show notice of failed connection", function(){
+      flyer.uplinkFailed();
+      flyer.startTransmitting();
+      expect(flyer.notices).toEqual(["Could not start a connection. Please refresh the page to try again."]);
     });
   });
 

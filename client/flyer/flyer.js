@@ -12,6 +12,9 @@ export default function Flyer(world){
   };
 
   var state;
+  this.state = {
+    uplinkStatus: "UNKNOWN"
+  };
   function logInfo() {
     flyer.logger.info.apply(flyer.logger, arguments);
   }
@@ -27,6 +30,15 @@ export default function Flyer(world){
     state = State.newReading(state, reading);
     transmitReading(reading);
     logInfo("[New reading]", reading);
+  };
+  this.uplinkAvailable = function(){
+    flyer.state.uplinkStatus = "AVAILABLE";
+  };
+  this.uplinkFailed = function(){
+    flyer.state.uplinkStatus = "FAILED";
+  };
+  this.startTransmitting = function(){
+    flyer.state.uplinkStatus = "TRANSMITTING";
   };
 
   // DEBT these properties belong on a projection
