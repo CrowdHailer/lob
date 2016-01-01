@@ -6,9 +6,17 @@ export default function Flyer(world){
   if ( !(this instanceof Flyer) ) { return new Flyer(world); }
   var flyer = this;
 
+  flyer.uplink = {
+    transmitReading: function(reading){
+    }
+  };
+
   var state;
   function logInfo() {
     flyer.logger.info.apply(flyer.logger, arguments);
+  }
+  function transmitReading(reading){
+    flyer.uplink.transmitReading(reading);
   }
 
   this.resetReadings = function(){
@@ -17,6 +25,7 @@ export default function Flyer(world){
   };
   this.newReading = function(reading){
     state = State.newReading(state, reading);
+    transmitReading(reading);
     logInfo("[New reading]", reading);
   };
 
