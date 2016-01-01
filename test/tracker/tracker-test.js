@@ -32,7 +32,7 @@ function Tracker(raw_state){
     logInfo("[Uplink Available]");
   };
 
-  tracker.newReadingReceived = function(reading){
+  tracker.newReading = function(reading){
     var state = tracker.state.set("latestReading", reading);
     var currentFlight = state.currentFlight;
     var flightHistory = state.flightHistory;
@@ -47,6 +47,14 @@ function Tracker(raw_state){
     state = state.set("flightHistory", flightHistory);
     tracker.state = state;
     // DEBT might want to log this action too
+  };
+
+  tracker.resetReadings = function(){
+    tracker.state = tracker.state.merge({
+      latestReading: null,
+      currentFlight: [],
+      flightHistory: []
+    });
   };
 }
 
@@ -83,7 +91,7 @@ describe("Tracker currently tracking flight", function(){
     var reading;
     beforeEach(function(){
       reading = {magnitude: 0};
-      tracker.newReadingReceived(reading);
+      tracker.newReading(reading);
     });
     it("should replace latest reading", function(){
       expect(tracker.state.latestReading).toBe(reading);
@@ -96,7 +104,7 @@ describe("Tracker currently tracking flight", function(){
     var reading;
     beforeEach(function(){
       reading = {};
-      tracker.newReadingReceived(reading);
+      tracker.newReading(reading);
     });
     // it("should replace latest reading", function(){
     //   expect(tracker.state.latestReading).toBe(reading);
@@ -106,6 +114,20 @@ describe("Tracker currently tracking flight", function(){
     });
     it("should add current flight to flight history", function(){
       expect(tracker.state.flightHistory[1]).toEqual([{}]);
+    });
+  });
+  describe("responding to reset readings", function(){
+    beforeEach(function(){
+      tracker.resetReadings();
+    });
+    it("should clear latest reading", function(){
+      expect(tracker.state.latestReading).toBe(null);
+    });
+    it("should clear current flight", function(){
+      expect(tracker.state.currentFlight).toEqual([]);
+    });
+    it("should clear flight history", function(){
+      expect(tracker.state.flightHistory).toEqual([]);
     });
   });
 });
@@ -124,7 +146,7 @@ describe("Tracker currently tracking grounded flyer", function(){
     var reading;
     beforeEach(function(){
       reading = {magnitude: 0};
-      tracker.newReadingReceived(reading);
+      tracker.newReading(reading);
     });
     // it("should replace latest reading", function(){
     //   expect(tracker.state.latestReading).toBe(reading);
@@ -137,7 +159,7 @@ describe("Tracker currently tracking grounded flyer", function(){
     var reading;
     beforeEach(function(){
       reading = {};
-      tracker.newReadingReceived(reading);
+      tracker.newReading(reading);
     });
     // it("should replace latest reading", function(){
     //   expect(tracker.state.latestReading).toBe(reading);
