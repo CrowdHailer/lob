@@ -90,9 +90,20 @@
     if ( !(this instanceof Flyer) ) { return new Flyer(world); }
     var flyer = this;
 
+    flyer.uplink = {
+      transmitReading: function(reading){
+      }
+    };
+
     var state;
+    this.state = {
+      uplinkStatus: "UNKNOWN"
+    };
     function logInfo() {
       flyer.logger.info.apply(flyer.logger, arguments);
+    }
+    function transmitReading(reading){
+      flyer.uplink.transmitReading(reading);
     }
 
     this.resetReadings = function(){
@@ -101,7 +112,17 @@
     };
     this.newReading = function(reading){
       state = newReading(state, reading);
+      transmitReading(reading);
       logInfo("[New reading]", reading);
+    };
+    this.uplinkAvailable = function(){
+      flyer.state.uplinkStatus = "AVAILABLE";
+    };
+    this.uplinkFailed = function(){
+      flyer.state.uplinkStatus = "FAILED";
+    };
+    this.startTransmitting = function(){
+      flyer.state.uplinkStatus = "TRANSMITTING";
     };
 
     // DEBT these properties belong on a projection

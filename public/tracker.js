@@ -1,4 +1,4 @@
-(function () { 'use strict';
+var Lob = (function () { 'use strict';
 
 	function __commonjs(fn, module) { return module = { exports: {} }, fn(module, module.exports), module.exports; }
 
@@ -56,6 +56,61 @@
 	Struct.prototype.merge = function (other) {
 	  return Struct(this, other);
 	};
+
+	var STATE_DEFAULTS = {
+	  uplinkStatus: "UNKNOWN",
+	  latestReading: null, // DEBT best place a null object here
+	  currentFlight: [],
+	  flightHistory: [],
+	};
+	function State(raw){
+	  if ( !(this instanceof State) ) { return new State(raw); }
+
+	  return Struct.call(this, STATE_DEFAULTS, raw);
+	}
+
+	State.prototype = Object.create(Struct.prototype);
+	State.prototype.constructor = State;
+
+	function Tracker(raw_state){
+	  var tracker = this;
+	  tracker.state = State(raw_state);
+
+	  function logInfo() {
+	    tracker.logger.info.apply(tracker.logger, arguments);
+	  }
+
+	  tracker.uplinkAvailable = function(){
+	    tracker.state = tracker.state.set("uplinkStatus", "AVAILABLE");
+	    // call log change. test listeners that the state has changed.
+	    logInfo("[Uplink Available]");
+	  };
+
+	  tracker.newReading = function(reading){
+	    var state = tracker.state.set("latestReading", reading);
+	    var currentFlight = state.currentFlight;
+	    var flightHistory = state.flightHistory;
+	    if (reading.magnitude < 4) {
+	      currentFlight =  currentFlight.concat(reading);
+	    } else if(currentFlight[0]) {
+	      // DEBT concat splits array so we double wrap the flight
+	      flightHistory = flightHistory.concat([currentFlight]);
+	      currentFlight = [];
+	    }
+	    state = state.set("currentFlight", currentFlight);
+	    state = state.set("flightHistory", flightHistory);
+	    tracker.state = state;
+	    // DEBT might want to log this action too
+	  };
+
+	  tracker.resetReadings = function(){
+	    tracker.state = tracker.state.merge({
+	      latestReading: null,
+	      currentFlight: [],
+	      flightHistory: []
+	    });
+	  };
+	}
 
 	var index$2 = __commonjs(function (module) {
 	'use strict';
@@ -177,11 +232,11 @@
 	  var channel = realtime.channels.get(channelName);
 	  channel.subscribe("newReading", function(event){
 	    // new Vector(event.data);
-	    tracker.receivedNewReaded(event.data);
+	    tracker.newReading(event.data);
 	  });
 	  channel.subscribe("resetReadings", function(_event){
 	    // event information not needed
-	    tracker.receivedResetReadings();
+	    tracker.resetReadings();
 	  });
 	}
 
@@ -200,90 +255,17 @@
 	//   });
 	// }
 
+	var tracker = new Tracker();
+	tracker.logger = window.console;
+
 	var uri = parseLocation(window.location);
 
-	var State = {
-	  fromUri: function(uri){
-	    return {
-	      token: uri.query["token"],
-	      channelName: uri.query["channel"],
-
-	    };
-	  }
-	};
-
-	// An app could act as a wrapper around an events object
-	function Tracker(){
-	  var state;
-	  var tracker = this;
-	  function updateProjection(state){
-	    tracker.projection.update(state);
-	  }
-	  this.watchProjection = function(view){
-	    tracker.projection.watch(view);
-	  };
-	  // this.someAction = function(update){
-	  //   try {
-	  //     state = new SomeAction(state, update, world);
-	  //   } catch (e) {
-	  //     // no update
-	  //   }
-	  // }
-	  this.uplinkAvailable = function(){
-	    console.log("uplink available");
-	  };
-	  this.receivedNewReaded = function(reading){
-	    console.log(reading);
-	  };
-	  this.receivedResetReadings = function(){
-	    console.log("reset reading");
-	  };
-	  this.applyState = function(newState){
-	    state = newState;
-	    updateProjection(state);
-	  };
-
-	}
-
-	function ConsoleView(logger){
-	  function wrap(projection){
-	    return "listening on: " + projection.channel + " with token: " + projection.token;
-	    // returns presentation
-	  }
-
-	  this.render = function(projection){
-	    logger.info(wrap(projection));
-	  };
-	}
-
-	function Projection(){
-	  // Could be past console
-	  var views = [];
-	  var projection;
-	  this.update = function(state){
-	    // return projection
-	    projection = {
-	      channel: state.channelName,
-	      token: state.token.slice(0, 4) + "..."
-	    };
-	  };
-	  this.watch = function(view){
-	    view(projection);
-	    views.push(view);
-	  };
-	}
-
-	var tracker = new Tracker();
-	tracker.projection = new Projection();
-	tracker.applyState(State.fromUri(uri));
-	// tracker.init()
-
-	var consoleView = new ConsoleView(window.console);
-	tracker.watchProjection(consoleView.render);
 	var uplinkController = new UplinkController({
 	  token: uri.query.token,
 	  channel: uri.query.channel
 	}, tracker);
+
+	return tracker;
 
 })();
 //# sourceMappingURL=tracker.js.map

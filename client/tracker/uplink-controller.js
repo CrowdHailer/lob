@@ -16,11 +16,11 @@ export default function UplinkController(options, tracker){
   var channel = realtime.channels.get(channelName);
   channel.subscribe("newReading", function(event){
     // new Vector(event.data);
-    tracker.receivedNewReaded(event.data);
+    tracker.newReading(event.data);
   });
   channel.subscribe("resetReadings", function(_event){
     // event information not needed
-    tracker.receivedResetReadings();
+    tracker.resetReadings();
   });
 }
 
