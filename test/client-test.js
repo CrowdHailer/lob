@@ -8,7 +8,7 @@ import * as Client from "../client/client";
 // FLIGHT -> Array of Readings all with less than threshold acceleration
 // FLIGHT HISTORY -> Array of flights not including the current flight
 
-describe("Client", function() {
+xdescribe("Client", function() {
   var client, console, listener;
 
   beforeEach(function(){
