@@ -1,7 +1,7 @@
 /* jshint esnext: true */
 
-import * as State from "../client/state";
-import { freefallReading, stationaryReading } from "./support.js";
+import * as State from "../../client/flyer/state";
+import { freefallReading, stationaryReading } from "../support.js";
 
 describe("Random State", function(){
   var state, oldState;

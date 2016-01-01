@@ -1,5 +1,6 @@
 /* jshint esnext: true */
-import "./polyfill";
+// TODO handle polyfill
+import "../polyfill";
 
 function lens(key){
   return function(func){

@@ -18,7 +18,7 @@ describe("Flyer", function() {
       console: console
     });
   });
-  xdescribe("after reset", function(){
+  describe("after reset", function(){
     beforeEach(function(){
       // client.onResetReadings(listener);
       flyer.resetReadings();
@@ -33,52 +33,52 @@ describe("Flyer", function() {
     it("should have an empty flight history", function(){
       expect(flyer.flightHistory).toEqual([]);
     });
-    it("should have logged the reset event", function(){
+    xit("should have logged the reset event", function(){
       expect(console.info.lastCall).toEqual(["[Reset readings]"]);
     });
-    it("should have notified the listener", function(){
+    xit("should have notified the listener", function(){
       expect(listener.lastCall).toEqual([]);
     });
   });
 
-  xdescribe("recording flights", function(){
+  describe("recording flights", function(){
     beforeEach(function(){
-      client.onNewReading(listener);
-      client.resetReadings();
-      client.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1000});
-      client.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1200});
-      client.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1400});
-      client.newReading({acceleration: {x: 0, y: 0, z: 10}, timestamp: 1600});
-      client.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1800});
-      client.newReading({acceleration: {x: 0, y: 0, z: 1}, timestamp: 2000});
+      // flyer.onNewReading(listener);
+      flyer.resetReadings();
+      flyer.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1000});
+      flyer.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1200});
+      flyer.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1400});
+      flyer.newReading({acceleration: {x: 0, y: 0, z: 10}, timestamp: 1600});
+      flyer.newReading({acceleration: {x: 0, y: 0, z: 0}, timestamp: 1800});
+      flyer.newReading({acceleration: {x: 0, y: 0, z: 1}, timestamp: 2000});
     });
     it("should have a current reading", function(){
-      expect(client.currentReading).toEqual({acceleration: {x: 0, y: 0, z: 1}, timestamp: 2000});
+      expect(flyer.currentReading).toEqual({acceleration: {x: 0, y: 0, z: 1}, timestamp: 2000});
     });
     it("should have a current flight", function(){
-      expect(client.currentFlight).toEqual([
+      expect(flyer.currentFlight).toEqual([
         {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1800},
         {acceleration: {x: 0, y: 0, z: 1}, timestamp: 2000}
       ]);
     });
     it("should have a flight history", function(){
-      expect(client.flightHistory).toEqual([[
+      expect(flyer.flightHistory).toEqual([[
         {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1000},
         {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1200},
         {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1400}
       ]]);
     });
-    it("should have logged the reading events", function(){
+    xit("should have logged the reading events", function(){
       expect(console.info.transcript.length).toEqual(7);
     });
-    it("should have notified the listener", function(){
+    xit("should have notified the listener", function(){
       expect(listener.lastCall).toEqual([{acceleration: {x: 0, y: 0, z: 1}, timestamp: 2000}]);
     });
   });
 
   xdescribe("notification", function(){
     it("should have a message after a bad reading", function(){
-      client.badReading();
+      flyer.badReading();
       expect(client.notices).toEqual(["Could not read the data from this device. Please try again on a mobile with working accelerometer."]);
     });
     it("should notify listeners of a bad reading", function(){
