@@ -11,11 +11,7 @@ function Tracker(raw_state){
   }
 
   function projectState(state){
-    return {
-      x: state.latestReading
-      // channel: state.channelName,
-      // token: state.token.slice(0, 4) + "..."
-    };
+    return state;
   }
   var view;
   tracker.showcase = {
@@ -62,6 +58,7 @@ function Tracker(raw_state){
     state = state.set("currentFlight", currentFlight);
     state = state.set("flightHistory", flightHistory);
     tracker.state = state;
+    showcase(tracker.state);
     // DEBT might want to log this action too
   };
 
@@ -71,6 +68,7 @@ function Tracker(raw_state){
       currentFlight: [],
       flightHistory: []
     });
+    showcase(tracker.state);
   };
 }
 

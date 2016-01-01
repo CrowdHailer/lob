@@ -82,11 +82,7 @@ var Lob = (function () { 'use strict';
 	  }
 
 	  function projectState(state){
-	    return {
-	      x: state.latestReading
-	      // channel: state.channelName,
-	      // token: state.token.slice(0, 4) + "..."
-	    };
+	    return state;
 	  }
 	  var view;
 	  tracker.showcase = {
@@ -133,6 +129,7 @@ var Lob = (function () { 'use strict';
 	    state = state.set("currentFlight", currentFlight);
 	    state = state.set("flightHistory", flightHistory);
 	    tracker.state = state;
+	    showcase(tracker.state);
 	    // DEBT might want to log this action too
 	  };
 
@@ -142,6 +139,21 @@ var Lob = (function () { 'use strict';
 	      currentFlight: [],
 	      flightHistory: []
 	    });
+	    showcase(tracker.state);
+	  };
+	}
+
+	/* jshint esnext: true */
+
+	function ConsoleView(logger){
+	  function wrap(projection){
+	    return projection;
+	    return "listening on: " + projection.channel + " with token: " + projection.token;
+	    // returns presentation
+	  }
+
+	  this.render = function(projection){
+	    logger.info(wrap(projection));
 	  };
 	}
 
@@ -291,27 +303,15 @@ var Lob = (function () { 'use strict';
 	var tracker = new Tracker();
 	tracker.logger = window.console;
 
+	var consoleView = new ConsoleView(window.console);
+	tracker.showcase.register(consoleView.render);
+
 	var uri = parseLocation(window.location);
 
 	var uplinkController = new UplinkController({
 	  token: uri.query.token,
 	  channel: uri.query.channel
 	}, tracker);
-
-	function ConsoleView(logger){
-	  function wrap(projection){
-	    return "listening on: " + projection.channel + " with token: " + projection.token;
-	    // returns presentation
-	  }
-
-	  this.render = function(projection){
-	    logger.info(wrap(projection));
-	  };
-	}
-
-	var consoleView = new ConsoleView(window.console);
-	tracker.showcase.register(consoleView.render);
-	// Dom views should be initialized with the ready on certain selectors library
 
 	return tracker;
 
