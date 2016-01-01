@@ -9,14 +9,12 @@ import Flyer from "../client/flyer/flyer";
 // FLIGHT HISTORY -> Array of flights not including the current flight
 
 describe("Flyer", function() {
-  var flyer, console, listener;
+  var flyer, listener;
 
   beforeEach(function(){
-    console = createTranscriptLogger();
     listener = createTranscriptFunction();
-    flyer = Flyer({
-      console: console
-    });
+    flyer = Flyer();
+    flyer.logger = createTranscriptLogger();
   });
   describe("after reset", function(){
     beforeEach(function(){
@@ -33,8 +31,8 @@ describe("Flyer", function() {
     it("should have an empty flight history", function(){
       expect(flyer.flightHistory).toEqual([]);
     });
-    xit("should have logged the reset event", function(){
-      expect(console.info.lastCall).toEqual(["[Reset readings]"]);
+    it("should have logged the reset event", function(){
+      expect(flyer.logger.info.lastCall).toEqual(["[Reset readings]"]);
     });
     xit("should have notified the listener", function(){
       expect(listener.lastCall).toEqual([]);
@@ -68,8 +66,8 @@ describe("Flyer", function() {
         {acceleration: {x: 0, y: 0, z: 0}, timestamp: 1400}
       ]]);
     });
-    xit("should have logged the reading events", function(){
-      expect(console.info.transcript.length).toEqual(7);
+    it("should have logged the reading events", function(){
+      expect(flyer.logger.info.transcript.length).toEqual(7);
     });
     xit("should have notified the listener", function(){
       expect(listener.lastCall).toEqual([{acceleration: {x: 0, y: 0, z: 1}, timestamp: 2000}]);
