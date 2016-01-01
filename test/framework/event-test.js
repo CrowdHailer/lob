@@ -5,7 +5,7 @@ import { createTranscriptFunction, createTranscriptLogger } from "../support";
 import * as Event from "../../client/framework/event";
 
 
-describe("Event", function(){
+xdescribe("Event", function(){
   var identityFn = function(a) { return a; };
 
   it("should pass minutiae to dispatcher", function(){
