@@ -2,36 +2,36 @@
 
 import { createTranscriptLogger, createTranscriptFunction } from "./support";
 
-import * as Client from "../client/client";
+import Flyer from "../client/flyer/flyer";
 
 // READING -> single acceleration vector and timestamp in milliseconds
 // FLIGHT -> Array of Readings all with less than threshold acceleration
 // FLIGHT HISTORY -> Array of flights not including the current flight
 
-xdescribe("Client", function() {
-  var client, console, listener;
+describe("Flyer", function() {
+  var flyer, console, listener;
 
   beforeEach(function(){
     console = createTranscriptLogger();
     listener = createTranscriptFunction();
-    client = Client.start({
+    flyer = Flyer({
       console: console
     });
   });
-  describe("after reset", function(){
+  xdescribe("after reset", function(){
     beforeEach(function(){
-      client.onResetReadings(listener);
-      client.resetReadings();
+      // client.onResetReadings(listener);
+      flyer.resetReadings();
     });
 
     it("should have a null current reading", function(){
-      expect(client.currentReading).toBe(null);
+      expect(flyer.currentReading).toBe(null);
     });
     it("should have an empty current flight", function(){
-      expect(client.currentFlight).toEqual([]);
+      expect(flyer.currentFlight).toEqual([]);
     });
     it("should have an empty flight history", function(){
-      expect(client.flightHistory).toEqual([]);
+      expect(flyer.flightHistory).toEqual([]);
     });
     it("should have logged the reset event", function(){
       expect(console.info.lastCall).toEqual(["[Reset readings]"]);
@@ -41,7 +41,7 @@ xdescribe("Client", function() {
     });
   });
 
-  describe("recording flights", function(){
+  xdescribe("recording flights", function(){
     beforeEach(function(){
       client.onNewReading(listener);
       client.resetReadings();
@@ -76,7 +76,7 @@ xdescribe("Client", function() {
     });
   });
 
-  describe("notification", function(){
+  xdescribe("notification", function(){
     it("should have a message after a bad reading", function(){
       client.badReading();
       expect(client.notices).toEqual(["Could not read the data from this device. Please try again on a mobile with working accelerometer."]);
@@ -99,7 +99,7 @@ xdescribe("Client", function() {
     });
   });
 
-  describe("uplink", function(){
+  xdescribe("uplink", function(){
     it("should start with an unknown uplink status", function(){
       expect(client.uplinkStatus).toEqual("UNKNOWN");
     });
