@@ -1,20 +1,6 @@
 /* jshint esnext: true */
 
-import Struct from "../carbide/struct";
-var STATE_DEFAULTS = {
-  uplinkStatus: "UNKNOWN",
-  latestReading: null, // DEBT best place a null object here
-  currentFlight: [],
-  flightHistory: [],
-};
-function State(raw){
-  if ( !(this instanceof State) ) { return new State(raw); }
-
-  return Struct.call(this, STATE_DEFAULTS, raw);
-}
-
-State.prototype = Object.create(Struct.prototype);
-State.prototype.constructor = State;
+import State from "./state";
 
 function Tracker(raw_state){
   var tracker = this;
@@ -24,10 +10,42 @@ function Tracker(raw_state){
     tracker.logger.info.apply(tracker.logger, arguments);
   }
 
+  function projectState(state){
+    return {
+      x: state.latestReading
+      // channel: state.channelName,
+      // token: state.token.slice(0, 4) + "..."
+    };
+  }
+  var view;
+  tracker.showcase = {
+    dispatch: function(state){
+      // var projection = new Projection(state);
+      if(view){
+        view(projectState(state));
+      }
+    },
+    register: function(newView){
+      newView(projectState(tracker.state));
+      view = newView;
+    }
+  };
+
+  // The tracker application has an internal state.
+  // All observers know that the can watch a given projection of that state
+  // project and present overloaded verbs.
+  // options showcase or exhibit
+  function showcase(state){
+    // The tracker just cares that its state is shown somewhere
+    tracker.showcase.dispatch(state);
+  }
+
   tracker.uplinkAvailable = function(){
+    // Set state action can cause projection to exhibit new state
     tracker.state = tracker.state.set("uplinkStatus", "AVAILABLE");
     // call log change. test listeners that the state has changed.
     logInfo("[Uplink Available]");
+    showcase(tracker.state);
   };
 
   tracker.newReading = function(reading){

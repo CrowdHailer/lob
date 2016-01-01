@@ -63,6 +63,7 @@ var Lob = (function () { 'use strict';
 	  currentFlight: [],
 	  flightHistory: [],
 	};
+
 	function State(raw){
 	  if ( !(this instanceof State) ) { return new State(raw); }
 
@@ -80,10 +81,42 @@ var Lob = (function () { 'use strict';
 	    tracker.logger.info.apply(tracker.logger, arguments);
 	  }
 
+	  function projectState(state){
+	    return {
+	      x: state.latestReading
+	      // channel: state.channelName,
+	      // token: state.token.slice(0, 4) + "..."
+	    };
+	  }
+	  var view;
+	  tracker.showcase = {
+	    dispatch: function(state){
+	      // var projection = new Projection(state);
+	      if(view){
+	        view(projectState(state));
+	      }
+	    },
+	    register: function(newView){
+	      newView(projectState(tracker.state));
+	      view = newView;
+	    }
+	  };
+
+	  // The tracker application has an internal state.
+	  // All observers know that the can watch a given projection of that state
+	  // project and present overloaded verbs.
+	  // options showcase or exhibit
+	  function showcase(state){
+	    // The tracker just cares that its state is shown somewhere
+	    tracker.showcase.dispatch(state);
+	  }
+
 	  tracker.uplinkAvailable = function(){
+	    // Set state action can cause projection to exhibit new state
 	    tracker.state = tracker.state.set("uplinkStatus", "AVAILABLE");
 	    // call log change. test listeners that the state has changed.
 	    logInfo("[Uplink Available]");
+	    showcase(tracker.state);
 	  };
 
 	  tracker.newReading = function(reading){
@@ -264,6 +297,21 @@ var Lob = (function () { 'use strict';
 	  token: uri.query.token,
 	  channel: uri.query.channel
 	}, tracker);
+
+	function ConsoleView(logger){
+	  function wrap(projection){
+	    return "listening on: " + projection.channel + " with token: " + projection.token;
+	    // returns presentation
+	  }
+
+	  this.render = function(projection){
+	    logger.info(wrap(projection));
+	  };
+	}
+
+	var consoleView = new ConsoleView(window.console);
+	tracker.showcase.register(consoleView.render);
+	// Dom views should be initialized with the ready on certain selectors library
 
 	return tracker;
 
