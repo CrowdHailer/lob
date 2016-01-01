@@ -1,3 +1,5 @@
+/* jshint esnext: true */
+
 import * as URI from "./uri";
 var uri = URI.parseLocation(window.location);
 
@@ -8,7 +10,7 @@ var State = {
       channelName: uri.query["channel"]
     }
   }
-}
+};
 
 // An app could act as a wrapper around an events object
 function Tracker(){
@@ -19,14 +21,14 @@ function Tracker(){
   }
   this.watchProjection = function(view){
     tracker.projection.watch(view);
-  }
+  };
   // this.someAction = function(update){
   //   try {
   //     state = new SomeAction(state, update, world);
   //   } catch (e) {
   //     // no update
   //   }
-  }
+  // }
   this.applyState = function(newState){
     state = newState;
     updateProjection(state);

@@ -168,8 +168,9 @@
 	      channelName: uri.query["channel"]
 	    }
 	  }
-	}
+	};
 
+	// An app could act as a wrapper around an events object
 	function Tracker(){
 	  var state;
 	  var tracker = this;
@@ -178,11 +179,19 @@
 	  }
 	  this.watchProjection = function(view){
 	    tracker.projection.watch(view);
-	  }
+	  };
+	  // this.someAction = function(update){
+	  //   try {
+	  //     state = new SomeAction(state, update, world);
+	  //   } catch (e) {
+	  //     // no update
+	  //   }
+	  // }
 	  this.applyState = function(newState){
 	    state = newState;
 	    updateProjection(state);
 	  }
+
 	}
 
 	function ConsoleView(logger){
@@ -216,9 +225,11 @@
 	var tracker = new Tracker();
 	tracker.projection = new Projection();
 	tracker.applyState(State.fromUri(uri));
+	// tracker.init()
 
 	var consoleView = new ConsoleView(window.console);
-	app.watchProjection(consoleView.render)
+	tracker.watchProjection(consoleView.render)
+	// Dom views should be initialized with the ready on certain selectors library
 
 })();
 //# sourceMappingURL=tracker.js.map
