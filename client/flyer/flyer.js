@@ -3,7 +3,6 @@
 // import * as State from "./state";
 import Projection from "./projection";
 
-// DEBT not quite sure why this can't just be named state;
 import Struct from "../carbide/struct";
 
 var FLYER_STATE_DEFAULTS = {
@@ -12,6 +11,7 @@ var FLYER_STATE_DEFAULTS = {
   currentFlight: [],
   flightHistory: [],
 };
+// DEBT not quite sure why this can't just be named state;
 function FlyerState(raw){
   if ( !(this instanceof FlyerState) ) { return new FlyerState(raw); }
 
@@ -44,6 +44,11 @@ export default function Flyer(state){
     logInfo("[Uplink Available]");
     showcase(flyer.state);
   };
+  this.startTransmitting = function(){
+    // TODO test and handle case when uplink not available.
+    flyer.state = flyer.state.set("uplinkStatus", "TRANSMITTING");
+    showcase(flyer.state);
+  };
   flyer.newReading = function(reading){
     var state = flyer.state.set("latestReading", reading);
     var currentFlight = state.currentFlight;
@@ -59,8 +64,8 @@ export default function Flyer(state){
     state = state.set("flightHistory", flightHistory);
     flyer.state = state;
     transmitReading(reading);
-    // logInfo("[New reading]", reading);
-    // showcase(flyer.state);
+    // logInfo("[New reading]", reading); DONT log this
+    showcase(flyer.state);
   };
   flyer.resetReadings = function(){
     flyer.state = flyer.state.merge({
@@ -72,17 +77,13 @@ export default function Flyer(state){
     // showcase(flyer.state);
   };
 
+  this.uplinkFailed = function(){
+    flyer.state = flyer.state.set("uplinkStatus", "FAILED");
+    showcase(flyer.state);
+    logInfo("[Uplink Failed]");
+  };
+
   // DEBT what to do before other values are set
-  // flyer.uplink = {
-  //   transmitReading: function(reading){
-  //   }
-  // };
-  // flyer.view = {
-  //   render: function(){
-  //     console.log("old view");
-  //   }
-  // };
-  //
   function transmitReading(reading){
     if (flyer.state.uplinkStatus === "TRANSMITTING") {
       flyer.uplink.transmitReading(reading);
@@ -94,29 +95,5 @@ export default function Flyer(state){
   function logInfo() {
     flyer.logger.info.apply(flyer.logger, arguments);
   }
-  //
-  // this.uplinkAvailable = function(){
-  //   flyer.state.uplinkStatus = "AVAILABLE";
-  //   showcase(flyer.state);
-  // };
-  // this.uplinkFailed = function(){
-  //   flyer.state.uplinkStatus = "FAILED";
-  //   showcase(flyer.state);
-  // };
-  // this.startTransmitting = function(){
-  //   // try {
-  //   //   flyer.state.update("uplinkStatus", Uplink.startTransmitting)
-  //   // } catch (e) {
-  //   //   view.alert(uplink unavailable)
-  //   // }
-  //   flyer.state.uplinkStatus = "TRANSMITTING";
-  //   showcase(flyer.state);
-  // };
-  // var logger;
-  // Object.defineProperty(flyer, "logger", function(){
-  //   get: function(){
-  //
-  //   }
-  // });
 }
 Flyer.State = FlyerState;

@@ -52,6 +52,21 @@ describe("Flyer with unknown uplink status", function(){
       expect(flyer.view.render.transcript.length).toBe(1);
     });
   });
+  describe("responding to uplinkFailed", function(){
+    beforeEach(function(){
+      flyer.uplinkFailed();
+    });
+    it("should have uplink status available", function(){
+      expect(flyer.state.uplinkStatus).toBe("FAILED");
+    });
+    it("should have reported the change as info", function(){
+      expect(flyer.logger.info.lastCall).toEqual(["[Uplink Failed]"]);
+    });
+    it("should have called for the view to be rerendered", function(){
+      // DEBT test projection
+      expect(flyer.view.render.transcript.length).toBe(1);
+    });
+  });
 });
 describe("Flyer in flight", function(){
   var flyer, logger;
@@ -61,6 +76,8 @@ describe("Flyer in flight", function(){
       currentFlight: [{}],
       flightHistory: [{}],
     });
+
+    flyer.view = {render: function(){}};
     flyer.logger = createTranscriptLogger();
   });
   describe("responding to new freefall reading", function(){
@@ -116,6 +133,7 @@ describe("grounded flyer", function(){
       currentFlight: [],
       flightHistory: [{}],
     });
+    flyer.view = {render: function(){}};
     flyer.logger = createTranscriptLogger();
   });
   describe("responding to new freefall reading", function(){
@@ -152,10 +170,11 @@ describe("Quiet(not transmitting) Flyer", function(){
   var flyer;
   beforeEach(function(){
     flyer = Flyer({uplinkStatus: "AVAILABLE"});
-    // flyer.logger = null logger
+    flyer.logger = createTranscriptLogger();
     flyer.uplink = {
       transmitReading: createTranscriptFunction()
     };
+    flyer.view = {render: createTranscriptFunction()};
   });
   describe("responding to new Reading", function(){
     var reading;
@@ -163,6 +182,13 @@ describe("Quiet(not transmitting) Flyer", function(){
       reading = freefallReading();
       flyer.newReading(reading);
     });
+    it("should have called for the view to be rerendered", function(){
+      // DEBT test projection
+      expect(flyer.view.render.transcript.length).toBe(1);
+    });
+    // it("should have reported the change as info", function(){
+    //   expect(flyer.logger.info.lastCall).toEqual(["[New Reading]"]);
+    // });
     it("should not transmit the new reading", function(){
       expect(flyer.uplink.transmitReading.transcript).toEqual([]);
     });
@@ -176,6 +202,7 @@ describe("Transmitting Flyer", function(){
     flyer.uplink = {
       transmitReading: createTranscriptFunction()
     };
+    flyer.view = {render: function(){}};
   });
   describe("responding to new Reading", function(){
     var reading;
