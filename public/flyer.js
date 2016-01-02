@@ -521,6 +521,19 @@ var Lob = (function () { 'use strict';
 	    flyer.uplinkFailed();
 	  });
 	  var channel = realtime.channels.get(channelName);
+	  tracker.uplink = {
+	    transmitReading: function(reading){
+	      channel.publish("newReading", reading, function(err) {
+	        // DEBT use provided console for messages
+	        // i.e. have message successful as app actions
+	        if(err) {
+	          console.warn("Unable to publish message; err = " + err.message);
+	        } else {
+	          console.info("Message successfully sent", reading);
+	        }
+	      });
+	    }
+	  };
 	}
 
 	var uri = parseLocation(window.location);
