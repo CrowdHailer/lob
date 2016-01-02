@@ -53,6 +53,101 @@ describe("Flyer with unknown uplink status", function(){
     });
   });
 });
+describe("Flyer in flight", function(){
+  var flyer, logger;
+  beforeEach(function(){
+    flyer = Flyer({
+      uplinkStatus: "AVAILABLE",
+      currentFlight: [{}],
+      flightHistory: [{}],
+    });
+    flyer.logger = createTranscriptLogger();
+  });
+  describe("responding to new freefall reading", function(){
+    var reading;
+    beforeEach(function(){
+      reading = {magnitude: 0};
+      flyer.newReading(reading);
+    });
+    it("should replace latest reading", function(){
+      expect(flyer.state.latestReading).toBe(reading);
+    });
+    it("should add reading to current flight", function(){
+      expect(flyer.state.currentFlight[1]).toEqual(reading);
+    });
+  });
+  describe("responding to new grounded reading", function(){
+    var reading;
+    beforeEach(function(){
+      reading = {};
+      flyer.newReading(reading);
+    });
+    // it("should replace latest reading", function(){
+    //   expect(flyer.state.latestReading).toBe(reading);
+    // });
+    it("should clear current flight", function(){
+      expect(flyer.state.currentFlight).toEqual([]);
+    });
+    it("should add current flight to flight history", function(){
+      expect(flyer.state.flightHistory[1]).toEqual([{}]);
+    });
+  });
+  describe("responding to reset readings", function(){
+    beforeEach(function(){
+      flyer.resetReadings();
+    });
+    it("should clear latest reading", function(){
+      expect(flyer.state.latestReading).toBe(null);
+    });
+    it("should clear current flight", function(){
+      expect(flyer.state.currentFlight).toEqual([]);
+    });
+    it("should clear flight history", function(){
+      expect(flyer.state.flightHistory).toEqual([]);
+    });
+  });
+});
+
+describe("grounded flyer", function(){
+  var flyer, logger;
+  beforeEach(function(){
+    flyer = Flyer({
+      uplinkStatus: "AVAILABLE",
+      currentFlight: [],
+      flightHistory: [{}],
+    });
+    flyer.logger = createTranscriptLogger();
+  });
+  describe("responding to new freefall reading", function(){
+    var reading;
+    beforeEach(function(){
+      reading = {magnitude: 0};
+      flyer.newReading(reading);
+    });
+    // it("should replace latest reading", function(){
+    //   expect(flyer.state.latestReading).toBe(reading);
+    // });
+    // it("should add reading to current flight", function(){
+    //   expect(flyer.state.currentFlight[1]).toEqual(reading);
+    // });
+  });
+  describe("responding to new grounded reading", function(){
+    var reading;
+    beforeEach(function(){
+      reading = {};
+      flyer.newReading(reading);
+    });
+    // it("should replace latest reading", function(){
+    //   expect(flyer.state.latestReading).toBe(reading);
+    // });
+    // it("should clear current flight", function(){
+    //   expect(flyer.state.currentFlight).toEqual([]);
+    // });
+    it("should not add current flight to flight history", function(){
+      expect(flyer.state.flightHistory[1]).toEqual(undefined);
+    });
+  });
+});
 describe("Quiet(not transmitting) Flyer", function(){
   var flyer;
   beforeEach(function(){

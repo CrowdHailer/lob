@@ -8,6 +8,9 @@ import Struct from "../carbide/struct";
 
 var FLYER_STATE_DEFAULTS = {
   uplinkStatus: "UNKNOWN",
+  latestReading: null, // DEBT best place a null object here
+  currentFlight: [],
+  flightHistory: [],
 };
 function FlyerState(raw){
   if ( !(this instanceof FlyerState) ) { return new FlyerState(raw); }
@@ -42,9 +45,30 @@ export default function Flyer(state){
     showcase(flyer.state);
   };
   flyer.newReading = function(reading){
-    // state = FlyerState.newReading(state, reading);
+    var state = flyer.state.set("latestReading", reading);
+    var currentFlight = state.currentFlight;
+    var flightHistory = state.flightHistory;
+    if (reading.magnitude < 4) {
+      currentFlight =  currentFlight.concat(reading);
+    } else if(currentFlight[0]) {
+      // DEBT concat splits array so we double wrap the flight
+      flightHistory = flightHistory.concat([currentFlight]);
+      currentFlight = [];
+    }
+    state = state.set("currentFlight", currentFlight);
+    state = state.set("flightHistory", flightHistory);
+    flyer.state = state;
     transmitReading(reading);
     // logInfo("[New reading]", reading);
+    // showcase(flyer.state);
+  };
+  flyer.resetReadings = function(){
+    flyer.state = flyer.state.merge({
+      latestReading: null,
+      currentFlight: [],
+      flightHistory: []
+    });
+    // logInfo("[Reset readings]");
     // showcase(flyer.state);
   };
 
@@ -71,11 +95,6 @@ export default function Flyer(state){
     flyer.logger.info.apply(flyer.logger, arguments);
   }
   //
-  // this.resetReadings = function(){
-  //   state = FlyerState.resetReadings(state);
-  //   logInfo("[Reset readings]");
-  //   showcase(flyer.state);
-  // };
   // this.uplinkAvailable = function(){
   //   flyer.state.uplinkStatus = "AVAILABLE";
   //   showcase(flyer.state);
