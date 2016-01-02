@@ -30,6 +30,29 @@ describe("Initialised Flyer", function(){
   //   }).toThrowError(TypeError, "Flyer is missing logger");
   // });
 });
+describe("Flyer with unknown uplink status", function(){
+  var flyer, logger;
+  beforeEach(function(){
+    flyer = Flyer({uplinkStatus: "UNKNOWN"});
+    flyer.logger = createTranscriptLogger();
+    flyer.view = {render: createTranscriptFunction()};
+  });
+  describe("responding to uplinkAvailable", function(){
+    beforeEach(function(){
+      flyer.uplinkAvailable();
+    });
+    it("should have uplink status available", function(){
+      expect(flyer.state.uplinkStatus).toBe("AVAILABLE");
+    });
+    it("should have reported the change as info", function(){
+      expect(flyer.logger.info.lastCall).toEqual(["[Uplink Available]"]);
+    });
+    it("should have called for the view to be rerendered", function(){
+      // DEBT test projection
+      expect(flyer.view.render.transcript.length).toBe(1);
+    });
+  });
+});
 describe("Quiet(not transmitting) Flyer", function(){
   var flyer;
   beforeEach(function(){

@@ -33,18 +33,22 @@ export default function Flyer(state){
   var flyer = this;
   flyer.state = state;
 
-  this.newReading = function(reading){
+  flyer.uplinkAvailable = function(){
+    // Set state action can cause projection to exhibit new state
+    flyer.state = flyer.state.set("uplinkStatus", "AVAILABLE");
+    // call log change. test listeners that the state has changed.
+    // stateChange({state: state, action: "Uplink Available", log: debug});
+    logInfo("[Uplink Available]");
+    showcase(flyer.state);
+  };
+  flyer.newReading = function(reading){
     // state = FlyerState.newReading(state, reading);
     transmitReading(reading);
     // logInfo("[New reading]", reading);
     // showcase(flyer.state);
   };
 
-  function transmitReading(reading){
-    if (flyer.state.uplinkStatus === "TRANSMITTING") {
-      flyer.uplink.transmitReading(reading);
-    }
-  }
+  // DEBT what to do before other values are set
   // flyer.uplink = {
   //   transmitReading: function(reading){
   //   }
@@ -55,12 +59,17 @@ export default function Flyer(state){
   //   }
   // };
   //
-  // function showcase(state){
-  //   flyer.view.render(Projection(state));
-  // }
-  // function logInfo() {
-  //   flyer.logger.info.apply(flyer.logger, arguments);
-  // }
+  function transmitReading(reading){
+    if (flyer.state.uplinkStatus === "TRANSMITTING") {
+      flyer.uplink.transmitReading(reading);
+    }
+  }
+  function showcase(state){
+    flyer.view.render(Projection(state));
+  }
+  function logInfo() {
+    flyer.logger.info.apply(flyer.logger, arguments);
+  }
   //
   // this.resetReadings = function(){
   //   state = FlyerState.resetReadings(state);
