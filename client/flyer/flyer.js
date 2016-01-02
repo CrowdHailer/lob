@@ -51,7 +51,8 @@ export default function Flyer(state){
     flyer.state = flyer.state.set("uplinkStatus", "TRANSMITTING");
     showcase(flyer.state);
   };
-  flyer.newReading = function(reading){
+  flyer.newReading = function(raw){
+    var reading = Reading(raw, flyer.clock);
     var state = flyer.state.set("latestReading", reading);
     var currentFlight = state.currentFlight;
     var flightHistory = state.flightHistory;
@@ -98,5 +99,7 @@ export default function Flyer(state){
   function logInfo() {
     flyer.logger.info.apply(flyer.logger, arguments);
   }
+  // DEBT should be set separatly for Testing
+  flyer.clock = window.Date;
 }
 Flyer.State = FlyerState;

@@ -88,14 +88,14 @@ describe("Flyer in flight", function(){
   describe("responding to new freefall reading", function(){
     var reading;
     beforeEach(function(){
-      reading = {magnitude: 0};
+      reading = {x: 0, y: 0, z: 0};
       flyer.newReading(reading);
     });
     it("should replace latest reading", function(){
-      expect(flyer.state.latestReading).toBe(reading);
+      expect(flyer.state.latestReading.magnitude).toBe(0);
     });
     it("should add reading to current flight", function(){
-      expect(flyer.state.currentFlight[1]).toEqual(reading);
+      expect(flyer.state.currentFlight[1].magnitude).toEqual(0);
     });
   });
   describe("responding to new grounded reading", function(){
@@ -212,11 +212,13 @@ describe("Transmitting Flyer", function(){
   describe("responding to new Reading", function(){
     var reading;
     beforeEach(function(){
-      reading = freefallReading();
-      flyer.newReading(reading);
+      flyer.clock = {
+        now: function(){ return 213; }
+      };
+      flyer.newReading({x:0, y: 0, z: 0});
     });
     it("should transmit the new reading", function(){
-      expect(flyer.uplink.transmitReading.transcript[0]).toEqual([reading]);
+      expect(flyer.uplink.transmitReading.transcript[0][0].timestamp).toEqual(213);
     });
   });
 });
