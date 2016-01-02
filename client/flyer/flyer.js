@@ -13,7 +13,7 @@ export default function Flyer(world){
   };
   flyer.view = {
     render: function(){
-
+      console.log("old view");
     }
   };
 
@@ -34,11 +34,13 @@ export default function Flyer(world){
   this.resetReadings = function(){
     state = State.resetReadings(state);
     logInfo("[Reset readings]");
+    showcase(flyer.state);
   };
   this.newReading = function(reading){
     state = State.newReading(state, reading);
     transmitReading(reading);
     logInfo("[New reading]", reading);
+    showcase(flyer.state);
   };
   this.uplinkAvailable = function(){
     flyer.state.uplinkStatus = "AVAILABLE";
