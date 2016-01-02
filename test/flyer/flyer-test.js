@@ -38,11 +38,16 @@ describe("Flyer with unknown uplink status", function(){
     flyer.view = {render: createTranscriptFunction()};
   });
   describe("responding to uplinkAvailable", function(){
+    var uplinkDetails;
     beforeEach(function(){
-      flyer.uplinkAvailable();
+      uplinkDetails = {channelName: "TEST", token: "longAndRandom"};
+      flyer.uplinkAvailable(uplinkDetails);
     });
     it("should have uplink status available", function(){
       expect(flyer.state.uplinkStatus).toBe("AVAILABLE");
+    });
+    it("should have uplink details", function(){
+      expect(flyer.state.uplinkDetails).toBe(uplinkDetails);
     });
     it("should have reported the change as info", function(){
       expect(flyer.logger.info.lastCall).toEqual(["[Uplink Available]"]);

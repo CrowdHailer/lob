@@ -7,6 +7,7 @@ import Struct from "../carbide/struct";
 
 var FLYER_STATE_DEFAULTS = {
   uplinkStatus: "UNKNOWN",
+  uplinkDetails: {},
   latestReading: null, // DEBT best place a null object here
   currentFlight: [],
   flightHistory: [],
@@ -36,9 +37,10 @@ export default function Flyer(state){
   var flyer = this;
   flyer.state = state;
 
-  flyer.uplinkAvailable = function(){
+  flyer.uplinkAvailable = function(details){
     // Set state action can cause projection to exhibit new state
     flyer.state = flyer.state.set("uplinkStatus", "AVAILABLE");
+    flyer.state = flyer.state.set("uplinkDetails", details);
     // call log change. test listeners that the state has changed.
     // stateChange({state: state, action: "Uplink Available", log: debug});
     logInfo("[Uplink Available]");
