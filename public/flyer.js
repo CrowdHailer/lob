@@ -253,10 +253,17 @@ var Lob = (function () { 'use strict';
 	    showcase(flyer.state); // Untested
 	  };
 
-	  this.uplinkFailed = function(){
+	  flyer.uplinkFailed = function(){
 	    flyer.state = flyer.state.set("uplinkStatus", "FAILED");
 	    showcase(flyer.state);
 	    logInfo("[Uplink Failed]");
+	  };
+
+	  flyer.closeAlert = function(){
+	    // DEBT untested
+	    flyer.state = flyer.state.set("alert", "");
+	    showcase(flyer.state);
+	    logInfo("Alert closed");
 	  };
 
 	  // DEBT what to do before other values are set
@@ -443,7 +450,7 @@ var Lob = (function () { 'use strict';
 
 	/* jshint esnext: true */
 
-	function Display$1($root){
+	function Display($root){
 	  var $maxFlightTime = $root.querySelector("[data-hook~=flight-time]");
 	  var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
 	  var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
@@ -499,7 +506,7 @@ var Lob = (function () { 'use strict';
 
 	/* jshint esnext: true */
 
-	function Display($root){
+	function Display$1($root){
 	  var $message = $root.querySelector("[data-display~=message]");
 	  return Object.create({}, {
 	    active: {
@@ -529,13 +536,13 @@ var Lob = (function () { 'use strict';
 	    var presentation = present(projection);
 	    var $avionics = document.querySelector("[data-interface~=avionics]");
 	    var $alert = document.querySelector("[data-display~=alert]");
-	    var display = new Display$1($avionics);
+	    var display = new Display($avionics);
 	    for (var attribute in display) {
 	      if (display.hasOwnProperty(attribute)) {
 	        display[attribute] = presentation[attribute];
 	      }
 	    }
-	    var alertDisplay = Display($alert);
+	    var alertDisplay = Display$1($alert);
 	    var alertMessage = projection.alert;
 	    if (alertMessage) {
 	      alertDisplay.message = alertMessage;

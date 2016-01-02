@@ -94,10 +94,17 @@ export default function Flyer(state){
     showcase(flyer.state); // Untested
   };
 
-  this.uplinkFailed = function(){
+  flyer.uplinkFailed = function(){
     flyer.state = flyer.state.set("uplinkStatus", "FAILED");
     showcase(flyer.state);
     logInfo("[Uplink Failed]");
+  };
+
+  flyer.closeAlert = function(){
+    // DEBT untested
+    flyer.state = flyer.state.set("alert", "");
+    showcase(flyer.state);
+    logInfo("Alert closed");
   };
 
   // DEBT what to do before other values are set
