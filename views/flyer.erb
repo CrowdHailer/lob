@@ -18,16 +18,16 @@
     <form id="starting-uplink" class="" action="#" method="post">
       <button type="button" data-display="status">Looking for connection</button>
     </form>
-    <form id="uplink-available" class="" action="#" method="post" data-command="start-transmitting">
-      <button type="button" data-display="status">Click to share flight</button>
+    <form id="uplink-available" onclick="Lob.startTransmitting()">
+      <button type="button">Click to share flight</button>
     </form>
     <form id="uplink-transmitting" class="" action="#" method="post">
       <button type="button" >
         <a href="<%= twitter_link %>" target="_blank">Share on Twitter</a><span data-display="channel"> Watch on channel '????'</span></button>
     </form>
   </div>
-  <form class="" action="#" method="post" data-command="reset">
-    <button type="button" data-command="reset">Reset</button>
+  <form onclick="Lob.resetReadings()">
+    <button type="button">Reset</button>
   </form>
   <!-- <form class="" action="/submit" method="post" data-command="submit">
     <input type="hidden" name="flight-time" value="0">

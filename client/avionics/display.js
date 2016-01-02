@@ -42,7 +42,6 @@ function Display($root){
     },
     uplinkStatus: {
       set: function(status){
-        console.log("setting status");
         $uplink.classList.remove("unknown");
         $uplink.classList.remove("available");
         $uplink.classList.remove("transmitting");
