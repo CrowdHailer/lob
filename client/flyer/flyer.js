@@ -12,21 +12,39 @@ var FLYER_STATE_DEFAULTS = {
 function FlyerState(raw){
   if ( !(this instanceof FlyerState) ) { return new FlyerState(raw); }
 
-  Struct.call(this, FLYER_STATE_DEFAULTS, raw);
+  // DEBT with return statement is not an instance of FlyerState.
+  // without return statement does not work at all.
+  return Struct.call(this, FLYER_STATE_DEFAULTS, raw);
 }
 
 FlyerState.prototype = Object.create(Struct.prototype);
 FlyerState.prototype.constructor = FlyerState;
 
+var INVALID_STATE_MESSAGE = "Flyer did not recieve valid initial state";
+
 export default function Flyer(state){
-  var flyer = this;
-  // DEBT could make state always wrap initial value
-  if (state === void 0) { state = new FlyerState(); }
-
-  if ( !(state instanceof FlyerState) ) { throw new TypeError("Flyer did not recieve valid initial state"); }
   if ( !(this instanceof Flyer) ) { return new Flyer(state); }
+  try {
+    state = FlyerState(state || {});
+  } catch (e) {
+    throw new TypeError(INVALID_STATE_MESSAGE);
+  }
 
+  var flyer = this;
   flyer.state = state;
+
+  this.newReading = function(reading){
+    // state = FlyerState.newReading(state, reading);
+    transmitReading(reading);
+    // logInfo("[New reading]", reading);
+    // showcase(flyer.state);
+  };
+
+  function transmitReading(reading){
+    if (flyer.state.uplinkStatus === "TRANSMITTING") {
+      flyer.uplink.transmitReading(reading);
+    }
+  }
   // flyer.uplink = {
   //   transmitReading: function(reading){
   //   }
@@ -40,9 +58,6 @@ export default function Flyer(state){
   // function showcase(state){
   //   flyer.view.render(Projection(state));
   // }
-  // function transmitReading(reading){
-  //   flyer.uplink.transmitReading(reading);
-  // }
   // function logInfo() {
   //   flyer.logger.info.apply(flyer.logger, arguments);
   // }
@@ -50,12 +65,6 @@ export default function Flyer(state){
   // this.resetReadings = function(){
   //   state = FlyerState.resetReadings(state);
   //   logInfo("[Reset readings]");
-  //   showcase(flyer.state);
-  // };
-  // this.newReading = function(reading){
-  //   state = FlyerState.newReading(state, reading);
-  //   transmitReading(reading);
-  //   logInfo("[New reading]", reading);
   //   showcase(flyer.state);
   // };
   // this.uplinkAvailable = function(){
