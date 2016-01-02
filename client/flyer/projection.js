@@ -29,7 +29,7 @@ function round(number){
   return parseFloat(number.toFixed(2));
 }
 
-function Presenter(raw){
+function Projection(raw){
 
   Object.defineProperty(this, "maxFlightTime", {
     get: function(){
@@ -72,7 +72,7 @@ function Presenter(raw){
   });
 }
 
-export function present(app){
-  return new Presenter(app);
+export function project(app){
+  return new Projection(app);
 }
-export default present;
+export default project;

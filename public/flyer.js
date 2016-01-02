@@ -88,7 +88,7 @@ var Lob = (function () { 'use strict';
 	  return parseFloat(number.toFixed(2));
 	}
 
-	function Presenter$1(raw){
+	function Projection(raw){
 
 	  Object.defineProperty(this, "maxFlightTime", {
 	    get: function(){
@@ -131,8 +131,8 @@ var Lob = (function () { 'use strict';
 	  });
 	}
 
-	function present$1(app){
-	  return new Presenter$1(app);
+	function project(app){
+	  return new Projection(app);
 	}
 
 	/* jshint esnext: true */
@@ -249,7 +249,7 @@ var Lob = (function () { 'use strict';
 	    }
 	  }
 	  function showcase(state){
-	    flyer.view.render(present$1(state));
+	    flyer.view.render(project(state));
 	  }
 	  function logInfo() {
 	    flyer.logger.info.apply(flyer.logger, arguments);
