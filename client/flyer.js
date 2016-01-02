@@ -22,10 +22,7 @@ var DEVICEMOTION = "devicemotion";
 function AccelerometerController(global, flyer){
   global.addEventListener(DEVICEMOTION, function(deviceMotionEvent){
     console.debug("AccelerometerController", deviceMotionEvent);
-    flyer.newReading({
-      acceleration: deviceMotionEvent.accelerationIncludingGravity,
-      timestamp: Date.now()
-    });
+    flyer.newReading(deviceMotionEvent.accelerationIncludingGravity);
   });
 }
 

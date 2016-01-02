@@ -166,6 +166,7 @@ var Lob = (function () { 'use strict';
 	  latestReading: null, // DEBT best place a null object here
 	  currentFlight: [],
 	  flightHistory: [],
+	  alert: ""
 	};
 	// DEBT not quite sure why this can't just be named state;
 	function FlyerState(raw){
@@ -207,21 +208,32 @@ var Lob = (function () { 'use strict';
 	    showcase(flyer.state);
 	  };
 	  flyer.newReading = function(raw){
-	    var reading = Reading(raw, flyer.clock);
-	    var state = flyer.state.set("latestReading", reading);
-	    var currentFlight = state.currentFlight;
-	    var flightHistory = state.flightHistory;
-	    if (reading.magnitude < 4) {
-	      currentFlight =  currentFlight.concat(reading);
-	    } else if(currentFlight[0]) {
-	      // DEBT concat splits array so we double wrap the flight
-	      flightHistory = flightHistory.concat([currentFlight]);
-	      currentFlight = [];
+	    try {
+	      var reading = Reading(raw, flyer.clock);
+	      var state = flyer.state.set("latestReading", reading);
+	      var currentFlight = state.currentFlight;
+	      var flightHistory = state.flightHistory;
+	      if (reading.magnitude < 4) {
+	        currentFlight =  currentFlight.concat(reading);
+	      } else if(currentFlight[0]) {
+	        // DEBT concat splits array so we double wrap the flight
+	        flightHistory = flightHistory.concat([currentFlight]);
+	        currentFlight = [];
+	      }
+	      state = state.set("currentFlight", currentFlight);
+	      state = state.set("flightHistory", flightHistory);
+	      flyer.state = state;
+	      transmitReading(reading);
+	    } catch (err) {
+	      // Debt change to invalid reading
+	      if (err instanceof TypeError) {
+	        flyer.state = flyer.state.set("alert", "Accelerometer not found for this device. Please try again on a different mobile");
+	        showcase(flyer.state);
+	        logInfo("Bad reading", raw); // Untested
+	      } else {
+	        throw err;
+	      }
 	    }
-	    state = state.set("currentFlight", currentFlight);
-	    state = state.set("flightHistory", flightHistory);
-	    flyer.state = state;
-	    transmitReading(reading);
 	    // logInfo("[New reading]", reading); DONT log this
 	    showcase(flyer.state);
 	  };
@@ -499,10 +511,7 @@ var Lob = (function () { 'use strict';
 	function AccelerometerController(global, flyer){
 	  global.addEventListener(DEVICEMOTION, function(deviceMotionEvent){
 	    console.debug("AccelerometerController", deviceMotionEvent);
-	    flyer.newReading({
-	      acceleration: deviceMotionEvent.accelerationIncludingGravity,
-	      timestamp: Date.now()
-	    });
+	    flyer.newReading(deviceMotionEvent.accelerationIncludingGravity);
 	  });
 	}
 

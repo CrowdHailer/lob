@@ -198,6 +198,14 @@ describe("Quiet(not transmitting) Flyer", function(){
       expect(flyer.uplink.transmitReading.transcript).toEqual([]);
     });
   });
+  describe("responding to bad reading", function(){
+    beforeEach(function(){
+      flyer.newReading({x: null});
+    });
+    it("should have an alert", function(){
+      expect(flyer.state.alert).not.toBe("");
+    });
+  });
 });
 describe("Transmitting Flyer", function(){
   var flyer;
