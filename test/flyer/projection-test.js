@@ -1,38 +1,29 @@
 /* jshint esnext: true */
 
 import { freefallReading, stationaryReading } from "../support";
-import Presenter from "../../client/avionics/presenter";
-import { format } from "../../client/avionics/presenter";
+import Projection from "../../client/flyer/projection";
 
-describe("Avionics Presenter", function(){
-  describe("formatting numbers", function(){
-    it("should format 0 as '+00.00'", function(){
-      expect(format(0)).toBe("+00.00");
-    });
-    it("should format -1 as '-01.00'", function(){
-      expect(format(-1)).toBe("-01.00");
-    });
-  });
+describe("Flyer Projection", function(){
 
-  describe("of refreshed app", function (){
+  describe("of reset state", function (){
     var appState = {
       currentReading: null,
       currentFlight: [],
       flightHistory: []
     };
-    var presenter = Presenter(appState);
+    var projection = Projection(appState);
 
     it("should have a maxFlightTime of 0", function(){
-      expect(presenter.maxFlightTime).toBe("0.00 s");
+      expect(projection.maxFlightTime).toBe(0.00);
     });
     it("should have a maxAltitude of 0", function(){
-      expect(presenter.maxAltitude).toBe("0.00 m");
+      expect(projection.maxAltitude).toBe(0.00);
     });
     it("should instruct user to lob", function(){
-      expect(presenter.instruction).toBe("Lob phone to get started");
+      expect(projection.hasThrow).toBe(false);
     });
-    it("should have a current Reading of waiting", function(){
-      expect(presenter.currentReadout).toEqual("Waiting.");
+    it("should have a current Reading as null", function(){
+      expect(projection.currentReading).toEqual(null);
     });
   });
 
@@ -43,16 +34,16 @@ describe("Avionics Presenter", function(){
       flightHistory: [],
       currentReading: reading
     };
-    var presenter = Presenter(appState);
+    var projection = Projection(appState);
 
     it("should have a maxFlightTime of .250", function(){
-      expect(presenter.maxFlightTime).toBe("0.25 s");
+      expect(projection.maxFlightTime).toBe(0.25);
     });
     it("should have a maxAltitude of 0", function(){
-      expect(presenter.maxAltitude).toBe("0.00 m");
+      expect(projection.maxAltitude).toBe(0.00);
     });
     it("should have a current Reading of with details", function(){
-      expect(presenter.currentReadout).toEqual("[+00.00, +00.00, -01.00]");
+      expect(projection.currentReading).toEqual(reading);
     });
   });
   describe("in mid flight state", function(){
@@ -61,12 +52,12 @@ describe("Avionics Presenter", function(){
       flightHistory: [],
       currentReading: freefallReading(200)
     };
-    var presenter = Presenter(appState);
+    var projection = Projection(appState);
     it("should have a maxFlightTime of .250", function(){
-      expect(presenter.maxFlightTime).toBe("0.35 s");
+      expect(projection.maxFlightTime).toBe(0.35);
     });
     it("should have a maxAltitude of 0", function(){
-      expect(presenter.maxAltitude).toBe("0.00 m");
+      expect(projection.maxAltitude).toBe(0.00);
     });
   });
   describe("after flight state", function(){
@@ -79,31 +70,31 @@ describe("Avionics Presenter", function(){
         [freefallReading(100), freefallReading(200)]
       ]
     };
-    var presenter = Presenter(appState);
+    var projection = Projection(appState);
     it("should have a maxFlightTime of .450", function(){
-      expect(presenter.maxFlightTime).toBe("0.45 s");
+      expect(projection.maxFlightTime).toBe(0.45);
     });
     it("should have a maxAltitude of 0.25", function(){
-      expect(presenter.maxAltitude).toBe("0.25 m");
+      expect(projection.maxAltitude).toBe(0.25);
     });
     it("should instruct user to lob", function(){
-      expect(presenter.instruction).toBe("OK! can you lob any higher");
+      expect(projection.hasThrow).toBe(true);
     });
   });
-  xdescribe("uplink", function(){
+  describe("uplink", function(){
     it("should have a uplinkStatus of unknown", function(){
       var appState = {
           uplinkStatus: "UNKNOWN"
       };
-      var presenter = Presenter(appState);
-      expect(presenter.uplinkStatus).toEqual("unknown");
+      var projection = Projection(appState);
+      expect(projection.uplinkStatus).toEqual("UNKNOWN");
     });
     it("should have a uplinkStatus of unknown", function(){
       var appState = {
           uplinkStatus: "AVAILABLE"
       };
-      var presenter = Presenter(appState);
-      expect(presenter.uplinkStatus).toEqual("available");
+      var projection = Projection(appState);
+      expect(projection.uplinkStatus).toEqual("AVAILABLE");
     });
   });
 });

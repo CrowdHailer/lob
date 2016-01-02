@@ -10,16 +10,24 @@ export default function Flyer(world){
     transmitReading: function(reading){
     }
   };
+  flyer.view = {
+    render: function(){
+      
+    }
+  };
 
   var state;
   this.state = {
     uplinkStatus: "UNKNOWN"
   };
-  function logInfo() {
-    flyer.logger.info.apply(flyer.logger, arguments);
+  function showcase(state){
+    flyer.view.render(state);
   }
   function transmitReading(reading){
     flyer.uplink.transmitReading(reading);
+  }
+  function logInfo() {
+    flyer.logger.info.apply(flyer.logger, arguments);
   }
 
   this.resetReadings = function(){
@@ -33,12 +41,20 @@ export default function Flyer(world){
   };
   this.uplinkAvailable = function(){
     flyer.state.uplinkStatus = "AVAILABLE";
+    showcase(flyer.state);
   };
   this.uplinkFailed = function(){
     flyer.state.uplinkStatus = "FAILED";
+    showcase(flyer.state);
   };
   this.startTransmitting = function(){
+    // try {
+    //   flyer.state.update("uplinkStatus", Uplink.startTransmitting)
+    // } catch (e) {
+    //   view.alert(uplink unavailable)
+    // }
     flyer.state.uplinkStatus = "TRANSMITTING";
+    showcase(flyer.state);
   };
 
   // DEBT these properties belong on a projection
