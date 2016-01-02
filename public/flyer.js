@@ -129,6 +129,11 @@ var Lob = (function () { 'use strict';
 	      return raw.uplinkDetails.channelName;
 	    }
 	  });
+	  Object.defineProperty(this, "alert", {
+	    get: function(){
+	      return raw.alert;
+	    }
+	  });
 	}
 
 	function project(app){
@@ -438,7 +443,7 @@ var Lob = (function () { 'use strict';
 
 	/* jshint esnext: true */
 
-	function Display($root){
+	function Display$1($root){
 	  var $maxFlightTime = $root.querySelector("[data-hook~=flight-time]");
 	  var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
 	  var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
@@ -492,17 +497,51 @@ var Lob = (function () { 'use strict';
 
 	}
 
+	/* jshint esnext: true */
+
+	function Display($root){
+	  var $message = $root.querySelector("[data-display~=message]");
+	  return Object.create({}, {
+	    active: {
+	      set: function(active){
+	        var ACTIVE = "active";
+	        if (active) {
+	          $root.classList.add(ACTIVE);
+	        } else {
+	          $root.classList.remove(ACTIVE);
+	        }
+	      },
+	      enumerable: true
+	    },
+	    message: {
+	      set: function(message){
+	        console.log(message);
+	        $message.innerHTML = message;
+	      }
+	    }
+	  });
+	}
+
 	var flyer = new Flyer();
 	flyer.logger = window.console;
 	flyer.view = {
 	  render: function(projection){
 	    var presentation = present(projection);
 	    var $avionics = document.querySelector("[data-interface~=avionics]");
-	    var display = new Display($avionics);
+	    var $alert = document.querySelector("[data-display~=alert]");
+	    var display = new Display$1($avionics);
 	    for (var attribute in display) {
 	      if (display.hasOwnProperty(attribute)) {
 	        display[attribute] = presentation[attribute];
 	      }
+	    }
+	    var alertDisplay = Display($alert);
+	    var alertMessage = projection.alert;
+	    if (alertMessage) {
+	      alertDisplay.message = alertMessage;
+	      alertDisplay.active = true;
+	    } else {
+	      alertDisplay.active = false;
 	    }
 	  }
 	};

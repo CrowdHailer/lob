@@ -16,6 +16,7 @@ export default function Display($root){
     },
     message: {
       set: function(message){
+        console.log(message);
         $message.innerHTML = message;
       }
     }

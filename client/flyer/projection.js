@@ -70,6 +70,11 @@ function Projection(raw){
       return raw.uplinkDetails.channelName;
     }
   });
+  Object.defineProperty(this, "alert", {
+    get: function(){
+      return raw.alert;
+    }
+  });
 }
 
 export function project(app){

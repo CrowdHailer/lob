@@ -2,6 +2,7 @@
 import Flyer from "./flyer/flyer";
 import Presenter from "./avionics/presenter";
 import Display from "./avionics/display";
+import AlertDisplay from "./alert/display";
 
 var flyer = new Flyer();
 flyer.logger = window.console;
@@ -9,11 +10,20 @@ flyer.view = {
   render: function(projection){
     var presentation = Presenter(projection);
     var $avionics = document.querySelector("[data-interface~=avionics]");
+    var $alert = document.querySelector("[data-display~=alert]");
     var display = new Display($avionics);
     for (var attribute in display) {
       if (display.hasOwnProperty(attribute)) {
         display[attribute] = presentation[attribute];
       }
+    }
+    var alertDisplay = AlertDisplay($alert);
+    var alertMessage = projection.alert;
+    if (alertMessage) {
+      alertDisplay.message = alertMessage;
+      alertDisplay.active = true;
+    } else {
+      alertDisplay.active = false;
     }
   }
 };
