@@ -3,13 +3,24 @@
 // import * as State from "./state";
 import Projection from "./projection";
 
-// DEBT not quite sure why this can't just be state;
-function FlyerState(){
+// DEBT not quite sure why this can't just be named state;
+import Struct from "../carbide/struct";
 
+var FLYER_STATE_DEFAULTS = {
+  uplinkStatus: "UNKNOWN",
+};
+function FlyerState(raw){
+  if ( !(this instanceof FlyerState) ) { return new FlyerState(raw); }
+
+  Struct.call(this, FLYER_STATE_DEFAULTS, raw);
 }
+
+FlyerState.prototype = Object.create(Struct.prototype);
+FlyerState.prototype.constructor = FlyerState;
 
 export default function Flyer(state){
   var flyer = this;
+  // DEBT could make state always wrap initial value
   if (state === void 0) { state = new FlyerState(); }
 
   if ( !(state instanceof FlyerState) ) { throw new TypeError("Flyer did not recieve valid initial state"); }

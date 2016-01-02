@@ -30,3 +30,17 @@ describe("Initialised Flyer", function(){
   //   }).toThrowError(TypeError, "Flyer is missing logger");
   // });
 });
+describe("Transmitting Flyer", function(){
+  var flyer;
+  beforeEach(function(){
+    flyer = Flyer();
+    // flyer.logger = null logger
+    flyer.uplink = {
+      transmitReading: function(reading){
+        return null;
+      }
+    };
+  });
+  // TODO needs state with uplinkStatus field
+
+});
