@@ -1,6 +1,7 @@
 /* jshint esnext: true */
 
 import * as State from "./state";
+import Projection from "./projection";
 
 export default function Flyer(world){
   if ( !(this instanceof Flyer) ) { return new Flyer(world); }
@@ -12,7 +13,7 @@ export default function Flyer(world){
   };
   flyer.view = {
     render: function(){
-      
+
     }
   };
 
@@ -21,7 +22,7 @@ export default function Flyer(world){
     uplinkStatus: "UNKNOWN"
   };
   function showcase(state){
-    flyer.view.render(state);
+    flyer.view.render(Projection(state));
   }
   function transmitReading(reading){
     flyer.uplink.transmitReading(reading);
