@@ -116,6 +116,8 @@ var Lob = (function () { 'use strict';
 	  };
 
 	  tracker.newReading = function(reading){
+	    // TODO don't need any of these things they all belong in flyer.
+	    // we just need to check that it plots to graph
 	    var state = tracker.state.set("latestReading", reading);
 	    var currentFlight = state.currentFlight;
 	    var flightHistory = state.flightHistory;

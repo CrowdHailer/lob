@@ -1,90 +1,59 @@
-(function () { 'use strict';
+var Lob = (function () { 'use strict';
 
-  if (!Object.assign) {
-    Object.defineProperty(Object, 'assign', {
-      enumerable: false,
-      configurable: true,
-      writable: true,
-      value: function(target) {
-        'use strict';
-        if (target === undefined || target === null) {
-          throw new TypeError('Cannot convert first argument to object');
+  /* jshint esnext: true */
+
+  function KeyError(key) {
+    this.name = "KeyError";
+    this.message = "key \"" + key + "\" not found";
+    this.stack = (new Error()).stack;
+  }
+  KeyError.prototype = Object.create(Error.prototype);
+  KeyError.prototype.constructor = KeyError;
+
+  function Struct(defaults, source){
+    "use strict";
+    if ( !(this instanceof Struct) ) { return new Struct(defaults, source); }
+
+    Object.assign(this, defaults);
+    for (var key in source) {
+      if (source.hasOwnProperty(key)) {
+        if (!this.hasOwnProperty(key)) {
+          throw new KeyError(key);
         }
-
-        var to = Object(target);
-        for (var i = 1; i < arguments.length; i++) {
-          var nextSource = arguments[i];
-          if (nextSource === undefined || nextSource === null) {
-            continue;
-          }
-          nextSource = Object(nextSource);
-
-          var keysArray = Object.keys(nextSource);
-          for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
-            var nextKey = keysArray[nextIndex];
-            var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
-            if (desc !== undefined && desc.enumerable) {
-              to[nextKey] = nextSource[nextKey];
-            }
-          }
-        }
-        return to;
+        this[key] = source[key];
       }
-    });
+    }
+    Object.freeze(this);
   }
 
-  function lens(key){
-    return function(func){
-      return function(obj){
-        obj = obj || key;
-        var update = {};
-        update[key] = func(obj[key]);
-        return Object.assign({}, obj, update);
-      };
-    };
-  }
+  Struct.prototype.hasKey = function (key) {
+    return Object.keys(this).indexOf(key) !== -1;
+  };
 
-  var FREEFALL_LIMIT = 4;
-
-  var Reading = {
-    freefall: function(reading){
-      var a = reading.acceleration;
-      var magnitude = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
-      return magnitude < FREEFALL_LIMIT;
+  Struct.prototype.fetch = function (key) {
+    if (this.hasKey(key)) {
+      return this[key];
+    } else {
+      throw new KeyError(key);
     }
   };
 
-  var EMPTY_READINGS = Object.freeze({
-    currentFlight: [],
-    current: null,
-    flightHistory: []
-  });
-
-  var readings = {
-    reset: function(_readings){
-      return EMPTY_READINGS;
-    },
-    // new: function(readings, reading){
-    //   return Object.assign({}, readings, {current: reading});
-    // }
+  Struct.prototype.set = function (key, value) {
+    if (this[key] === value) {
+      return this;
+    }
+    var tmp = {};
+    tmp[key] = value;
+    return this.merge(tmp);
   };
 
-  var resetReadings = lens("readings")(readings.reset);
+  Struct.prototype.update = function (key, operation) {
+    return this.set(key, operation(this[key]));
+  };
 
-  function newReading(state, current){
-    state = state || {};
-    var readings = state.readings || EMPTY_READINGS;
-    var currentFlight = readings.currentFlight;
-    var flightHistory = readings.flightHistory;
-    if (Reading.freefall(current)) {
-      currentFlight = currentFlight.concat(current);
-    } else if(currentFlight[0]) {
-      flightHistory = flightHistory.concat([currentFlight]);
-      currentFlight = [];
-    }
-    readings = {current: current, currentFlight: currentFlight, flightHistory: flightHistory};
-    return Object.assign({}, state, {readings: readings});
-  }
+  Struct.prototype.merge = function (other) {
+    return Struct(this, other);
+  };
 
   /* jshint esnext: true */
 
@@ -164,83 +133,99 @@
     return new Presenter$1(app);
   }
 
-  function Flyer(world){
-    if ( !(this instanceof Flyer) ) { return new Flyer(world); }
+  var FLYER_STATE_DEFAULTS = {
+    uplinkStatus: "UNKNOWN",
+    latestReading: null, // DEBT best place a null object here
+    currentFlight: [],
+    flightHistory: [],
+  };
+  // DEBT not quite sure why this can't just be named state;
+  function FlyerState(raw){
+    if ( !(this instanceof FlyerState) ) { return new FlyerState(raw); }
+
+    // DEBT with return statement is not an instance of FlyerState.
+    // without return statement does not work at all.
+    return Struct.call(this, FLYER_STATE_DEFAULTS, raw);
+  }
+
+  FlyerState.prototype = Object.create(Struct.prototype);
+  FlyerState.prototype.constructor = FlyerState;
+
+  var INVALID_STATE_MESSAGE = "Flyer did not recieve valid initial state";
+
+  function Flyer(state){
+    if ( !(this instanceof Flyer) ) { return new Flyer(state); }
+    try {
+      state = FlyerState(state || {});
+    } catch (e) {
+      throw new TypeError(INVALID_STATE_MESSAGE);
+    }
+
     var flyer = this;
+    flyer.state = state;
 
-    flyer.uplink = {
-      transmitReading: function(reading){
-      }
+    flyer.uplinkAvailable = function(){
+      // Set state action can cause projection to exhibit new state
+      flyer.state = flyer.state.set("uplinkStatus", "AVAILABLE");
+      // call log change. test listeners that the state has changed.
+      // stateChange({state: state, action: "Uplink Available", log: debug});
+      logInfo("[Uplink Available]");
+      showcase(flyer.state);
     };
-    flyer.view = {
-      render: function(){
-        console.log("old view");
+    this.startTransmitting = function(){
+      // TODO test and handle case when uplink not available.
+      flyer.state = flyer.state.set("uplinkStatus", "TRANSMITTING");
+      showcase(flyer.state);
+    };
+    flyer.newReading = function(reading){
+      var state = flyer.state.set("latestReading", reading);
+      var currentFlight = state.currentFlight;
+      var flightHistory = state.flightHistory;
+      if (reading.magnitude < 4) {
+        currentFlight =  currentFlight.concat(reading);
+      } else if(currentFlight[0]) {
+        // DEBT concat splits array so we double wrap the flight
+        flightHistory = flightHistory.concat([currentFlight]);
+        currentFlight = [];
       }
+      state = state.set("currentFlight", currentFlight);
+      state = state.set("flightHistory", flightHistory);
+      flyer.state = state;
+      transmitReading(reading);
+      // logInfo("[New reading]", reading); DONT log this
+      showcase(flyer.state);
+    };
+    flyer.resetReadings = function(){
+      flyer.state = flyer.state.merge({
+        latestReading: null,
+        currentFlight: [],
+        flightHistory: []
+      });
+      // transmit
+      logInfo("[Reset readings]");
+      showcase(flyer.state);
     };
 
-    var state;
-    this.state = {
-      uplinkStatus: "UNKNOWN"
+    this.uplinkFailed = function(){
+      flyer.state = flyer.state.set("uplinkStatus", "FAILED");
+      showcase(flyer.state);
+      logInfo("[Uplink Failed]");
     };
+
+    // DEBT what to do before other values are set
+    function transmitReading(reading){
+      if (flyer.state.uplinkStatus === "TRANSMITTING") {
+        flyer.uplink.transmitReading(reading);
+      }
+    }
     function showcase(state){
       flyer.view.render(present$1(state));
-    }
-    function transmitReading(reading){
-      flyer.uplink.transmitReading(reading);
     }
     function logInfo() {
       flyer.logger.info.apply(flyer.logger, arguments);
     }
-
-    this.resetReadings = function(){
-      state = resetReadings(state);
-      logInfo("[Reset readings]");
-      showcase(flyer.state);
-    };
-    this.newReading = function(reading){
-      state = newReading(state, reading);
-      transmitReading(reading);
-      logInfo("[New reading]", reading);
-      showcase(flyer.state);
-    };
-    this.uplinkAvailable = function(){
-      flyer.state.uplinkStatus = "AVAILABLE";
-      showcase(flyer.state);
-    };
-    this.uplinkFailed = function(){
-      flyer.state.uplinkStatus = "FAILED";
-      showcase(flyer.state);
-    };
-    this.startTransmitting = function(){
-      // try {
-      //   flyer.state.update("uplinkStatus", Uplink.startTransmitting)
-      // } catch (e) {
-      //   view.alert(uplink unavailable)
-      // }
-      flyer.state.uplinkStatus = "TRANSMITTING";
-      showcase(flyer.state);
-    };
-
-    // DEBT these properties belong on a projection
-    Object.defineProperty(this, "currentReading", {
-      get: function(){
-        var readings = state.readings || {};
-        return readings.current;
-      }
-    });
-    Object.defineProperty(this, "currentFlight", {
-      get: function(){
-        var readings = state.readings || {};
-        return readings.currentFlight || [];
-      }
-    });
-    Object.defineProperty(this, "flightHistory", {
-      get: function(){
-        var readings = state.readings || {};
-        return readings.flightHistory || [];
-      }
-    });
   }
+  Flyer.State = FlyerState;
 
   /* jshint esnext: true */
 
@@ -367,14 +352,11 @@
   flyer.view = {
     render: function(projection){
       var presentation = present(projection);
-      console.log("ola", presentation);
       var $avionics = document.querySelector("[data-interface~=avionics]");
       var display = new Display($avionics);
-      console.log($avionics);
       for (var attribute in display) {
-          console.log(presentation[attribute])
         if (display.hasOwnProperty(attribute)) {
-          // display[attribute] = presenter[attribute];
+          display[attribute] = presentation[attribute];
         }
       }
     }
@@ -392,6 +374,8 @@
   }
 
   var accelerometerController = new AccelerometerController(window, flyer);
+
+  return flyer;
 
 })();
 //# sourceMappingURL=flyer.js.map

@@ -73,8 +73,9 @@ export default function Flyer(state){
       currentFlight: [],
       flightHistory: []
     });
-    // logInfo("[Reset readings]");
-    // showcase(flyer.state);
+    // transmit
+    logInfo("[Reset readings]"); // Untested
+    showcase(flyer.state); // Untested
   };
 
   this.uplinkFailed = function(){

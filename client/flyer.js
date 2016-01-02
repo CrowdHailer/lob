@@ -8,14 +8,11 @@ flyer.logger = window.console;
 flyer.view = {
   render: function(projection){
     var presentation = Presenter(projection);
-    console.log("ola", presentation);
     var $avionics = document.querySelector("[data-interface~=avionics]");
     var display = new Display($avionics);
-    console.log($avionics);
     for (var attribute in display) {
-        console.log(presentation[attribute])
       if (display.hasOwnProperty(attribute)) {
-        // display[attribute] = presenter[attribute];
+        display[attribute] = presentation[attribute];
       }
     }
   }
@@ -33,3 +30,4 @@ function AccelerometerController(global, flyer){
 }
 
 var accelerometerController = new AccelerometerController(window, flyer);
+export default flyer;
