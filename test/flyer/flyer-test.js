@@ -50,7 +50,7 @@ describe("Flyer with unknown uplink status", function(){
       expect(flyer.state.uplinkDetails).toBe(uplinkDetails);
     });
     it("should have reported the change as info", function(){
-      expect(flyer.logger.info.lastCall).toEqual(["[Uplink Available]"]);
+      expect(flyer.logger.info.lastCall).toEqual(["Uplink Available", uplinkDetails]);
     });
     it("should have called for the view to be rerendered", function(){
       // DEBT test projection

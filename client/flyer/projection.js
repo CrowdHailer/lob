@@ -67,7 +67,7 @@ function Presenter(raw){
   });
   Object.defineProperty(this, "channelName", {
     get: function(){
-      return raw.channelName;
+      return raw.uplinkDetails.channelName;
     }
   });
 }

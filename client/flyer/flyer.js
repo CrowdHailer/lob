@@ -43,7 +43,7 @@ export default function Flyer(state){
     flyer.state = flyer.state.set("uplinkDetails", details);
     // call log change. test listeners that the state has changed.
     // stateChange({state: state, action: "Uplink Available", log: debug});
-    logInfo("[Uplink Available]");
+    logInfo("Uplink Available", details);
     showcase(flyer.state);
   };
   this.startTransmitting = function(){
