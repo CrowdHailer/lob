@@ -101,7 +101,7 @@ describe("Flyer in flight", function(){
   describe("responding to new grounded reading", function(){
     var reading;
     beforeEach(function(){
-      reading = {};
+      reading = {x: 0, y: 0, z: 10};
       flyer.newReading(reading);
     });
     // it("should replace latest reading", function(){
@@ -144,7 +144,7 @@ describe("grounded flyer", function(){
   describe("responding to new freefall reading", function(){
     var reading;
     beforeEach(function(){
-      reading = {magnitude: 0};
+      reading = {x: 0, y: 0, z: 0};
       flyer.newReading(reading);
     });
     // it("should replace latest reading", function(){
@@ -157,7 +157,7 @@ describe("grounded flyer", function(){
   describe("responding to new grounded reading", function(){
     var reading;
     beforeEach(function(){
-      reading = {};
+      reading = {x: 0, y: 0, z: 10};
       flyer.newReading(reading);
     });
     // it("should replace latest reading", function(){
@@ -184,7 +184,7 @@ describe("Quiet(not transmitting) Flyer", function(){
   describe("responding to new Reading", function(){
     var reading;
     beforeEach(function(){
-      reading = freefallReading();
+      reading = {x: 0, y: 0, z: 0};
       flyer.newReading(reading);
     });
     it("should have called for the view to be rerendered", function(){

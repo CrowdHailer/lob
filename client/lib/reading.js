@@ -11,6 +11,10 @@ export default function Reading(raw, clock){
   this.y = raw.y;
   this.z = raw.z;
   this.timestamp = clock.now();
+
+  if (typeof this.x !== "number") {
+    throw new TypeError("Reading should have numerical values for x, y, z");
+  }
 }
 
 Object.defineProperty(Reading.prototype, "magnitude", {

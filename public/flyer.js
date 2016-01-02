@@ -135,6 +135,31 @@ var Lob = (function () { 'use strict';
 	  return new Presenter$1(app);
 	}
 
+	/* jshint esnext: true */
+
+	function roundtoFour(number) {
+	  return parseFloat(number.toFixed(4));
+	}
+
+	function Reading(raw, clock){
+	  if ( !(this instanceof Reading) ) { return new Reading(raw, clock); }
+
+	  this.x = raw.x;
+	  this.y = raw.y;
+	  this.z = raw.z;
+	  this.timestamp = clock.now();
+
+	  if (typeof this.x !== "number") {
+	    throw new TypeError("Reading should have numerical values for x, y, z");
+	  }
+	}
+
+	Object.defineProperty(Reading.prototype, "magnitude", {
+	  get: function(){
+	    return roundtoFour(Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z));
+	  }
+	});
+
 	var FLYER_STATE_DEFAULTS = {
 	  uplinkStatus: "UNKNOWN",
 	  uplinkDetails: {},
@@ -181,7 +206,8 @@ var Lob = (function () { 'use strict';
 	    flyer.state = flyer.state.set("uplinkStatus", "TRANSMITTING");
 	    showcase(flyer.state);
 	  };
-	  flyer.newReading = function(reading){
+	  flyer.newReading = function(raw){
+	    var reading = Reading(raw, flyer.clock);
 	    var state = flyer.state.set("latestReading", reading);
 	    var currentFlight = state.currentFlight;
 	    var flightHistory = state.flightHistory;
@@ -228,6 +254,8 @@ var Lob = (function () { 'use strict';
 	  function logInfo() {
 	    flyer.logger.info.apply(flyer.logger, arguments);
 	  }
+	  // DEBT should be set separatly for Testing
+	  flyer.clock = window.Date;
 	}
 	Flyer.State = FlyerState;
 

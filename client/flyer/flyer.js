@@ -2,6 +2,7 @@
 
 // import * as State from "./state";
 import Projection from "./projection";
+import Reading from "../lib/reading";
 
 import Struct from "../carbide/struct";
 

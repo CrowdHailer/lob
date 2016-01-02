@@ -27,3 +27,10 @@ describe("Initialised Reading", function(){
     expect(reading.magnitude).toBe(3.7417);
   });
 });
+describe("Invalid Reading", function(){
+  it("cannot be constructed without x number", function(){
+    expect(function(){
+      Reading({x: null, y: 2, z: 3}, {now: function(){ return 1234567; }});
+    }).toThrowError(TypeError, "Reading should have numerical values for x, y, z");
+  });
+});
