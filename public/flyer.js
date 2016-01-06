@@ -190,11 +190,11 @@ var Lob = (function () { 'use strict';
 	  return parseFloat(number.toFixed(2));
 	}
 
-	function Projection(raw){
+	function Projection(rawState){
 
 	  Object.defineProperty(this, "maxFlightTime", {
 	    get: function(){
-	      var flights = raw.flightHistory.concat([raw.currentFlight]);
+	      var flights = rawState.flightHistory.concat([rawState.currentFlight]);
 	      var flightDurations = flights.map(readingsDuration);
 	      var time =  Math.max.apply(null, flightDurations);
 	      return time;
@@ -203,15 +203,15 @@ var Lob = (function () { 'use strict';
 
 	  Object.defineProperty(this, "maxAltitude", {
 	    get: function(){
-	      var flightDurations = raw.flightHistory.map(readingsDuration);
+	      var flightDurations = rawState.flightHistory.map(readingsDuration);
 	      var max = Math.max.apply(null, [0].concat(flightDurations));
 	      return round(altitudeForFreefallDuration(max));
 	    }
 	  });
 
-	  Object.defineProperty(this, "currentReading", {
+	  Object.defineProperty(this, "latestReading", {
 	    get: function(){
-	      return raw.currentReading;
+	      return rawState.latestReading;
 	    }
 	  });
 
@@ -223,17 +223,17 @@ var Lob = (function () { 'use strict';
 
 	  Object.defineProperty(this, "uplinkStatus", {
 	    get: function(){
-	      return raw.uplinkStatus;
+	      return rawState.uplinkStatus;
 	    }
 	  });
 	  Object.defineProperty(this, "channelName", {
 	    get: function(){
-	      return raw.uplinkDetails.channelName;
+	      return rawState.uplinkDetails.channelName;
 	    }
 	  });
 	  Object.defineProperty(this, "alert", {
 	    get: function(){
-	      return raw.alert;
+	      return rawState.alert;
 	    }
 	  });
 	}
@@ -435,27 +435,27 @@ var Lob = (function () { 'use strict';
 	  return padded;
 	}
 
-	function Presenter(raw){
+	function Presenter(projection){
 
 	  Object.defineProperty(this, "maxFlightTime", {
 	    get: function(){
-	      return raw.maxFlightTime + " s";
+	      return projection.maxFlightTime + " s";
 	    }
 	  });
 
 	  Object.defineProperty(this, "maxAltitude", {
 	    get: function(){
-	      return raw.maxAltitude + " m";
+	      return projection.maxAltitude + " m";
 	    }
 	  });
 
 	  Object.defineProperty(this, "currentReadout", {
 	    get: function(){
 	      // DEBT replace with reading toString method
-	      if (!raw.currentReading) {
+	      if (!projection.latestReading) {
 	        return "Waiting.";
 	      }
-	      var acceleration = raw.currentReading.acceleration;
+	      var acceleration = projection.latestReading;
 	      var x = acceleration.x;
 	      var y = acceleration.y;
 	      var z = acceleration.z;
@@ -474,12 +474,12 @@ var Lob = (function () { 'use strict';
 
 	  Object.defineProperty(this, "uplinkStatus", {
 	    get: function(){
-	      return raw.uplinkStatus.toLowerCase();
+	      return projection.uplinkStatus.toLowerCase();
 	    }
 	  });
 	  Object.defineProperty(this, "channelName", {
 	    get: function(){
-	      return raw.channelName;
+	      return projection.channelName;
 	    }
 	  });
 	}

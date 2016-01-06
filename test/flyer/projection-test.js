@@ -7,7 +7,7 @@ describe("Flyer Projection", function(){
 
   describe("of reset state", function (){
     var appState = {
-      currentReading: null,
+      latestReading: null,
       currentFlight: [],
       flightHistory: []
     };
@@ -23,7 +23,7 @@ describe("Flyer Projection", function(){
       expect(projection.hasThrow).toBe(false);
     });
     it("should have a current Reading as null", function(){
-      expect(projection.currentReading).toEqual(null);
+      expect(projection.latestReading).toEqual(null);
     });
   });
 
@@ -32,7 +32,7 @@ describe("Flyer Projection", function(){
     var appState = {
       currentFlight: [reading],
       flightHistory: [],
-      currentReading: reading
+      latestReading: reading
     };
     var projection = Projection(appState);
 
@@ -43,14 +43,14 @@ describe("Flyer Projection", function(){
       expect(projection.maxAltitude).toBe(0.00);
     });
     it("should have a current Reading of with details", function(){
-      expect(projection.currentReading).toEqual(reading);
+      expect(projection.latestReading).toEqual(reading);
     });
   });
   describe("in mid flight state", function(){
     var appState = {
       currentFlight: [freefallReading(100), freefallReading(200)],
       flightHistory: [],
-      currentReading: freefallReading(200)
+      latestReading: freefallReading(200)
     };
     var projection = Projection(appState);
     it("should have a maxFlightTime of .250", function(){
@@ -63,7 +63,7 @@ describe("Flyer Projection", function(){
   describe("after flight state", function(){
     var appState = {
       currentFlight: [],
-      currentReading: null,
+      latestReading: null,
       flightHistory: [
         [freefallReading(100), freefallReading(200)],
         [freefallReading(100), freefallReading(300)],

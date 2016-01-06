@@ -8,27 +8,27 @@ export function format(i){
   return padded;
 }
 
-function Presenter(raw){
+function Presenter(projection){
 
   Object.defineProperty(this, "maxFlightTime", {
     get: function(){
-      return raw.maxFlightTime + " s";
+      return projection.maxFlightTime + " s";
     }
   });
 
   Object.defineProperty(this, "maxAltitude", {
     get: function(){
-      return raw.maxAltitude + " m";
+      return projection.maxAltitude + " m";
     }
   });
 
   Object.defineProperty(this, "currentReadout", {
     get: function(){
       // DEBT replace with reading toString method
-      if (!raw.currentReading) {
+      if (!projection.latestReading) {
         return "Waiting.";
       }
-      var acceleration = raw.currentReading.acceleration;
+      var acceleration = projection.latestReading;
       var x = acceleration.x;
       var y = acceleration.y;
       var z = acceleration.z;
@@ -47,12 +47,12 @@ function Presenter(raw){
 
   Object.defineProperty(this, "uplinkStatus", {
     get: function(){
-      return raw.uplinkStatus.toLowerCase();
+      return projection.uplinkStatus.toLowerCase();
     }
   });
   Object.defineProperty(this, "channelName", {
     get: function(){
-      return raw.channelName;
+      return projection.channelName;
     }
   });
 }
