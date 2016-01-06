@@ -31,7 +31,6 @@ flyer.view = {
 var DEVICEMOTION = "devicemotion";
 function AccelerometerController(global, flyer){
   global.addEventListener(DEVICEMOTION, function(deviceMotionEvent){
-    console.debug("AccelerometerController", deviceMotionEvent);
     flyer.newReading(deviceMotionEvent.accelerationIncludingGravity);
   });
 }
@@ -49,6 +48,7 @@ export default function FlyerUplinkController(options, tracker){
   });
   realtime.connection.on("failed", function(err) {
     flyer.uplinkFailed();
+    console.log(err.reason.message);
   });
   var channel = realtime.channels.get(channelName);
   tracker.uplink = {

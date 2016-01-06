@@ -9,6 +9,9 @@
   #uplink-transmitting {
     display: none;
   }
+  #uplink-failed {
+    display: none;
+  }
 }
 #uplink.available {
   #starting-uplink {
@@ -20,6 +23,9 @@
   #uplink-transmitting {
     display: none;
   }
+  #uplink-failed {
+    display: none;
+  }
 }
 #uplink.transmitting {
   #starting-uplink {
@@ -29,6 +35,23 @@
     display: none;
   }
   #uplink-transmitting {
+    display: block;
+  }
+  #uplink-failed {
+    display: none;
+  }
+}
+#uplink.failed {
+  #starting-uplink {
+    display: none;
+  }
+  #uplink-available {
+    display: none;
+  }
+  #uplink-transmitting {
+    display: none;
+  }
+  #uplink-failed {
     display: block;
   }
 }
