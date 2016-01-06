@@ -90,8 +90,9 @@ export default function Flyer(state){
       flightHistory: []
     });
     // transmit
-    logInfo("[Reset readings]"); // Untested
+    transmitResetReadings();
     showcase(flyer.state); // Untested
+    logInfo("Reset readings"); // Untested
   };
 
   flyer.uplinkFailed = function(){
@@ -111,6 +112,11 @@ export default function Flyer(state){
   function transmitReading(reading){
     if (flyer.state.uplinkStatus === "TRANSMITTING") {
       flyer.uplink.transmitReading(reading);
+    }
+  }
+  function transmitResetReadings(){
+    if (flyer.state.uplinkStatus === "TRANSMITTING") {
+      flyer.uplink.transmitResetReadings();
     }
   }
   function showcase(state){

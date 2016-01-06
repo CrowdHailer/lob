@@ -62,6 +62,18 @@ export default function FlyerUplinkController(options, tracker){
           console.info("Message successfully sent", reading);
         }
       });
+    },
+    transmitResetReadings: function(){
+      channel.publish("resetReadings", {}, function(err) {
+        // DEBT use provided console for messages
+        // i.e. have message successful as app actions
+        if(err) {
+          window.console.warn("Unable to publish message; err = " + err.message);
+        } else {
+          // TODO comment to ably that if error here then no information released at all.
+          window.console.info("Message successfully sent");
+        }
+      });
     }
   };
 }

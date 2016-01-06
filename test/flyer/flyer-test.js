@@ -114,20 +114,6 @@ describe("Flyer in flight", function(){
       expect(flyer.state.flightHistory[1]).toEqual([{}]);
     });
   });
-  describe("responding to reset readings", function(){
-    beforeEach(function(){
-      flyer.resetReadings();
-    });
-    it("should clear latest reading", function(){
-      expect(flyer.state.latestReading).toBe(null);
-    });
-    it("should clear current flight", function(){
-      expect(flyer.state.currentFlight).toEqual([]);
-    });
-    it("should clear flight history", function(){
-      expect(flyer.state.flightHistory).toEqual([]);
-    });
-  });
 });
 
 describe("grounded flyer", function(){

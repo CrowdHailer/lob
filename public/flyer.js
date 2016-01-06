@@ -249,8 +249,9 @@ var Lob = (function () { 'use strict';
 	      flightHistory: []
 	    });
 	    // transmit
-	    logInfo("[Reset readings]"); // Untested
+	    transmitResetReadings();
 	    showcase(flyer.state); // Untested
+	    logInfo("Reset readings"); // Untested
 	  };
 
 	  flyer.uplinkFailed = function(){
@@ -270,6 +271,11 @@ var Lob = (function () { 'use strict';
 	  function transmitReading(reading){
 	    if (flyer.state.uplinkStatus === "TRANSMITTING") {
 	      flyer.uplink.transmitReading(reading);
+	    }
+	  }
+	  function transmitResetReadings(){
+	    if (flyer.state.uplinkStatus === "TRANSMITTING") {
+	      flyer.uplink.transmitResetReadings();
 	    }
 	  }
 	  function showcase(state){
@@ -585,6 +591,18 @@ var Lob = (function () { 'use strict';
 	          console.warn("Unable to publish message; err = " + err.message);
 	        } else {
 	          console.info("Message successfully sent", reading);
+	        }
+	      });
+	    },
+	    transmitResetReadings: function(){
+	      channel.publish("resetReadings", {}, function(err) {
+	        // DEBT use provided console for messages
+	        // i.e. have message successful as app actions
+	        if(err) {
+	          window.console.warn("Unable to publish message; err = " + err.message);
+	        } else {
+	          // TODO comment to ably that if error here then no information released at all.
+	          window.console.info("Message successfully sent");
 	        }
 	      });
 	    }
