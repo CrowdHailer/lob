@@ -33,6 +33,7 @@ export default function Flyer(state){
   try {
     state = FlyerState(state || {});
   } catch (e) {
+    alert(e);
     throw new TypeError(INVALID_STATE_MESSAGE);
   }
 

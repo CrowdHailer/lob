@@ -1,8 +1,12 @@
 /* jshint esnext: true */
+import "./utils/polyfill";
 import Flyer from "./flyer/flyer";
 import Presenter from "./avionics/presenter";
 import Display from "./avionics/display";
 import AlertDisplay from "./alert/display";
+import * as URI from "./uri";
+try {
+
 
 var flyer = new Flyer();
 flyer.logger = window.console;
@@ -38,7 +42,7 @@ function AccelerometerController(global, flyer){
 var accelerometerController = new AccelerometerController(window, flyer);
 
 // import FlyerUplinkController from "./flyer/flyer-uplink-controller";
-export default function FlyerUplinkController(options, tracker){
+function FlyerUplinkController(options, tracker){
   var channelName = options.channel;
   var token = options.token;
   var realtime = new Ably.Realtime({ token: token });
@@ -78,11 +82,17 @@ export default function FlyerUplinkController(options, tracker){
   };
 }
 
-import * as URI from "./uri";
+
 var uri = URI.parseLocation(window.location);
 
 var uplinkController = FlyerUplinkController({
   token: uri.query.token,
   channel: uri.query.channel
 }, flyer);
+} catch (e) {
+  alert(e);
+  throw e;
+} finally {
+
+}
 export default flyer;
