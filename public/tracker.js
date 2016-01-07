@@ -109,7 +109,7 @@ var Lob = (function () { 'use strict';
 	    tracker.state = tracker.state.set("uplinkStatus", "AVAILABLE");
 	    tracker.state = tracker.state.set("uplinkChannelName", channelName);
 	    // call log change. test listeners that the state has changed.
-	    logInfo("Uplink available", channelName);
+	    logInfo("Uplink available on channel:", channelName);
 	    showcase(tracker.state);
 	  };
 
@@ -328,6 +328,9 @@ var Lob = (function () { 'use strict';
 
 	function TrackerShowcase(window){
 	  if ( !(this instanceof TrackerShowcase) ) { return new TrackerShowcase(window); }
+	  var showcase = this;
+	  var views = [];
+
 
 	  this.update = function(projection){
 	    // Values needed in display
@@ -341,6 +344,17 @@ var Lob = (function () { 'use strict';
 	      isLive: isLive(projection),
 	      readings: projection.flightSnapshot || projection.liveFlight
 	    });
+	    showcase.projection = this;
+	    views.forEach(function(view){
+	      view.render(projection);
+	    });
+	  };
+
+	  this.addView = function(view){
+	    if (showcase.projection) {
+	      view.render(showcase.projection);
+	    }
+	    views.push(view);
 	  };
 	}
 
@@ -384,6 +398,16 @@ var Lob = (function () { 'use strict';
 	//   });
 	// }
 
+	/* jshint esnext: true */
+
+	function ready(fn) {
+	  if (document.readyState !== "loading"){
+	    fn();
+	  } else {
+	    document.addEventListener("DOMContentLoaded", fn);
+	  }
+	}
+
 	// GENERAL CONFIGURATION
 	window.Tracker = Tracker;
 	window.Tracker.Reading = Reading;
@@ -397,6 +421,31 @@ var Lob = (function () { 'use strict';
 	tracker.showcase = TrackerShowcase(window);
 
 	var uplinkController = new UplinkController(router.state, tracker);
+
+	function uplinkStatusMessageFromProjection(projection) {
+	  var message = projection.uplinkStatus;
+	  if (message === 'AVAILABLE') {
+	    return 'Connection made on channel "' + projection.uplinkChannelName +'"';
+	  } else {
+	    return 'Unknown';
+	  }
+	  // body...
+	}
+
+	ready(function(){
+	  var $uplinkStatusMessage = document.querySelector('[data-display~=uplink-status-message]');
+	  console.log('dom is ready', $uplinkStatusMessage);
+	  var mainView = {
+	    render: function(projection){
+	      console.log('Display rendering:', projection);
+	      $uplinkStatusMessage.innerHTML = uplinkStatusMessageFromProjection(projection);
+	    }
+	  };
+	  tracker.showcase.addView(mainView);
+	});
+
+
+	// Dom views should be initialized with the ready on certain selectors library
 
 	return tracker;
 
