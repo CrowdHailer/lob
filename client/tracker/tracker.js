@@ -41,6 +41,16 @@ function Tracker(state, world){
     showcase(tracker.state);
   };
 
+  tracker.uplinkFailed = function(err){
+    console.log(err);
+    // Set state action can cause projection to exhibit new state
+    tracker.state = tracker.state.set("uplinkStatus", "FAILED");
+    // tracker.state = tracker.state.set("uplinkChannelName", channelName);
+    // // call log change. test listeners that the state has changed.
+    logInfo("Uplink failed to connect", err);
+    showcase(tracker.state);
+  };
+
   tracker.newReading = function(reading){
     var wasInFlight = lastInArray(tracker.state.liveFlight) && isInFlight(lastInArray(tracker.state.liveFlight));
     var isNowGrounded = !isInFlight(reading);

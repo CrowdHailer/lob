@@ -11,7 +11,7 @@ export default function UplinkController(options, tracker){
     tracker.uplinkAvailable(channelName);
   });
   realtime.connection.on("failed", function(err) {
-    tracker.uplinkFailed();
+    tracker.uplinkFailed(err);
   });
   var channel = realtime.channels.get(channelName);
   channel.subscribe("newReading", function(event){

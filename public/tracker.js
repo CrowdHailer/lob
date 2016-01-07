@@ -113,6 +113,16 @@ var Lob = (function () { 'use strict';
 	    showcase(tracker.state);
 	  };
 
+	  tracker.uplinkFailed = function(err){
+	    console.log(err);
+	    // Set state action can cause projection to exhibit new state
+	    tracker.state = tracker.state.set("uplinkStatus", "FAILED");
+	    // tracker.state = tracker.state.set("uplinkChannelName", channelName);
+	    // // call log change. test listeners that the state has changed.
+	    logInfo("Uplink failed to connect", err);
+	    showcase(tracker.state);
+	  };
+
 	  tracker.newReading = function(reading){
 	    var wasInFlight = lastInArray(tracker.state.liveFlight) && isInFlight(lastInArray(tracker.state.liveFlight));
 	    var isNowGrounded = !isInFlight(reading);
@@ -371,7 +381,7 @@ var Lob = (function () { 'use strict';
 	    tracker.uplinkAvailable(channelName);
 	  });
 	  realtime.connection.on("failed", function(err) {
-	    tracker.uplinkFailed();
+	    tracker.uplinkFailed(err);
 	  });
 	  var channel = realtime.channels.get(channelName);
 	  channel.subscribe("newReading", function(event){
@@ -425,7 +435,9 @@ var Lob = (function () { 'use strict';
 	function uplinkStatusMessageFromProjection(projection) {
 	  var message = projection.uplinkStatus;
 	  if (message === 'AVAILABLE') {
-	    return 'Connection made on channel "' + projection.uplinkChannelName +'"';
+	    return 'Connection made to channel "' + projection.uplinkChannelName +'"';
+	  } else if (message === 'FAILED') {
+	    return 'Could not connect to Ably service';
 	  } else {
 	    return 'Unknown';
 	  }

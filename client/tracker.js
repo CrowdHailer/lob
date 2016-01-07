@@ -30,10 +30,11 @@ function uplinkStatusMessageFromProjection(projection) {
   var message = projection.uplinkStatus;
   if (message === 'AVAILABLE') {
     return 'Connection made to channel "' + projection.uplinkChannelName +'"';
+  } else if (message === 'FAILED') {
+    return 'Could not connect to Ably service';
   } else {
     return 'Unknown';
   }
-  // body...
 }
 
 ready(function(){
