@@ -76,6 +76,8 @@ function Tracker(state, world){
     // Only if not locked live
     // Only if current flight has content
     var state = tracker.state.set('flightSnapshot', tracker.state.liveFlight);
+    // ONLY if in tracking flight status
+    var state = tracker.state.set('flightOutputStatus', 'HOLDING_SNAPSHOT');
 
     tracker.state = state; // Assign at end to work as transaction
     showcase(state);
@@ -83,7 +85,11 @@ function Tracker(state, world){
   };
 
   tracker.watchLiveTracking = function(){
-    console.warn("try to watch live tracking");
+    var state = tracker.state.set('flightOutputStatus', 'FOLLOWING_FLIGHT');
+
+    tracker.state = state;
+    showcase(state);
+    logEvent("Watching live tracking");
   };
   tracker.lockLiveTracking = function(){
     console.warn("try to lock live tracking");

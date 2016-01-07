@@ -20,7 +20,7 @@ describe("Tracker with unknown uplink status", function(){
     it("should have uplink status available", function(){
       expect(tracker.state.uplinkStatus).toBe("AVAILABLE");
     });
-    it("should have reported the change as info", function(){
+    xit("should have reported the change as info", function(){
       expect(tracker.logger.info.lastCall).toEqual(["[Uplink Available]"]);
     });
   });
