@@ -82,6 +82,16 @@ function Tracker(state, world){
     logEvent("Taken snapshot");
   };
 
+  tracker.watchLiveTracking = function(){
+    console.warn("try to watch live tracking");
+  };
+  tracker.lockLiveTracking = function(){
+    console.warn("try to lock live tracking");
+  };
+  tracker.unlockLiveTracking = function(){
+    console.warn("try to unlock live tracking");
+  };
+
   // watchlivetracking
   // locklivetracking
   // unlocklivetracking

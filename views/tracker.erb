@@ -1,11 +1,16 @@
 <main id="tracker-page">
-  <div data-display="uplink-status-message">Connecting to Ably</div>
-  <label>lock live
-    <input type="checkbox" onchange="console.log(event.target.checked)">
-  </label>
-  <label>paused
-    <input type="checkbox" onchange="console.log(event.target.checked)">
-  </label>
+  <form>
+    <button type="button" data-display="uplink-status-message">Connecting to Ably</button>
+  </form>
+  <form id="tracker-live" onclick="Lob.lockLiveTracking()">
+    <button type="button">Watching live, click to lock</button>
+  </form>
+  <form id="tracker-snapshot" onclick="Lob.watchLiveTracking()">
+    <button type="button">Showing snapshot, click to return to live feed</button>
+  </form>
+  <form id="tracker-locked-live" onclick="Lob.unlockLiveTracking()">
+    <button type="button">Locked to live tracking, click to allow pausing</button>
+  </form>
   <a href="/">
     <h1>Lob</h1>
   </a>
