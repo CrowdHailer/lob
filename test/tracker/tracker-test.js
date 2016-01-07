@@ -9,6 +9,9 @@ describe("Tracker with unknown uplink status", function(){
   beforeEach(function(){
     tracker = new Tracker({uplinkStatus: "UNKNOWN"}, {});
     tracker.logger = createTranscriptLogger();
+    tracker.showcase = {
+      update: function(){}
+    };
   });
   describe("responding to uplinkAvailable", function(){
     beforeEach(function(){

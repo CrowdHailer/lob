@@ -28,6 +28,8 @@ function Tracker(state, world){
   }
   var tracker = this;
   tracker.state = state;
+  // DEBT return to external assignment
+  world = world || {};
   tracker.logger = world.logger // Or error causing of silent version;
 
   tracker.uplinkAvailable = function(){
@@ -79,7 +81,7 @@ function Tracker(state, world){
     tracker.logger.info.apply(tracker.logger, arguments);
   }
   function showcase(state) {
-    console.log('showcase', state);
+    tracker.showcase.update(state);
   }
 
   function projectState(state){

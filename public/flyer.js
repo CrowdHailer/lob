@@ -330,7 +330,8 @@ var Lob = (function () { 'use strict';
 	  };
 	  flyer.newReading = function(raw){
 	    try {
-	      var reading = Reading(raw, flyer.clock);
+	      raw.timestamp = Date.now();
+	      var reading = Reading(raw);
 	      var state = flyer.state.set("latestReading", reading);
 	      var currentFlight = state.currentFlight;
 	      var flightHistory = state.flightHistory;

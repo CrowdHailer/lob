@@ -10,6 +10,9 @@ describe("New grounded reading", function(){
       logger: createTranscriptLogger()
     };
     tracker = Tracker({liveFlight: [{}]}, world);
+    tracker.showcase = {
+      update: function(){}
+    };
     reading = {};
     tracker.newReading(reading);
   });

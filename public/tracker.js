@@ -88,8 +88,8 @@ var Lob = (function () { 'use strict';
 
 	var TRACKER_INVALID_STATE_MESSAGE = "Tracker did not recieve valid initial state";
 
-	function Tracker(state){
-	  if ( !(this instanceof Tracker) ) { return new Tracker(state); }
+	function Tracker(state, world){
+	  if ( !(this instanceof Tracker) ) { return new Tracker(state, world); }
 	  try {
 	    state = State(state || {});
 	  } catch (e) {
@@ -99,6 +99,9 @@ var Lob = (function () { 'use strict';
 	  }
 	  var tracker = this;
 	  tracker.state = state;
+	  // DEBT return to external assignment
+	  world = world || {};
+	  tracker.logger = world.logger // Or error causing of silent version;
 
 	  tracker.uplinkAvailable = function(){
 	    // Set state action can cause projection to exhibit new state
@@ -149,7 +152,7 @@ var Lob = (function () { 'use strict';
 	    tracker.logger.info.apply(tracker.logger, arguments);
 	  }
 	  function showcase(state) {
-	    console.log('showcase', state);
+	    tracker.showcase.update(state);
 	  }
 
 	  function projectState(state){
@@ -208,6 +211,16 @@ var Lob = (function () { 'use strict';
 	    return roundtoFour(Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z));
 	  }
 	});
+
+	/* jshint esnext: true */
+
+	function TrackerShowcase(window){
+	  if ( !(this instanceof TrackerShowcase) ) { return new TrackerShowcase(window); }
+
+	  this.update = function(projection){
+	    console.log('projection', projection);
+	  };
+	}
 
 	var index$2 = __commonjs(function (module) {
 	'use strict';
@@ -316,6 +329,7 @@ var Lob = (function () { 'use strict';
 
 	var tracker = new Tracker();
 	tracker.logger = window.console;
+	tracker.showcase = TrackerShowcase(window);
 
 	var router = Router(window);
 
