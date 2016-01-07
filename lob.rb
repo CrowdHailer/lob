@@ -28,15 +28,16 @@ post '/new-flight' do
 end
 
 post '/join' do
-  channel = request.POST["channel"].upcase
+  channel_name = request.POST["channel-name"].upcase
   token = client.auth.request_token.token
-  redirect "/tracker?channel=#{channel}&token=#{token}"
+  redirect "/tracker?channel-name=#{channel_name}&token=#{token}"
 end
 
 get '/track/:channel' do
-  channel = params[:channel].upcase
+  # TODO change sent
+  channel_name = params[:channel].upcase
   token = client.auth.request_token.token
-  redirect "/tracker?channel=#{channel}&token=#{token}"
+  redirect "/tracker?channel-name=#{channel_name}&token=#{token}"
 end
 
 get '/flyer' do

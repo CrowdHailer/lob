@@ -2,18 +2,22 @@
 
 import * as QString from "query-string";
 
-// Pass in window not location in case state is needed
+// Router makes use of current location
 // Router should always return some value of state it does not have the knowledge to regard it as invalid
-export default function Router(window){
-  if ( !(this instanceof Router) ) { return new Router(window); }
+// Router is currently untested
+// Router does not follow modifications to the application location.
+// Router is generic for tracker and flyer at the moment
+// location is a size cause and might make sense to be lazily applied
+export default function Router(location){
+  if ( !(this instanceof Router) ) { return new Router(location); }
   var router = this;
-  router.location = window.location;
+  router.location = location;
 
   function getState(){
     var query = QString.parse(router.location.search);
     return {
       token: query.token,
-      channel: query.channel
+      channelName: query['channel-name']
     };
   }
 

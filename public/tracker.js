@@ -212,30 +212,6 @@ var Lob = (function () { 'use strict';
 	  }
 	});
 
-	/* jshint esnext: true */
-
-	function isLive(projection){
-	  return !projection.flightSnapshot;
-	}
-
-	function TrackerShowcase(window){
-	  if ( !(this instanceof TrackerShowcase) ) { return new TrackerShowcase(window); }
-
-	  this.update = function(projection){
-	    // Values needed in display
-	    // isLive
-	    // readings
-	    // isLockedToLiveReadings
-	    // graph lines
-	    // uplink statuses
-	    console.log('projection', projection);
-	    console.log('display', {
-	      isLive: isLive(projection),
-	      readings: projection.flightSnapshot || projection.liveFlight
-	    });
-	  };
-	}
-
 	var index$2 = __commonjs(function (module) {
 	'use strict';
 	module.exports = function (str) {
@@ -318,18 +294,22 @@ var Lob = (function () { 'use strict';
 
 	var parse = index.parse;
 
-	// Pass in window not location in case state is needed
+	// Router makes use of current location
 	// Router should always return some value of state it does not have the knowledge to regard it as invalid
-	function Router(window){
-	  if ( !(this instanceof Router) ) { return new Router(window); }
+	// Router is currently untested
+	// Router does not follow modifications to the application location.
+	// Router is generic for tracker and flyer at the moment
+	// location is a size cause and might make sense to be lazily applied
+	function Router(location){
+	  if ( !(this instanceof Router) ) { return new Router(location); }
 	  var router = this;
-	  router.location = window.location;
+	  router.location = location;
 
 	  function getState(){
 	    var query = parse(router.location.search);
 	    return {
 	      token: query.token,
-	      channel: query.channel
+	      channelName: query['channel-name']
 	    };
 	  }
 
@@ -338,19 +318,41 @@ var Lob = (function () { 'use strict';
 	  });
 	}
 
+	/* jshint esnext: true */
+
+	function isLive(projection){
+	  return !projection.flightSnapshot;
+	}
+
+	function TrackerShowcase(window){
+	  if ( !(this instanceof TrackerShowcase) ) { return new TrackerShowcase(window); }
+
+	  this.update = function(projection){
+	    // Values needed in display
+	    // isLive
+	    // readings
+	    // isLockedToLiveReadings
+	    // graph lines
+	    // uplink statuses
+	    console.log('projection', projection);
+	    console.log('display', {
+	      isLive: isLive(projection),
+	      readings: projection.flightSnapshot || projection.liveFlight
+	    });
+	  };
+	}
+
+	// GENERAL CONFIGURATION
 	window.Tracker = Tracker;
 	window.Tracker.Reading = Reading;
+
+	var router = Router(window.location);
+	console.log('Router:', 'started with initial state:', router.state);
+
 
 	var tracker = new Tracker();
 	tracker.logger = window.console;
 	tracker.showcase = TrackerShowcase(window);
-
-	var router = Router(window);
-
-	console.log(router.state);
-
-
-	// Dom views should be initialized with the ready on certain selectors library
 
 	return tracker;
 
