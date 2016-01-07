@@ -11,7 +11,7 @@ describe("New grounded reading", function(){
     reading = {};
     tracker.newReading(reading);
   });
-  it("should add the latest reading to live flight", function(){
+  xit("should add the latest reading to live flight", function(){
     expect(tracker.state.liveFlight[1]).toBe(reading);
   });
   xit("should start timeout", function(){
