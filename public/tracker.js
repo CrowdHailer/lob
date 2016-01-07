@@ -155,19 +155,6 @@ var Lob = (function () { 'use strict';
 	  function projectState(state){
 	    return state;
 	  }
-	  // var view;
-	  // tracker.showcase = {
-	  //   dispatch: function(state){
-	  //     // var projection = new Projection(state);
-	  //     if(view){
-	  //       view(projectState(state));
-	  //     }
-	  //   },
-	  //   register: function(newView){
-	  //     newView(projectState(tracker.state));
-	  //     view = newView;
-	  //   }
-	  // };
 
 	  // The tracker application has an internal state.
 	  // All observers know that the can watch a given projection of that state
@@ -183,6 +170,44 @@ var Lob = (function () { 'use strict';
 	  tracker.resetReadings = function(){
 	  };
 	}
+
+	/* jshint esnext: true */
+	function isRational(x, other) {
+	  if (typeof x !== "number"){
+	    return false;
+	  }
+	  if (!isFinite(x)){
+	    return false;
+	  }
+	  var rest = Array.prototype.slice.call(arguments, 1);
+	  if (rest.length > 0) {
+	    return isRational.apply(this, rest);
+	  }
+	  return true;
+	}
+
+	function roundtoFour(number) {
+	  return parseFloat(number.toFixed(4));
+	}
+
+	function Reading(raw){
+	  if ( !(this instanceof Reading) ) { return new Reading(raw); }
+
+	  this.x = raw.x;
+	  this.y = raw.y;
+	  this.z = raw.z;
+	  this.timestamp = raw.timestamp;
+
+	  if (!isRational(this.x, this.y, this.z, this.timestamp)) {
+	    throw new TypeError("Reading should have numerical values for x, y, z & timestamp");
+	  }
+	}
+
+	Object.defineProperty(Reading.prototype, "magnitude", {
+	  get: function(){
+	    return roundtoFour(Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z));
+	  }
+	});
 
 	var index$2 = __commonjs(function (module) {
 	'use strict';
@@ -285,6 +310,9 @@ var Lob = (function () { 'use strict';
 	    get: getState
 	  });
 	}
+
+	window.Tracker = Tracker;
+	window.Tracker.Reading = Reading;
 
 	var tracker = new Tracker();
 	tracker.logger = window.console;

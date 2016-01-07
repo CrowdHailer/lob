@@ -26,7 +26,7 @@ describe("Initialised Reading", function(){
     expect(reading.magnitude).toBe(3.7417);
   });
 });
-fdescribe("Invalid Reading", function(){
+describe("Invalid Reading", function(){
   it("cannot be constructed without x number", function(){
     expect(function(){
       Reading({x: null, y: 2, z: 3, timestamp: 12345});

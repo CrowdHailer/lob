@@ -2,6 +2,10 @@
 
 import Tracker from "./tracker/tracker";
 import ConsoleView from "./tracker/console-view";
+import Reading from "./lib/reading";
+
+window.Tracker = Tracker;
+window.Tracker.Reading = Reading;
 
 var tracker = new Tracker();
 tracker.logger = window.console;
