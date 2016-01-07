@@ -17,8 +17,8 @@ function lastNInArray(n, array){
 
 var TRACKER_INVALID_STATE_MESSAGE = "Tracker did not recieve valid initial state";
 
-function Tracker(state){
-  if ( !(this instanceof Tracker) ) { return new Tracker(state); }
+function Tracker(state, world){
+  if ( !(this instanceof Tracker) ) { return new Tracker(state, world); }
   try {
     state = State(state || {});
   } catch (e) {
@@ -28,6 +28,7 @@ function Tracker(state){
   }
   var tracker = this;
   tracker.state = state;
+  tracker.logger = world.logger // Or error causing of silent version;
 
   tracker.uplinkAvailable = function(){
     // Set state action can cause projection to exhibit new state

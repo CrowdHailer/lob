@@ -6,12 +6,14 @@ import Tracker from "../../client/tracker/tracker";
 describe("New grounded reading", function(){
   var tracker, world, reading;
   beforeEach(function(){
-    world = {};
+    world = {
+      logger: createTranscriptLogger()
+    };
     tracker = Tracker({liveFlight: [{}]}, world);
     reading = {};
     tracker.newReading(reading);
   });
-  xit("should add the latest reading to live flight", function(){
+  it("should add the latest reading to live flight", function(){
     expect(tracker.state.liveFlight[1]).toBe(reading);
   });
   xit("should start timeout", function(){

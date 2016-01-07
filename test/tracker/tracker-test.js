@@ -7,7 +7,7 @@ import Tracker from "../../client/tracker/tracker";
 describe("Tracker with unknown uplink status", function(){
   var tracker, logger;
   beforeEach(function(){
-    tracker = new Tracker({uplinkStatus: "UNKNOWN"});
+    tracker = new Tracker({uplinkStatus: "UNKNOWN"}, {});
     tracker.logger = createTranscriptLogger();
   });
   describe("responding to uplinkAvailable", function(){
