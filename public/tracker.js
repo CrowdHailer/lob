@@ -60,7 +60,7 @@ var Lob = (function () { 'use strict';
 	var STATE_DEFAULTS = {
 	  uplinkStatus: "UNKNOWN",
 	  liveFlight: [],
-	  flightSnapShot: null,
+	  flightSnapshot: null,
 	  lockedToLiveTracking: false
 	};
 
@@ -72,6 +72,19 @@ var Lob = (function () { 'use strict';
 
 	State.prototype = Object.create(Struct.prototype);
 	State.prototype.constructor = State;
+
+	function isInFlight(reading){
+	  // DEBT magic number
+	  return reading.magnitude < 4;
+	}
+
+	function lastInArray(array){
+	  return array[array.length - 1];
+	}
+
+	function lastNInArray(n, array){
+	  return array.slice(Math.max(array.length - n, 0));
+	}
 
 	var TRACKER_INVALID_STATE_MESSAGE = "Tracker did not recieve valid initial state";
 
@@ -96,17 +109,47 @@ var Lob = (function () { 'use strict';
 	  };
 
 	  tracker.newReading = function(reading){
+	    var wasInFlight = lastInArray(tracker.state.liveFlight) && isInFlight(lastInArray(tracker.state.liveFlight));
+	    var isNowGrounded = !isInFlight(reading);
+	    if (wasInFlight && isNowGrounded) {
+	      setTimeout(function () {
+	        console.log('pause the reading');
+	        // pause the reading
+	      }, 1000);
+	    }
+
 	    var state = tracker.state.update("liveFlight", function(readings){
-	      return readings.concat(reading);
+	      readings = readings.concat(reading);
+	      return lastNInArray(5, readings);
 	    });
 	    // simplest is to just start timer
 	    // here to add timer controller
 	    tracker.state = state; // Assign at end to work as transaction
-	    // showcase(state);
-	    // logEvent("New reading");
+	    showcase(state);
+	    logEvent("New reading");
 	  };
+
+	  tracker.takeSnapshot = function(){
+	    // Only if not locked live
+	    // Only if current flight has content
+	    var state = tracker.state.set('flightSnapshot', tracker.state.liveFlight);
+
+	    tracker.state = state; // Assign at end to work as transaction
+	    showcase(state);
+	    logEvent("Taken snapshot");
+	  };
+
+	  // watchlivetracking
+	  // locklivetracking
+	  // unlocklivetracking
+	  function logEvent() {
+	    tracker.logger.debug.apply(tracker.logger, arguments);
+	  }
 	  function logInfo() {
 	    tracker.logger.info.apply(tracker.logger, arguments);
+	  }
+	  function showcase(state) {
+	    console.log('showcase', state);
 	  }
 
 	  function projectState(state){

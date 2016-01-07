@@ -2,6 +2,19 @@
 
 import State from "./state";
 
+function isInFlight(reading){
+  // DEBT magic number
+  return reading.magnitude < 4;
+}
+
+function lastInArray(array){
+  return array[array.length - 1];
+}
+
+function lastNInArray(n, array){
+  return array.slice(Math.max(array.length - n, 0));
+}
+
 var TRACKER_INVALID_STATE_MESSAGE = "Tracker did not recieve valid initial state";
 
 function Tracker(state){
@@ -25,35 +38,52 @@ function Tracker(state){
   };
 
   tracker.newReading = function(reading){
+    var wasInFlight = lastInArray(tracker.state.liveFlight) && isInFlight(lastInArray(tracker.state.liveFlight));
+    var isNowGrounded = !isInFlight(reading);
+    if (wasInFlight && isNowGrounded) {
+      setTimeout(function () {
+        console.log('pause the reading');
+        // pause the reading
+      }, 1000);
+    }
+
     var state = tracker.state.update("liveFlight", function(readings){
-      return readings.concat(reading);
+      readings = readings.concat(reading);
+      return lastNInArray(5, readings);
     });
     // simplest is to just start timer
     // here to add timer controller
     tracker.state = state; // Assign at end to work as transaction
-    // showcase(state);
-    // logEvent("New reading");
+    showcase(state);
+    logEvent("New reading");
   };
+
+  tracker.takeSnapshot = function(){
+    // Only if not locked live
+    // Only if current flight has content
+    var state = tracker.state.set('flightSnapshot', tracker.state.liveFlight);
+
+    tracker.state = state; // Assign at end to work as transaction
+    showcase(state);
+    logEvent("Taken snapshot");
+  };
+
+  // watchlivetracking
+  // locklivetracking
+  // unlocklivetracking
+  function logEvent() {
+    tracker.logger.debug.apply(tracker.logger, arguments);
+  }
   function logInfo() {
     tracker.logger.info.apply(tracker.logger, arguments);
+  }
+  function showcase(state) {
+    console.log('showcase', state);
   }
 
   function projectState(state){
     return state;
   }
-  // var view;
-  // tracker.showcase = {
-  //   dispatch: function(state){
-  //     // var projection = new Projection(state);
-  //     if(view){
-  //       view(projectState(state));
-  //     }
-  //   },
-  //   register: function(newView){
-  //     newView(projectState(tracker.state));
-  //     view = newView;
-  //   }
-  // };
 
   // The tracker application has an internal state.
   // All observers know that the can watch a given projection of that state
