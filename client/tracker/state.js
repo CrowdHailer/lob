@@ -4,6 +4,7 @@ import Struct from "../carbide/struct";
 
 var STATE_DEFAULTS = {
   uplinkStatus: "UNKNOWN",
+  uplinkChannelName: "UNKNOWN",
   liveFlight: [],
   flightSnapshot: null,
   lockedToLiveTracking: false

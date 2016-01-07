@@ -3,12 +3,12 @@
 
 /* jshint esnext: true */
 export default function UplinkController(options, tracker){
-  var channelName = options.channel;
+  var channelName = options.channelName;
   var token = options.token;
   var realtime = new Ably.Realtime({ token: token });
   realtime.connection.on("connected", function(err) {
     // If we keep explicitly passing channel data to the controller we should pass it to the main app here
-    tracker.uplinkAvailable();
+    tracker.uplinkAvailable(channelName);
   });
   realtime.connection.on("failed", function(err) {
     tracker.uplinkFailed();
@@ -19,7 +19,6 @@ export default function UplinkController(options, tracker){
     tracker.newReading(event.data);
   });
   channel.subscribe("resetReadings", function(_event){
-    // event information not needed
     tracker.resetReadings();
   });
 }

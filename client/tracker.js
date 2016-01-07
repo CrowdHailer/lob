@@ -3,6 +3,7 @@
 // IMPORTS
 import Tracker from "./tracker/tracker";
 import Router from "./router";
+import UplinkController from "./tracker/uplink-controller";
 import ConsoleView from "./tracker/console-view";
 import Showcase from "./tracker/showcase";
 import Reading from "./lib/reading";
@@ -19,15 +20,7 @@ var tracker = new Tracker();
 tracker.logger = window.console;
 tracker.showcase = Showcase(window);
 
-// var consoleView = new ConsoleView(window.console);
-// // tracker.showcase.register(consoleView.render);
-//
-// import UplinkController from "./tracker/uplink-controller";
-//
-// var uplinkController = new UplinkController({
-//   token: uri.query.token,
-//   channel: uri.query.channel
-// }, tracker);
+var uplinkController = new UplinkController(router.state, tracker);
 
 export default tracker;
 

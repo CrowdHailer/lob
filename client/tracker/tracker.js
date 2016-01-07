@@ -32,11 +32,12 @@ function Tracker(state, world){
   world = world || {};
   tracker.logger = world.logger // Or error causing of silent version;
 
-  tracker.uplinkAvailable = function(){
+  tracker.uplinkAvailable = function(channelName){
     // Set state action can cause projection to exhibit new state
     tracker.state = tracker.state.set("uplinkStatus", "AVAILABLE");
+    tracker.state = tracker.state.set("uplinkChannelName", channelName);
     // call log change. test listeners that the state has changed.
-    logInfo("[Uplink Available]");
+    logInfo("Uplink available on channel:", channelName);
     showcase(tracker.state);
   };
 
