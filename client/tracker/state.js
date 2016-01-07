@@ -4,9 +4,7 @@ import Struct from "../carbide/struct";
 
 var STATE_DEFAULTS = {
   uplinkStatus: "UNKNOWN",
-  latestReading: null, // DEBT best place a null object here
   currentFlight: [],
-  flightHistory: [],
 };
 
 function State(raw){
