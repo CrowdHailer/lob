@@ -2,7 +2,7 @@
 
 import State from "./state";
 
-var INVALID_STATE_MESSAGE = "Flyer did not recieve valid initial state";
+var TRACKER_INVALID_STATE_MESSAGE = "Tracker did not recieve valid initial state";
 
 function Tracker(state){
   if ( !(this instanceof Tracker) ) { return new Tracker(state); }
@@ -10,7 +10,7 @@ function Tracker(state){
     state = State(state || {});
   } catch (e) {
     // alert(e); DEBT throws in tests
-    throw new TypeError(INVALID_STATE_MESSAGE);
+    throw new TypeError(TRACKER_INVALID_STATE_MESSAGE);
     // return; // Will be needed if we move the error handling to logger
   }
   var tracker = this;
@@ -24,6 +24,13 @@ function Tracker(state){
     showcase(tracker.state);
   };
 
+  tracker.newReading = function(reading){
+    var state = tracker.state.update("liveFlight", function(readings){
+      return readings.concat(reading);
+    });
+
+    tracker.state = state; // Assign at end to work as transaction
+  };
   function logInfo() {
     tracker.logger.info.apply(tracker.logger, arguments);
   }
@@ -55,8 +62,6 @@ function Tracker(state){
   }
 
 
-  tracker.newReading = function(reading){
-  };
 
   tracker.resetReadings = function(){
   };
