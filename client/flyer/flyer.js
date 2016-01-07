@@ -33,7 +33,7 @@ export default function Flyer(state){
   try {
     state = FlyerState(state || {});
   } catch (e) {
-    alert(e);
+    // alert(e); DEBT throws in tests
     throw new TypeError(INVALID_STATE_MESSAGE);
   }
 

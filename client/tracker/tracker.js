@@ -45,32 +45,9 @@ function Tracker(raw_state){
   };
 
   tracker.newReading = function(reading){
-    // TODO don't need any of these things they all belong in flyer.
-    // we just need to check that it plots to graph
-    var state = tracker.state.set("latestReading", reading);
-    var currentFlight = state.currentFlight;
-    var flightHistory = state.flightHistory;
-    if (reading.magnitude < 4) {
-      currentFlight =  currentFlight.concat(reading);
-    } else if(currentFlight[0]) {
-      // DEBT concat splits array so we double wrap the flight
-      flightHistory = flightHistory.concat([currentFlight]);
-      currentFlight = [];
-    }
-    state = state.set("currentFlight", currentFlight);
-    state = state.set("flightHistory", flightHistory);
-    tracker.state = state;
-    showcase(tracker.state);
-    // DEBT might want to log this action too
   };
 
   tracker.resetReadings = function(){
-    tracker.state = tracker.state.merge({
-      latestReading: null,
-      currentFlight: [],
-      flightHistory: []
-    });
-    showcase(tracker.state);
   };
 }
 
