@@ -39,11 +39,30 @@ function uplinkStatusMessageFromProjection(projection) {
 
 ready(function(){
   var $uplinkStatusMessage = document.querySelector('[data-display~=uplink-status-message]');
-  console.log('dom is ready', $uplinkStatusMessage);
+  var $trackerHoldingSnapshot = document.querySelector('[data-display~=tracker-holding-snapshot]');
+  var $trackerFollowingLive = document.querySelector('[data-display~=tracker-following-live]');
+  var $trackerFollowingFlight = document.querySelector('[data-display~=tracker-following-flight]');
+  console.debug('dom is ready', $uplinkStatusMessage);
   var mainView = {
     render: function(projection){
       console.log('Display rendering:', projection);
       $uplinkStatusMessage.innerHTML = uplinkStatusMessageFromProjection(projection);
+      if (projection.flightOutputStatus === 'HOLDING_SNAPSHOT') {
+        $trackerHoldingSnapshot.style.display = '';
+        $trackerFollowingLive.style.display = 'none';
+        $trackerFollowingFlight.style.display = 'none';
+
+      } else if (projection.flightOutputStatus === 'FOLLOWING_LIVE') {
+        $trackerHoldingSnapshot.style.display = 'none';
+        $trackerFollowingLive.style.display = '';
+        $trackerFollowingFlight.style.display = 'none';
+
+      } else if (projection.flightOutputStatus === 'FOLLOWING_FLIGHT') {
+        $trackerHoldingSnapshot.style.display = 'none';
+        $trackerFollowingLive.style.display = 'none';
+        $trackerFollowingFlight.style.display = '';
+
+      }
     }
   };
   tracker.showcase.addView(mainView);

@@ -72,35 +72,35 @@ function Tracker(state, world){
     logEvent("New reading");
   };
 
-  tracker.takeSnapshot = function(){
-    // Only if not locked live
+  tracker.holdSnapshot = function(){
+    // Take and hold a snapshot only if the tracker is tracking flights
+    if (tracker.state.flightOutputStatus !== 'FOLLOWING_FLIGHT') {
+      return;
+    }
     // Only if current flight has content
     var state = tracker.state.set('flightSnapshot', tracker.state.liveFlight);
-    // ONLY if in tracking flight status
-    var state = tracker.state.set('flightOutputStatus', 'HOLDING_SNAPSHOT');
+    state = state.set('flightOutputStatus', 'HOLDING_SNAPSHOT');
 
     tracker.state = state; // Assign at end to work as transaction
     showcase(state);
     logEvent("Taken snapshot");
   };
 
-  tracker.watchLiveTracking = function(){
+  tracker.followFlight = function(){
     var state = tracker.state.set('flightOutputStatus', 'FOLLOWING_FLIGHT');
-
+    state.set('flightSnapshot', null); // probably unnecessary as we can use the flight output status
     tracker.state = state;
     showcase(state);
-    logEvent("Watching live tracking");
+    logEvent("following flight");
   };
-  tracker.lockLiveTracking = function(){
-    console.warn("try to lock live tracking");
-  };
-  tracker.unlockLiveTracking = function(){
-    console.warn("try to unlock live tracking");
+  // This state is for when we are following a live feed but do not want pause at flight end
+  tracker.followLive = function(){
+    var state = tracker.state.set('flightOutputStatus', 'FOLLOWING_LIVE');
+    tracker.state = state;
+    showcase(state);
+    logEvent("following live readings");
   };
 
-  // watchlivetracking
-  // locklivetracking
-  // unlocklivetracking
   function logEvent() {
     tracker.logger.debug.apply(tracker.logger, arguments);
   }

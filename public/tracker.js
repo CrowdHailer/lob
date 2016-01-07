@@ -60,6 +60,7 @@ var Lob = (function () { 'use strict';
 	var STATE_DEFAULTS = {
 	  uplinkStatus: "UNKNOWN",
 	  uplinkChannelName: "UNKNOWN",
+	  flightOutputStatus: "FOLLOWING_FLIGHT", // FOLLOWING_LIVE | HOLDING_SNAPSHOT
 	  liveFlight: [],
 	  flightSnapshot: null,
 	  lockedToLiveTracking: false
@@ -144,29 +145,35 @@ var Lob = (function () { 'use strict';
 	    logEvent("New reading");
 	  };
 
-	  tracker.takeSnapshot = function(){
-	    // Only if not locked live
+	  tracker.holdSnapshot = function(){
+	    // Take and hold a snapshot only if the tracker is tracking flights
+	    if (tracker.state.flightOutputStatus !== 'FOLLOWING_FLIGHT') {
+	      return;
+	    }
 	    // Only if current flight has content
 	    var state = tracker.state.set('flightSnapshot', tracker.state.liveFlight);
+	    state = state.set('flightOutputStatus', 'HOLDING_SNAPSHOT');
 
 	    tracker.state = state; // Assign at end to work as transaction
 	    showcase(state);
 	    logEvent("Taken snapshot");
 	  };
 
-	  tracker.watchLiveTracking = function(){
-	    console.warn("try to watch live tracking");
+	  tracker.followFlight = function(){
+	    var state = tracker.state.set('flightOutputStatus', 'FOLLOWING_FLIGHT');
+	    state.set('flightSnapshot', null); // probably unnecessary as we can use the flight output status
+	    tracker.state = state;
+	    showcase(state);
+	    logEvent("following flight");
 	  };
-	  tracker.lockLiveTracking = function(){
-	    console.warn("try to lock live tracking");
-	  };
-	  tracker.unlockLiveTracking = function(){
-	    console.warn("try to unlock live tracking");
+	  // This state is for when we are following a live feed but do not want pause at flight end
+	  tracker.followLive = function(){
+	    var state = tracker.state.set('flightOutputStatus', 'FOLLOWING_LIVE');
+	    tracker.state = state;
+	    showcase(state);
+	    logEvent("following live readings");
 	  };
 
-	  // watchlivetracking
-	  // locklivetracking
-	  // unlocklivetracking
 	  function logEvent() {
 	    tracker.logger.debug.apply(tracker.logger, arguments);
 	  }
@@ -455,11 +462,30 @@ var Lob = (function () { 'use strict';
 
 	ready(function(){
 	  var $uplinkStatusMessage = document.querySelector('[data-display~=uplink-status-message]');
-	  console.log('dom is ready', $uplinkStatusMessage);
+	  var $trackerHoldingSnapshot = document.querySelector('[data-display~=tracker-holding-snapshot]');
+	  var $trackerFollowingLive = document.querySelector('[data-display~=tracker-following-live]');
+	  var $trackerFollowingFlight = document.querySelector('[data-display~=tracker-following-flight]');
+	  console.debug('dom is ready', $uplinkStatusMessage);
 	  var mainView = {
 	    render: function(projection){
 	      console.log('Display rendering:', projection);
 	      $uplinkStatusMessage.innerHTML = uplinkStatusMessageFromProjection(projection);
+	      if (projection.flightOutputStatus === 'HOLDING_SNAPSHOT') {
+	        $trackerHoldingSnapshot.style.display = '';
+	        $trackerFollowingLive.style.display = 'none';
+	        $trackerFollowingFlight.style.display = 'none';
+
+	      } else if (projection.flightOutputStatus === 'FOLLOWING_LIVE') {
+	        $trackerHoldingSnapshot.style.display = 'none';
+	        $trackerFollowingLive.style.display = '';
+	        $trackerFollowingFlight.style.display = 'none';
+
+	      } else if (projection.flightOutputStatus === 'FOLLOWING_FLIGHT') {
+	        $trackerHoldingSnapshot.style.display = 'none';
+	        $trackerFollowingLive.style.display = 'none';
+	        $trackerFollowingFlight.style.display = '';
+
+	      }
 	    }
 	  };
 	  tracker.showcase.addView(mainView);
