@@ -59,9 +59,9 @@ var Lob = (function () { 'use strict';
 
 	var STATE_DEFAULTS = {
 	  uplinkStatus: "UNKNOWN",
-	  latestReading: null, // DEBT best place a null object here
-	  currentFlight: [],
-	  flightHistory: [],
+	  liveFlight: [],
+	  flightSnapShot: null,
+	  lockedToLiveTracking: false
 	};
 
 	function State(raw){
@@ -73,39 +73,19 @@ var Lob = (function () { 'use strict';
 	State.prototype = Object.create(Struct.prototype);
 	State.prototype.constructor = State;
 
-	function Tracker(raw_state){
+	var TRACKER_INVALID_STATE_MESSAGE = "Tracker did not recieve valid initial state";
+
+	function Tracker(state){
+	  if ( !(this instanceof Tracker) ) { return new Tracker(state); }
+	  try {
+	    state = State(state || {});
+	  } catch (e) {
+	    // alert(e); DEBT throws in tests
+	    throw new TypeError(TRACKER_INVALID_STATE_MESSAGE);
+	    // return; // Will be needed if we move the error handling to logger
+	  }
 	  var tracker = this;
-	  tracker.state = State(raw_state);
-
-	  function logInfo() {
-	    tracker.logger.info.apply(tracker.logger, arguments);
-	  }
-
-	  function projectState(state){
-	    return state;
-	  }
-	  var view;
-	  tracker.showcase = {
-	    dispatch: function(state){
-	      // var projection = new Projection(state);
-	      if(view){
-	        view(projectState(state));
-	      }
-	    },
-	    register: function(newView){
-	      newView(projectState(tracker.state));
-	      view = newView;
-	    }
-	  };
-
-	  // The tracker application has an internal state.
-	  // All observers know that the can watch a given projection of that state
-	  // project and present overloaded verbs.
-	  // options showcase or exhibit
-	  function showcase(state){
-	    // The tracker just cares that its state is shown somewhere
-	    tracker.showcase.dispatch(state);
-	  }
+	  tracker.state = state;
 
 	  tracker.uplinkAvailable = function(){
 	    // Set state action can cause projection to exhibit new state
@@ -116,46 +96,48 @@ var Lob = (function () { 'use strict';
 	  };
 
 	  tracker.newReading = function(reading){
-	    // TODO don't need any of these things they all belong in flyer.
-	    // we just need to check that it plots to graph
-	    var state = tracker.state.set("latestReading", reading);
-	    var currentFlight = state.currentFlight;
-	    var flightHistory = state.flightHistory;
-	    if (reading.magnitude < 4) {
-	      currentFlight =  currentFlight.concat(reading);
-	    } else if(currentFlight[0]) {
-	      // DEBT concat splits array so we double wrap the flight
-	      flightHistory = flightHistory.concat([currentFlight]);
-	      currentFlight = [];
-	    }
-	    state = state.set("currentFlight", currentFlight);
-	    state = state.set("flightHistory", flightHistory);
-	    tracker.state = state;
-	    showcase(tracker.state);
-	    // DEBT might want to log this action too
-	  };
-
-	  tracker.resetReadings = function(){
-	    tracker.state = tracker.state.merge({
-	      latestReading: null,
-	      currentFlight: [],
-	      flightHistory: []
+	    var state = tracker.state.update("liveFlight", function(readings){
+	      return readings.concat(reading);
 	    });
-	    showcase(tracker.state);
+	    // simplest is to just start timer
+	    // here to add timer controller
+	    tracker.state = state; // Assign at end to work as transaction
+	    // showcase(state);
+	    // logEvent("New reading");
 	  };
-	}
-
-	/* jshint esnext: true */
-
-	function ConsoleView(logger){
-	  function wrap(projection){
-	    return projection;
-	    return "listening on: " + projection.channel + " with token: " + projection.token;
-	    // returns presentation
+	  function logInfo() {
+	    tracker.logger.info.apply(tracker.logger, arguments);
 	  }
 
-	  this.render = function(projection){
-	    logger.info(wrap(projection));
+	  function projectState(state){
+	    return state;
+	  }
+	  // var view;
+	  // tracker.showcase = {
+	  //   dispatch: function(state){
+	  //     // var projection = new Projection(state);
+	  //     if(view){
+	  //       view(projectState(state));
+	  //     }
+	  //   },
+	  //   register: function(newView){
+	  //     newView(projectState(tracker.state));
+	  //     view = newView;
+	  //   }
+	  // };
+
+	  // The tracker application has an internal state.
+	  // All observers know that the can watch a given projection of that state
+	  // project and present overloaded verbs.
+	  // options showcase or exhibit
+	  // function showcase(state){
+	  //   // The tracker just cares that its state is shown somewhere
+	  //   tracker.showcase.dispatch(state);
+	  // }
+
+
+
+	  tracker.resetReadings = function(){
 	  };
 	}
 
@@ -241,79 +223,35 @@ var Lob = (function () { 'use strict';
 
 	var parse = index.parse;
 
-	var URI_DEFAULTS = {
-	  path: [],
-	  query: {},
-	};
+	// Pass in window not location in case state is needed
+	// Router should always return some value of state it does not have the knowledge to regard it as invalid
+	function Router(window){
+	  if ( !(this instanceof Router) ) { return new Router(window); }
+	  var router = this;
+	  router.location = window.location;
 
-	function URI(raw){
-	  if ( !(this instanceof URI) ) { return new URI(raw); }
+	  function getState(){
+	    var query = parse(router.location.search);
+	    return {
+	      token: query.token,
+	      channel: query.channel
+	    };
+	  }
 
-	  return Struct.call(this, URI_DEFAULTS, raw);
-	}
-
-	URI.prototype = Object.create(Struct.prototype);
-	URI.prototype.constructor = URI;
-
-	function parseLocation(location){
-	  var query = parse(location.search);
-	  var path = location.pathname.substring(1).split("/");
-	  return new URI({path: path, query: query});
-	}
-
-	// Could also be called UplinkDriver - might be more suitable
-	// RESPONSIBILITY - Drive the tracker application in response to messages from the Ably uplink
-
-	/* jshint esnext: true */
-	function UplinkController(options, tracker){
-	  var channelName = options.channel;
-	  var token = options.token;
-	  var realtime = new Ably.Realtime({ token: token });
-	  realtime.connection.on("connected", function(err) {
-	    // If we keep explicitly passing channel data to the controller we should pass it to the main app here
-	    tracker.uplinkAvailable();
-	  });
-	  realtime.connection.on("failed", function(err) {
-	    tracker.uplinkFailed();
-	  });
-	  var channel = realtime.channels.get(channelName);
-	  channel.subscribe("newReading", function(event){
-	    // new Vector(event.data);
-	    tracker.newReading(event.data);
-	  });
-	  channel.subscribe("resetReadings", function(_event){
-	    // event information not needed
-	    tracker.resetReadings();
+	  Object.defineProperty(router, 'state', {
+	    get: getState
 	  });
 	}
-
-	// uplink controller does very little work so it is not separated from uplink
-
-	// function Uplink(options, logger){
-	//   var channelName = options.channel;
-	//   var token = options.token;
-	//   var realtime = new Ably.Realtime({ token: token });
-	//   var channel = realtime.channels.get(channelName);
-	//   realtime.connection.on("connected", function(err) {
-	//     console.log("realtime connected");
-	//   });
-	//   realtime.connection.on("failed", function(err) {
-	//     console.log("realtime connection failed");
-	//   });
-	// }
 
 	var tracker = new Tracker();
 	tracker.logger = window.console;
 
-	var consoleView = new ConsoleView(window.console);
-	tracker.showcase.register(consoleView.render);
+	var router = Router(window);
 
-	var uri = parseLocation(window.location);
+	console.log(router.state);
 
-	var uplinkController = new UplinkController({
-	  token: uri.query.token,
-	  channel: uri.query.channel
-	}, tracker);
+
+	// Dom views should be initialized with the ready on certain selectors library
 
 	return tracker;
 
