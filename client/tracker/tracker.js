@@ -2,9 +2,27 @@
 
 import State from "./state";
 
-function Tracker(raw_state){
+var INVALID_STATE_MESSAGE = "Flyer did not recieve valid initial state";
+
+function Tracker(state){
+  if ( !(this instanceof Tracker) ) { return new Tracker(state); }
+  try {
+    state = State(state || {});
+  } catch (e) {
+    // alert(e); DEBT throws in tests
+    throw new TypeError(INVALID_STATE_MESSAGE);
+    // return; // Will be needed if we move the error handling to logger
+  }
   var tracker = this;
-  tracker.state = State(raw_state);
+  tracker.state = state;
+
+  tracker.uplinkAvailable = function(){
+    // Set state action can cause projection to exhibit new state
+    tracker.state = tracker.state.set("uplinkStatus", "AVAILABLE");
+    // call log change. test listeners that the state has changed.
+    logInfo("[Uplink Available]");
+    showcase(tracker.state);
+  };
 
   function logInfo() {
     tracker.logger.info.apply(tracker.logger, arguments);
@@ -36,13 +54,6 @@ function Tracker(raw_state){
     tracker.showcase.dispatch(state);
   }
 
-  tracker.uplinkAvailable = function(){
-    // Set state action can cause projection to exhibit new state
-    tracker.state = tracker.state.set("uplinkStatus", "AVAILABLE");
-    // call log change. test listeners that the state has changed.
-    logInfo("[Uplink Available]");
-    showcase(tracker.state);
-  };
 
   tracker.newReading = function(reading){
   };
