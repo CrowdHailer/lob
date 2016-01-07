@@ -347,12 +347,6 @@ var Lob = (function () { 'use strict';
 	  });
 	}
 
-	/* jshint esnext: true */
-
-	function isLive(projection){
-	  return !projection.flightSnapshot;
-	}
-
 	function TrackerShowcase(window){
 	  if ( !(this instanceof TrackerShowcase) ) { return new TrackerShowcase(window); }
 	  var showcase = this;
@@ -366,11 +360,6 @@ var Lob = (function () { 'use strict';
 	    // isLockedToLiveReadings
 	    // graph lines
 	    // uplink statuses
-	    console.log('projection', projection);
-	    console.log('display', {
-	      isLive: isLive(projection),
-	      readings: projection.flightSnapshot || projection.liveFlight
-	    });
 	    showcase.projection = this;
 	    views.forEach(function(view){
 	      view.render(projection);
@@ -468,7 +457,7 @@ var Lob = (function () { 'use strict';
 	  console.debug('dom is ready', $uplinkStatusMessage);
 	  var mainView = {
 	    render: function(projection){
-	      console.log('Display rendering:', projection);
+	      console.debug('Display rendering:', projection);
 	      $uplinkStatusMessage.innerHTML = uplinkStatusMessageFromProjection(projection);
 	      if (projection.flightOutputStatus === 'HOLDING_SNAPSHOT') {
 	        $trackerHoldingSnapshot.style.display = '';

@@ -17,11 +17,6 @@ export default function TrackerShowcase(window){
     // isLockedToLiveReadings
     // graph lines
     // uplink statuses
-    console.log('projection', projection);
-    console.log('display', {
-      isLive: isLive(projection),
-      readings: projection.flightSnapshot || projection.liveFlight
-    });
     showcase.projection = this;
     views.forEach(function(view){
       view.render(projection);

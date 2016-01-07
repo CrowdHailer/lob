@@ -45,7 +45,7 @@ ready(function(){
   console.debug('dom is ready', $uplinkStatusMessage);
   var mainView = {
     render: function(projection){
-      console.log('Display rendering:', projection);
+      console.debug('Display rendering:', projection);
       $uplinkStatusMessage.innerHTML = uplinkStatusMessageFromProjection(projection);
       if (projection.flightOutputStatus === 'HOLDING_SNAPSHOT') {
         $trackerHoldingSnapshot.style.display = '';
