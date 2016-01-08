@@ -89,10 +89,14 @@ svg {
   display: block;
   margin-left: auto;
   margin-right: auto;
-  padding-top: 2rem; }
+  padding-top: 2rem;
+  position: relative;
+  z-index: -1; }
 
 main.width-limited {
   overflow: visible; }
+  main.width-limited form {
+    background: #FFCC00; }
 
 html {
   box-sizing: border-box; }
