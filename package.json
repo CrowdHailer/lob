@@ -6,7 +6,7 @@
   "scripts": {
     "test": "karma start",
     "test:run": "karma start",
-    "build": "npm run -s build:scripts && npm run -s build:styles",
+    "build": "npm run -s build:scripts && npm run -s build:styles && cp assets/header-refreshed.svg public/header.svg",
     "build:styles": "node-sass assets/styles/lob.scss > public/lob.css",
     "build:scripts": "npm run build:scripts:flyer && npm run build:scripts:tracker",
     "build:scripts:tracker": "rollup -c --input ./client/tracker.js --output public/tracker.js",
