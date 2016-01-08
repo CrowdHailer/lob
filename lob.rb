@@ -63,3 +63,7 @@ end
 get '/leaderboard' do
   erb :leaderboard, locals: {flights: History}
 end
+
+get '/about' do
+  erb :about
+end
