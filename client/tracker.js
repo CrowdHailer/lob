@@ -40,11 +40,12 @@ function uplinkStatusMessageFromProjection(projection) {
 }
 
 ready(function(){
-  var $uplinkStatusMessage = document.querySelector('[data-display~=uplink-status-message]');
-  var $trackerHoldingSnapshot = document.querySelector('[data-display~=tracker-holding-snapshot]');
-  var $trackerFollowingLive = document.querySelector('[data-display~=tracker-following-live]');
-  var $trackerFollowingFlight = document.querySelector('[data-display~=tracker-following-flight]');
-  var $alert = document.querySelector("[data-display~=alert]");
+  var $root = document.documentElement;
+  var $uplinkStatusMessage = queryDisplay('uplink-status-message', $root);
+  var $trackerHoldingSnapshot = queryDisplay('tracker-holding-snapshot', $root);
+  var $trackerFollowingLive = queryDisplay('tracker-following-live', $root);
+  var $trackerFollowingFlight = queryDisplay('tracker-following-flight', $root);
+  var $alert = queryDisplay('alert', $root);
   var alertDisplay = AlertDisplay($alert);
   console.debug('dom is ready', $uplinkStatusMessage);
   var mainView = {
@@ -80,3 +81,6 @@ ready(function(){
 
 
 // Dom views should be initialized with the ready on certain selectors library
+function queryDisplay(display, element){
+  return element.querySelector('[data-display~=' + display + ']');
+}
