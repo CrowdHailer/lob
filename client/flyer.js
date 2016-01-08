@@ -1,10 +1,10 @@
 /* jshint esnext: true */
 import "./utils/polyfill";
 import Flyer from "./flyer/flyer";
+import Router from "./router";
 import Presenter from "./avionics/presenter";
 import Display from "./avionics/display";
 import AlertDisplay from "./alert/display";
-import * as URI from "./uri";
 try {
 
 
@@ -43,7 +43,7 @@ var accelerometerController = new AccelerometerController(window, flyer);
 
 // import FlyerUplinkController from "./flyer/flyer-uplink-controller";
 function FlyerUplinkController(options, tracker){
-  var channelName = options.channel;
+  var channelName = options.channelName;
   var token = options.token;
   var realtime = new Ably.Realtime({ token: token });
   realtime.connection.on("connected", function(err) {
@@ -83,11 +83,12 @@ function FlyerUplinkController(options, tracker){
 }
 
 
-var uri = URI.parseLocation(window.location);
+var router = Router(window.location);
+console.log('Router:', 'Started with initial state:', router.state);
 
 var uplinkController = FlyerUplinkController({
-  token: uri.query.token,
-  channel: uri.query.channel
+  token: router.state.token,
+  channelName: router.state.channelName
 }, flyer);
 } catch (e) {
   alert(e);

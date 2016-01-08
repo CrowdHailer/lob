@@ -2,61 +2,6 @@ var Lob = (function () { 'use strict';
 
 	function __commonjs(fn, module) { return module = { exports: {} }, fn(module, module.exports), module.exports; }
 
-	/* jshint esnext: true */
-
-	function KeyError(key) {
-	  this.name = "KeyError";
-	  this.message = "key \"" + key + "\" not found";
-	  this.stack = (new Error()).stack;
-	}
-	KeyError.prototype = Object.create(Error.prototype);
-	KeyError.prototype.constructor = KeyError;
-
-	function Struct(defaults, source){
-	  "use strict";
-	  if ( !(this instanceof Struct) ) { return new Struct(defaults, source); }
-
-	  Object.assign(this, defaults);
-	  for (var key in source) {
-	    if (source.hasOwnProperty(key)) {
-	      if (!this.hasOwnProperty(key)) {
-	        throw new KeyError(key);
-	      }
-	      this[key] = source[key];
-	    }
-	  }
-	  Object.freeze(this);
-	}
-
-	Struct.prototype.hasKey = function (key) {
-	  return Object.keys(this).indexOf(key) !== -1;
-	};
-
-	Struct.prototype.fetch = function (key) {
-	  if (this.hasKey(key)) {
-	    return this[key];
-	  } else {
-	    throw new KeyError(key);
-	  }
-	};
-
-	Struct.prototype.set = function (key, value) {
-	  if (this[key] === value) {
-	    return this;
-	  }
-	  var tmp = {};
-	  tmp[key] = value;
-	  return this.merge(tmp);
-	};
-
-	Struct.prototype.update = function (key, operation) {
-	  return this.set(key, operation(this[key]));
-	};
-
-	Struct.prototype.merge = function (other) {
-	  return Struct(this, other);
-	};
-
 	var index$2 = __commonjs(function (module) {
 	'use strict';
 	module.exports = function (str) {
@@ -139,25 +84,84 @@ var Lob = (function () { 'use strict';
 
 	var parse = index.parse;
 
-	var URI_DEFAULTS = {
-	  path: [],
-	  query: {},
+	// Router makes use of current location
+	// Router should always return some value of state it does not have the knowledge to regard it as invalid
+	// Router is currently untested
+	// Router does not follow modifications to the application location.
+	// Router is generic for tracker and flyer at the moment
+	// location is a size cause and might make sense to be lazily applied
+	function Router(location){
+	  if ( !(this instanceof Router) ) { return new Router(location); }
+	  var router = this;
+	  router.location = location;
+
+	  function getState(){
+	    var query = parse(router.location.search);
+	    return {
+	      token: query.token,
+	      channelName: query['channel-name']
+	    };
+	  }
+
+	  Object.defineProperty(router, 'state', {
+	    get: getState
+	  });
+	}
+
+	/* jshint esnext: true */
+
+	function KeyError(key) {
+	  this.name = "KeyError";
+	  this.message = "key \"" + key + "\" not found";
+	  this.stack = (new Error()).stack;
+	}
+	KeyError.prototype = Object.create(Error.prototype);
+	KeyError.prototype.constructor = KeyError;
+
+	function Struct(defaults, source){
+	  "use strict";
+	  if ( !(this instanceof Struct) ) { return new Struct(defaults, source); }
+
+	  Object.assign(this, defaults);
+	  for (var key in source) {
+	    if (source.hasOwnProperty(key)) {
+	      if (!this.hasOwnProperty(key)) {
+	        throw new KeyError(key);
+	      }
+	      this[key] = source[key];
+	    }
+	  }
+	  Object.freeze(this);
+	}
+
+	Struct.prototype.hasKey = function (key) {
+	  return Object.keys(this).indexOf(key) !== -1;
 	};
 
-	function URI(raw){
-	  if ( !(this instanceof URI) ) { return new URI(raw); }
+	Struct.prototype.fetch = function (key) {
+	  if (this.hasKey(key)) {
+	    return this[key];
+	  } else {
+	    throw new KeyError(key);
+	  }
+	};
 
-	  return Struct.call(this, URI_DEFAULTS, raw);
-	}
+	Struct.prototype.set = function (key, value) {
+	  if (this[key] === value) {
+	    return this;
+	  }
+	  var tmp = {};
+	  tmp[key] = value;
+	  return this.merge(tmp);
+	};
 
-	URI.prototype = Object.create(Struct.prototype);
-	URI.prototype.constructor = URI;
+	Struct.prototype.update = function (key, operation) {
+	  return this.set(key, operation(this[key]));
+	};
 
-	function parseLocation(location){
-	  var query = parse(location.search);
-	  var path = location.pathname.substring(1).split("/");
-	  return new URI({path: path, query: query});
-	}
+	Struct.prototype.merge = function (other) {
+	  return Struct(this, other);
+	};
 
 	/* jshint esnext: true */
 
@@ -504,7 +508,7 @@ var Lob = (function () { 'use strict';
 
 	/* jshint esnext: true */
 
-	function Display($root){
+	function Display$1($root){
 	  var $maxFlightTime = $root.querySelector("[data-hook~=flight-time]");
 	  var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
 	  var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
@@ -560,7 +564,7 @@ var Lob = (function () { 'use strict';
 
 	/* jshint esnext: true */
 
-	function Display$1($root){
+	function Display($root){
 	  var $message = $root.querySelector("[data-display~=message]");
 	  return Object.create({}, {
 	    active: {
@@ -593,13 +597,13 @@ var Lob = (function () { 'use strict';
 	    var presentation = present(projection);
 	    var $avionics = document.querySelector("[data-interface~=avionics]");
 	    var $alert = document.querySelector("[data-display~=alert]");
-	    var display = new Display($avionics);
+	    var display = new Display$1($avionics);
 	    for (var attribute in display) {
 	      if (display.hasOwnProperty(attribute)) {
 	        display[attribute] = presentation[attribute];
 	      }
 	    }
-	    var alertDisplay = Display$1($alert);
+	    var alertDisplay = Display($alert);
 	    var alertMessage = projection.alert;
 	    if (alertMessage) {
 	      alertDisplay.message = alertMessage;
@@ -621,7 +625,7 @@ var Lob = (function () { 'use strict';
 
 	// import FlyerUplinkController from "./flyer/flyer-uplink-controller";
 	function FlyerUplinkController(options, tracker){
-	  var channelName = options.channel;
+	  var channelName = options.channelName;
 	  var token = options.token;
 	  var realtime = new Ably.Realtime({ token: token });
 	  realtime.connection.on("connected", function(err) {
@@ -661,11 +665,12 @@ var Lob = (function () { 'use strict';
 	}
 
 
-	var uri = parseLocation(window.location);
+	var router = Router(window.location);
+	console.log('Router:', 'Started with initial state:', router.state);
 
 	var uplinkController = FlyerUplinkController({
-	  token: uri.query.token,
-	  channel: uri.query.channel
+	  token: router.state.token,
+	  channelName: router.state.channelName
 	}, flyer);
 	} catch (e) {
 	  alert(e);

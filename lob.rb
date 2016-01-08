@@ -23,8 +23,8 @@ end
 
 post '/new-flight' do
   token = client.auth.request_token.token
-  channel = cookies[:channel_name] ||= create_channel_name
-  redirect "/flyer?channel=#{channel}&token=#{token}"
+  channel_name = cookies[:channel_name] ||= create_channel_name
+  redirect "/flyer?channel-name=#{channel_name}&token=#{token}"
 end
 
 post '/join' do

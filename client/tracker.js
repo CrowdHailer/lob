@@ -1,6 +1,7 @@
 /* jshint esnext: true */
 
 // IMPORTS
+import "./utils/polyfill";
 import Tracker from "./tracker/tracker";
 import Router from "./router";
 import UplinkController from "./tracker/uplink-controller";
