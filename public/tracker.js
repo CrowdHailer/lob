@@ -61,7 +61,7 @@ var Lob = (function () { 'use strict';
     flightOutputStatus: "FOLLOWING_FLIGHT", // FOLLOWING_LIVE | HOLDING_SNAPSHOT
     liveFlight: [],
     flightSnapshot: null,
-    lockedToLiveTracking: false
+    alert: ""
   };
 
   function State(raw){
@@ -115,7 +115,8 @@ var Lob = (function () { 'use strict';
     tracker.uplinkFailed = function(err){
       console.log(err);
       // Set state action can cause projection to exhibit new state
-      tracker.state = tracker.state.set("uplinkStatus", "FAILED");
+      var state = tracker.state.set("uplinkStatus", "FAILED");
+      tracker.state = state.set("alert", "Could not connect to Ably realtime service. Please try again later");
       // tracker.state = tracker.state.set("uplinkChannelName", channelName);
       // // call log change. test listeners that the state has changed.
       logInfo("Uplink failed to connect", err);
@@ -170,6 +171,13 @@ var Lob = (function () { 'use strict';
       tracker.state = state;
       showcase(state);
       logEvent("following live readings");
+    };
+
+    tracker.closeAlert = function(){
+      // DEBT untested
+      tracker.state = tracker.state.set("alert", "");
+      showcase(tracker.state);
+      logEvent("Alert closed");
     };
 
     function logEvent() {
@@ -381,6 +389,31 @@ var Lob = (function () { 'use strict';
     });
   }
 
+  /* jshint esnext: true */
+
+  function Display($root){
+    var $message = $root.querySelector("[data-display~=message]");
+    return Object.create({}, {
+      active: {
+        set: function(active){
+          var ACTIVE = "active";
+          if (active) {
+            $root.classList.add(ACTIVE);
+          } else {
+            $root.classList.remove(ACTIVE);
+          }
+        },
+        enumerable: true
+      },
+      message: {
+        set: function(message){
+          console.log(message);
+          $message.innerHTML = message;
+        }
+      }
+    });
+  }
+
   // GENERAL CONFIGURATION
   window.Tracker = Tracker;
   window.Tracker.Reading = Reading;
@@ -411,6 +444,8 @@ var Lob = (function () { 'use strict';
     var $trackerHoldingSnapshot = document.querySelector('[data-display~=tracker-holding-snapshot]');
     var $trackerFollowingLive = document.querySelector('[data-display~=tracker-following-live]');
     var $trackerFollowingFlight = document.querySelector('[data-display~=tracker-following-flight]');
+    var $alert = document.querySelector("[data-display~=alert]");
+    var alertDisplay = Display($alert);
     console.debug('dom is ready', $uplinkStatusMessage);
     var mainView = {
       render: function(projection){
@@ -430,7 +465,13 @@ var Lob = (function () { 'use strict';
           $trackerHoldingSnapshot.style.display = 'none';
           $trackerFollowingLive.style.display = 'none';
           $trackerFollowingFlight.style.display = '';
-
+        }
+        var alertMessage = projection.alert;
+        if (alertMessage) {
+          alertDisplay.message = alertMessage;
+          alertDisplay.active = true;
+        } else {
+          alertDisplay.active = false;
         }
       }
     };

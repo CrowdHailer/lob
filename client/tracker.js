@@ -8,6 +8,7 @@ import UplinkController from "./tracker/uplink-controller";
 import ConsoleView from "./tracker/console-view";
 import Showcase from "./tracker/showcase";
 import Reading from "./lib/reading";
+import AlertDisplay from "./alert/display";
 
 // GENERAL CONFIGURATION
 window.Tracker = Tracker;
@@ -43,6 +44,8 @@ ready(function(){
   var $trackerHoldingSnapshot = document.querySelector('[data-display~=tracker-holding-snapshot]');
   var $trackerFollowingLive = document.querySelector('[data-display~=tracker-following-live]');
   var $trackerFollowingFlight = document.querySelector('[data-display~=tracker-following-flight]');
+  var $alert = document.querySelector("[data-display~=alert]");
+  var alertDisplay = AlertDisplay($alert);
   console.debug('dom is ready', $uplinkStatusMessage);
   var mainView = {
     render: function(projection){
@@ -62,7 +65,13 @@ ready(function(){
         $trackerHoldingSnapshot.style.display = 'none';
         $trackerFollowingLive.style.display = 'none';
         $trackerFollowingFlight.style.display = '';
-
+      }
+      var alertMessage = projection.alert;
+      if (alertMessage) {
+        alertDisplay.message = alertMessage;
+        alertDisplay.active = true;
+      } else {
+        alertDisplay.active = false;
       }
     }
   };

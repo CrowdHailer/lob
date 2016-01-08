@@ -8,7 +8,7 @@ var STATE_DEFAULTS = {
   flightOutputStatus: "FOLLOWING_FLIGHT", // FOLLOWING_LIVE | HOLDING_SNAPSHOT
   liveFlight: [],
   flightSnapshot: null,
-  lockedToLiveTracking: false
+  alert: ""
 };
 
 function State(raw){

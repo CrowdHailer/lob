@@ -44,7 +44,8 @@ function Tracker(state, world){
   tracker.uplinkFailed = function(err){
     console.log(err);
     // Set state action can cause projection to exhibit new state
-    tracker.state = tracker.state.set("uplinkStatus", "FAILED");
+    var state = tracker.state.set("uplinkStatus", "FAILED");
+    tracker.state = state.set("alert", "Could not connect to Ably realtime service. Please try again later");
     // tracker.state = tracker.state.set("uplinkChannelName", channelName);
     // // call log change. test listeners that the state has changed.
     logInfo("Uplink failed to connect", err);
@@ -99,6 +100,13 @@ function Tracker(state, world){
     tracker.state = state;
     showcase(state);
     logEvent("following live readings");
+  };
+
+  tracker.closeAlert = function(){
+    // DEBT untested
+    tracker.state = tracker.state.set("alert", "");
+    showcase(tracker.state);
+    logEvent("Alert closed");
   };
 
   function logEvent() {
