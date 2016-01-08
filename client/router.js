@@ -1,7 +1,5 @@
 /* jshint esnext: true */
 
-import * as QString from "query-string";
-
 // Router makes use of current location
 // Router should always return some value of state it does not have the knowledge to regard it as invalid
 // Router is currently untested
@@ -14,10 +12,9 @@ export default function Router(location){
   router.location = location;
 
   function getState(){
-    var query = QString.parse(router.location.search);
     return {
-      token: query.token,
-      channelName: query['channel-name']
+      token: getQueryParameter('token', router.location.search),
+      channelName: getQueryParameter('channel-name', router.location.search)
     };
   }
 
@@ -26,9 +23,9 @@ export default function Router(location){
   });
 }
 
-export function getQueryParameter(name) {
+export function getQueryParameter(name, queryString) {
   name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
   var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-  results = regex.exec(location.search);
+  results = regex.exec(queryString);
   return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }

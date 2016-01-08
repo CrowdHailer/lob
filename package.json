@@ -44,8 +44,5 @@
     "rollup-plugin-npm": "^1.2.0",
     "rollup-plugin-typescript": "^0.2.1",
     "tsd": "^0.6.5"
-  },
-  "dependencies": {
-    "query-string": "^3.0.0"
   }
 }
