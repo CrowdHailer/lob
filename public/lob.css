@@ -1,4 +1,4 @@
-@import url(https://fonts.googleapis.com/css?family=Raleway:400,200);
+@import url(https://fonts.googleapis.com/css?family=Raleway:400,300,200);
 /*
 * Scut, a collection of Sass utilities
 * to ease and improve our implementations of common style-code patterns.
@@ -34,6 +34,69 @@
   background-color: rgba(255, 255, 255, 0.5); }
   .notices.active section {
     transform: translateY(0%); }
+
+#uplink.unknown #starting-uplink {
+  display: block; }
+
+#uplink.unknown #uplink-available {
+  display: none; }
+
+#uplink.unknown #uplink-transmitting {
+  display: none; }
+
+#uplink.unknown #uplink-failed {
+  display: none; }
+
+#uplink.available #starting-uplink {
+  display: none; }
+
+#uplink.available #uplink-available {
+  display: block; }
+
+#uplink.available #uplink-transmitting {
+  display: none; }
+
+#uplink.available #uplink-failed {
+  display: none; }
+
+#uplink.transmitting #starting-uplink {
+  display: none; }
+
+#uplink.transmitting #uplink-available {
+  display: none; }
+
+#uplink.transmitting #uplink-transmitting {
+  display: block; }
+
+#uplink.transmitting #uplink-failed {
+  display: none; }
+
+#uplink.failed #starting-uplink {
+  display: none; }
+
+#uplink.failed #uplink-available {
+  display: none; }
+
+#uplink.failed #uplink-transmitting {
+  display: none; }
+
+#uplink.failed #uplink-failed {
+  display: block; }
+
+svg {
+  overflow: visible;
+  max-width: 960px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 2rem;
+  position: relative;
+  z-index: -1; }
+
+main.width-limited {
+  overflow: visible; }
+  main.width-limited form {
+    background: #FFCC00; }
 
 html {
   box-sizing: border-box; }
@@ -85,6 +148,9 @@ a.clean {
   color: inherit; }
 
 .center {
+  text-align: center; }
+
+.readout {
   text-align: center;
   font-family: monospace; }
 
@@ -93,9 +159,9 @@ html, body {
 
 body {
   font-family: 'Raleway', sans-serif;
-  font-weight: 200;
+  font-weight: 300;
   background-color: #FFCC00;
-  font-size: 1.8rem; }
+  font-size: 1.2rem; }
 
 .width-limited {
   overflow: hidden;

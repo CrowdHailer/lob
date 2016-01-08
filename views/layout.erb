@@ -26,19 +26,15 @@
   <meta name="twitter:site" content="@crowdhailer" />
   <!-- most of the rest works from og -->
 
-  <script src="sweetalert.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="sweetalert.css">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="/lob.css" media="screen" title="no title" charset="utf-8">
   <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" ></script>
-  <script src="/lob.js"></script>
 </head>
 <body>
-  <aside class="notices" data-component="notice">
+  <aside class="notices" onclick="Lob.closeAlert()" data-display="alert">
     <section>
       <h1>Ooops!</h1>
-      <p data-display="notice">Could not read the data from this device. Please try again on a mobile with working accelerometer.</p>
+      <p data-display="message"></p>
       <p class="close">Click to close</p>
     </section>
     <div class="sheet"></div>

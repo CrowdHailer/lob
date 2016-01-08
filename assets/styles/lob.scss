@@ -1,7 +1,9 @@
-@import url(https://fonts.googleapis.com/css?family=Raleway:400,200);
+@import url(https://fonts.googleapis.com/css?family=Raleway:400,300,200);
 
 @import 'vendor/scut';
 @import "./notices";
+@import "./uplink";
+@import "./header";
 
 // RESETS
 // Preferred behaviour
@@ -20,6 +22,9 @@ p {
 }
 .center {
   text-align: center;
+}
+.readout {
+  text-align: center;
   font-family: monospace;
 }
 
@@ -31,9 +36,10 @@ html, body {
 
 body {
   font-family: 'Raleway', sans-serif;
-  font-weight: 200;
+  font-weight: 300;
   background-color: #FFCC00;
-  font-size: 1.8rem;
+  font-size: 1.2rem;
+  // TODO make bigger on large screen
 }
 
 .width-limited {
