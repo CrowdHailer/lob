@@ -5,6 +5,7 @@ import Router from "./router";
 import Presenter from "./avionics/presenter";
 import Display from "./avionics/display";
 import AlertDisplay from "./alert/display";
+import { throttle } from "./utils/fn";
 try {
 
 
@@ -55,18 +56,20 @@ function FlyerUplinkController(options, tracker){
     console.log(err.reason.message);
   });
   var channel = realtime.channels.get(channelName);
+  function transmitReading(reading){
+    channel.publish("newReading", reading, function(err) {
+      // DEBT use provided console for messages
+      // i.e. have message successful as app actions
+      if(err) {
+        console.warn("Unable to publish message; err = " + err.message);
+      } else {
+        console.info("Reding Message successfully sent", reading);
+      }
+    });
+  }
+
   tracker.uplink = {
-    transmitReading: function(reading){
-      channel.publish("newReading", reading, function(err) {
-        // DEBT use provided console for messages
-        // i.e. have message successful as app actions
-        if(err) {
-          console.warn("Unable to publish message; err = " + err.message);
-        } else {
-          console.info("Message successfully sent", reading);
-        }
-      });
-    },
+    transmitReading: throttle(transmitReading, 250),
     transmitResetReadings: function(){
       channel.publish("resetReadings", {}, function(err) {
         // DEBT use provided console for messages

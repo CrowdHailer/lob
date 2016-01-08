@@ -432,7 +432,7 @@ var Lob = (function () { 'use strict';
 
   /* jshint esnext: true */
 
-  function Display($root){
+  function Display$1($root){
     var $maxFlightTime = $root.querySelector("[data-hook~=flight-time]");
     var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
     var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
@@ -488,7 +488,7 @@ var Lob = (function () { 'use strict';
 
   /* jshint esnext: true */
 
-  function Display$1($root){
+  function Display($root){
     var $message = $root.querySelector("[data-display~=message]");
     return Object.create({}, {
       active: {
@@ -511,6 +511,28 @@ var Lob = (function () { 'use strict';
     });
   }
 
+  function throttle(fn, threshhold, scope) {
+    threshhold = threshhold || 250;
+    var last,
+    deferTimer;
+    return function () {
+      var context = scope || this;
+      var now = Date.now(), args = arguments;
+
+      if (last && now < last + threshhold) {
+        // hold on to it
+        clearTimeout(deferTimer);
+        deferTimer = setTimeout(function () {
+          last = now;
+          fn.apply(context, args);
+        }, threshhold);
+      } else {
+        last = now;
+        fn.apply(context, args);
+      }
+    };
+  }
+
   try {
 
 
@@ -521,13 +543,13 @@ var Lob = (function () { 'use strict';
       var presentation = present(projection);
       var $avionics = document.querySelector("[data-interface~=avionics]");
       var $alert = document.querySelector("[data-display~=alert]");
-      var display = new Display($avionics);
+      var display = new Display$1($avionics);
       for (var attribute in display) {
         if (display.hasOwnProperty(attribute)) {
           display[attribute] = presentation[attribute];
         }
       }
-      var alertDisplay = Display$1($alert);
+      var alertDisplay = Display($alert);
       var alertMessage = projection.alert;
       if (alertMessage) {
         alertDisplay.message = alertMessage;
@@ -561,18 +583,20 @@ var Lob = (function () { 'use strict';
       console.log(err.reason.message);
     });
     var channel = realtime.channels.get(channelName);
+    function transmitReading(reading){
+      channel.publish("newReading", reading, function(err) {
+        // DEBT use provided console for messages
+        // i.e. have message successful as app actions
+        if(err) {
+          console.warn("Unable to publish message; err = " + err.message);
+        } else {
+          console.info("Reding Message successfully sent", reading);
+        }
+      });
+    }
+
     tracker.uplink = {
-      transmitReading: function(reading){
-        channel.publish("newReading", reading, function(err) {
-          // DEBT use provided console for messages
-          // i.e. have message successful as app actions
-          if(err) {
-            console.warn("Unable to publish message; err = " + err.message);
-          } else {
-            console.info("Message successfully sent", reading);
-          }
-        });
-      },
+      transmitReading: throttle(transmitReading, 1000),
       transmitResetReadings: function(){
         channel.publish("resetReadings", {}, function(err) {
           // DEBT use provided console for messages
