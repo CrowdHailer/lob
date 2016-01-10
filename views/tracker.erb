@@ -26,11 +26,11 @@ var data = [
     pointColor: '#F16220',
     pointStrokeColor: '#fff',
     data: [
-      { x: 19, y: 65 },
-      { x: 27, y: 59 },
-      { x: 28, y: 69 },
-      { x: 40, y: 81 },
-      { x: 48, y: 56 }
+      { x: 1452442412335 + 19 * 10000, y: 65 },
+      { x: 1452442412335 + 27 * 10000, y: 59 },
+      { x: 1452442412335 + 28 * 10000, y: 69 },
+      { x: 1452442412335 + 40 * 10000, y: 81 },
+      { x: 1452442412335 + 48 * 10000, y: 56 }
     ]
   },
   {
@@ -39,16 +39,27 @@ var data = [
     pointColor: '#007ACC',
     pointStrokeColor: '#fff',
     data: [
-      { x: 19, y: 75, r: 4 },
-      { x: 27, y: 69, r: 7 },
-      { x: 28, y: 70, r: 5 },
-      { x: 40, y: 31, r: 3 },
-      { x: 48, y: 76, r: 6 },
-      { x: 52, y: 23, r: 3 },
-      { x: 24, y: 32, r: 4 }
+      { x: 1452442412335 + 19 * 10000, y: 75, r: 4 },
+      { x: 1452442412335 + 27 * 10000, y: 69, r: 7 },
+      { x: 1452442412335 + 28 * 10000, y: 70, r: 5 },
+      { x: 1452442412335 + 40 * 10000, y: 31, r: 3 },
+      { x: 1452442412335 + 48 * 10000, y: 76, r: 6 },
+      { x: 1452442412335 + 52 * 10000, y: 23, r: 3 },
+      { x: 1452442412335 + 24 * 10000, y: 32, r: 4 }
     ]
   }
 ];
 var ctx = document.getElementById("myChart").getContext("2d");
-new Chart(ctx).Scatter(data, {});
+myScatterChart = new Chart(ctx).Scatter(data, {
+  scaleType: 'date',
+  scaleDateFormat: "yyyy mmm d",
+  scaleTimeFormat: "MM.ss",
+});
+
+setTimeout(function () {
+  set = myScatterChart.datasets[0];
+  console.log(set.length);
+  set.setPointData(set.points.length, 1452442412335 + 20 * 10000, 55);
+  myScatterChart.update()
+}, 10000);
 </script>
