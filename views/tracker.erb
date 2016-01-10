@@ -5,14 +5,50 @@
   <form data-display="tracker-following-flight" onclick="Lob.followLive()">
     <button type="button">Watching live, click to lock</button>
   </form>
-  <form data-display="tracker-holding-snapshot" onclick="Lob.followFlight()">
+  <form data-display="tracker-holding-snapshot" onclick="Lob.followFlight()" style="display:none;">
     <button type="button">Showing snapshot, click to return to live feed</button>
   </form>
-  <form data-display="tracker-following-live" onclick="Lob.followFlight()">
+  <form data-display="tracker-following-live" onclick="Lob.followFlight()" style="display:none;">
     <button type="button">Locked to live tracking, click to allow pausing</button>
   </form>
   <div id="orientation-tracker" data-display="tracker">
     <canvas id="myChart" width="960" height="800"></canvas>
   </div>
 </main>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/dima117/Chart.Scatter/master/Chart.Scatter.js"></script>
 <script type="text/javascript" src="/tracker.js"></script>
+<script type="text/javascript">
+var data = [
+  {
+    label: 'My First dataset',
+    strokeColor: '#F16220',
+    pointColor: '#F16220',
+    pointStrokeColor: '#fff',
+    data: [
+      { x: 19, y: 65 },
+      { x: 27, y: 59 },
+      { x: 28, y: 69 },
+      { x: 40, y: 81 },
+      { x: 48, y: 56 }
+    ]
+  },
+  {
+    label: 'My Second dataset',
+    strokeColor: '#007ACC',
+    pointColor: '#007ACC',
+    pointStrokeColor: '#fff',
+    data: [
+      { x: 19, y: 75, r: 4 },
+      { x: 27, y: 69, r: 7 },
+      { x: 28, y: 70, r: 5 },
+      { x: 40, y: 31, r: 3 },
+      { x: 48, y: 76, r: 6 },
+      { x: 52, y: 23, r: 3 },
+      { x: 24, y: 32, r: 4 }
+    ]
+  }
+];
+var ctx = document.getElementById("myChart").getContext("2d");
+new Chart(ctx).Scatter(data, {});
+</script>
