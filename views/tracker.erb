@@ -1,4 +1,4 @@
-<main id="tracker-page">
+<main class="width-limited">
   <form>
     <button type="button" data-display="uplink-status-message">Connecting to Ably</button>
   </form>
@@ -11,12 +11,8 @@
   <form data-display="tracker-following-live" onclick="Lob.followFlight()">
     <button type="button">Locked to live tracking, click to allow pausing</button>
   </form>
-  <a href="/">
-    <h1>Lob</h1>
-  </a>
   <div id="orientation-tracker" data-display="tracker">
-    <canvas id="myChart" width="960" height="800" style="background-color:#EEE"></canvas>
+    <canvas id="myChart" width="960" height="800"></canvas>
   </div>
-  <p>Realtime connection powered by <a href="https://ably.io" target="_blank">Ably.io</a></p>
 </main>
 <script type="text/javascript" src="/tracker.js"></script>
