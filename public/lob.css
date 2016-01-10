@@ -161,10 +161,17 @@ body {
   font-size: 1.2rem; }
 
 .width-limited {
-  max-width: 960px;
+  max-width: 760px;
   margin: 0 auto;
   padding-left: 1em;
   padding-right: 1em; }
+
+footer {
+  background-color: black;
+  color: white; }
+  footer a {
+    font-weight: bold;
+    color: #FC0; }
 
 footer p {
   padding-left: 1em;
