@@ -5,7 +5,7 @@ export function argsToArray(args){
 }
 
 export function throttle(fn, threshhold, scope) {
-  threshhold = threshhold || 250;
+  threshhold = threshhold;
   var last,
   deferTimer;
   return function () {

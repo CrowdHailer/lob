@@ -432,7 +432,7 @@ var Lob = (function () { 'use strict';
 
   /* jshint esnext: true */
 
-  function Display$1($root){
+  function Display($root){
     var $maxFlightTime = $root.querySelector("[data-hook~=flight-time]");
     var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
     var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
@@ -488,7 +488,7 @@ var Lob = (function () { 'use strict';
 
   /* jshint esnext: true */
 
-  function Display($root){
+  function Display$1($root){
     var $message = $root.querySelector("[data-display~=message]");
     return Object.create({}, {
       active: {
@@ -512,7 +512,7 @@ var Lob = (function () { 'use strict';
   }
 
   function throttle(fn, threshhold, scope) {
-    threshhold = threshhold || 250;
+    threshhold = threshhold;
     var last,
     deferTimer;
     return function () {
@@ -533,6 +533,8 @@ var Lob = (function () { 'use strict';
     };
   }
 
+  var readingPublishLimit = 250; // ms
+
   try {
 
 
@@ -543,13 +545,13 @@ var Lob = (function () { 'use strict';
       var presentation = present(projection);
       var $avionics = document.querySelector("[data-interface~=avionics]");
       var $alert = document.querySelector("[data-display~=alert]");
-      var display = new Display$1($avionics);
+      var display = new Display($avionics);
       for (var attribute in display) {
         if (display.hasOwnProperty(attribute)) {
           display[attribute] = presentation[attribute];
         }
       }
-      var alertDisplay = Display($alert);
+      var alertDisplay = Display$1($alert);
       var alertMessage = projection.alert;
       if (alertMessage) {
         alertDisplay.message = alertMessage;
@@ -595,10 +597,10 @@ var Lob = (function () { 'use strict';
       });
     }
 
+    console.log('readingPublishLimit', readingPublishLimit, 'ms');
     flyer.uplink = {
-      transmitReading: throttle(transmitReading, 250),
+      transmitReading: throttle(transmitReading, readingPublishLimit),
       transmitResetReadings: function(){
-        console.log('here');
         channel.publish("resetReadings", {}, function(err) {
           // DEBT use provided console for messages
           // i.e. have message successful as app actions
@@ -606,8 +608,7 @@ var Lob = (function () { 'use strict';
             window.console.warn("Unable to publish message; err = " + err.message);
           } else {
             // TODO comment to ably that if error here then no information released at all.
-            window.console.log('oop')
-            window.console.info("Message successfully sent", message);
+            window.console.info("Message successfully sent");
           }
         });
       }

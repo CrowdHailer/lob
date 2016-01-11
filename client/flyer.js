@@ -6,6 +6,7 @@ import Presenter from "./avionics/presenter";
 import Display from "./avionics/display";
 import AlertDisplay from "./alert/display";
 import { throttle } from "./utils/fn";
+import { readingPublishLimit } from './config';
 try {
 
 
@@ -68,8 +69,9 @@ function FlyerUplinkController(options, flyer){
     });
   }
 
+  console.log('readingPublishLimit', readingPublishLimit, 'ms');
   flyer.uplink = {
-    transmitReading: throttle(transmitReading, 250),
+    transmitReading: throttle(transmitReading, readingPublishLimit),
     transmitResetReadings: function(){
       channel.publish("resetReadings", {}, function(err) {
         // DEBT use provided console for messages
