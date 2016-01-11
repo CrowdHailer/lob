@@ -183,6 +183,7 @@ var Lob = (function () { 'use strict';
       logEvent("following live readings");
     };
     tracker.resetReadings = function(){
+      console.log('resetReadings');
     };
 
     tracker.closeAlert = function(){
