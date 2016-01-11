@@ -60,7 +60,7 @@ function Tracker(state, world){
     var isNowGrounded = !isInFlight(newReading);
     if (wasInFlight && isNowGrounded) {
       setTimeout(function () {
-        console.log('pause the reading');
+        tracker.holdSnapshot();
         // pause the newReading
       }, 1000);
     }
@@ -74,7 +74,9 @@ function Tracker(state, world){
     // here to add timer controller
     tracker.state = state; // Assign at end to work as transaction
     // showcase(state);
-    tracker.showcase.addReading(newReading);
+    if (tracker.state.flightOutputStatus !== 'HOLDING_SNAPSHOT') {
+      tracker.showcase.addReading(newReading);
+    }
     // logEvent("New newReading");
   };
 

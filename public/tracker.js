@@ -131,7 +131,7 @@ var Lob = (function () { 'use strict';
       var isNowGrounded = !isInFlight(newReading);
       if (wasInFlight && isNowGrounded) {
         setTimeout(function () {
-          console.log('pause the reading');
+          tracker.holdSnapshot();
           // pause the newReading
         }, 1000);
       }
@@ -145,7 +145,9 @@ var Lob = (function () { 'use strict';
       // here to add timer controller
       tracker.state = state; // Assign at end to work as transaction
       // showcase(state);
-      tracker.showcase.addReading(newReading);
+      if (tracker.state.flightOutputStatus !== 'HOLDING_SNAPSHOT') {
+        tracker.showcase.addReading(newReading);
+      }
       // logEvent("New newReading");
     };
 
@@ -492,6 +494,7 @@ var Lob = (function () { 'use strict';
     window.myLineChart = myLineChart
     this.addPoint = function(point){
       var date = new Date(point.timestamp)
+      // TODO plot only some legends
       if (i % 1 === 0) {
         myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + ':' + date.getSeconds() + 's');
       } else {
