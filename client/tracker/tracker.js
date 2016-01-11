@@ -52,25 +52,32 @@ function Tracker(state, world){
     showcase(tracker.state);
   };
 
-  tracker.newReading = function(reading){
-    var wasInFlight = lastInArray(tracker.state.liveFlight) && isInFlight(lastInArray(tracker.state.liveFlight));
-    var isNowGrounded = !isInFlight(reading);
+  tracker.newReading = function(newReading){
+    // DEBT return null reading if array empty
+    // DEBT throw error if new reading is missing a magnitude property
+    var lastReading = lastInArray(tracker.state.liveFlight)
+    var wasInFlight = lastReading && isInFlight(lastReading);
+    var isNowGrounded = !isInFlight(newReading);
     if (wasInFlight && isNowGrounded) {
       setTimeout(function () {
-        console.log('pause the reading');
-        // pause the reading
+        tracker.holdSnapshot();
+        // pause the newReading
       }, 1000);
     }
 
     var state = tracker.state.update("liveFlight", function(readings){
-      readings = readings.concat(reading);
-      return lastNInArray(5, readings);
+      readings = readings.concat(newReading);
+      // DEBT make configurable
+      return lastNInArray(40, readings);
     });
     // simplest is to just start timer
     // here to add timer controller
     tracker.state = state; // Assign at end to work as transaction
-    showcase(state);
-    logEvent("New reading");
+    // showcase(state);
+    if (tracker.state.flightOutputStatus !== 'HOLDING_SNAPSHOT') {
+      tracker.showcase.addReading(newReading);
+    }
+    // logEvent("New newReading");
   };
 
   tracker.holdSnapshot = function(){
@@ -88,6 +95,9 @@ function Tracker(state, world){
   };
 
   tracker.followFlight = function(){
+    if (tracker.state.flightOutputStatus === 'HOLDING_SNAPSHOT') {
+      tracker.showcase.setReadings(tracker.state.liveFlight);
+    }
     var state = tracker.state.set('flightOutputStatus', 'FOLLOWING_FLIGHT');
     state.set('flightSnapshot', null); // probably unnecessary as we can use the flight output status
     tracker.state = state;
@@ -100,6 +110,10 @@ function Tracker(state, world){
     tracker.state = state;
     showcase(state);
     logEvent("following live readings");
+  };
+  tracker.resetReadings = function(){
+    // Fundamentally no reason to resetReadings;
+    console.log('resetReadings');
   };
 
   tracker.closeAlert = function(){
@@ -134,8 +148,6 @@ function Tracker(state, world){
 
 
 
-  tracker.resetReadings = function(){
-  };
 }
 
 export default Tracker;

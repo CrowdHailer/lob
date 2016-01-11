@@ -230,3 +230,8 @@ input {
   background-color: transparent;
   font-family: raleway; }
 
+canvas {
+  background-color: #EEE;
+  width: 100%;
+  border: 2px solid black; }
+

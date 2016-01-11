@@ -123,25 +123,32 @@ var Lob = (function () { 'use strict';
       showcase(tracker.state);
     };
 
-    tracker.newReading = function(reading){
-      var wasInFlight = lastInArray(tracker.state.liveFlight) && isInFlight(lastInArray(tracker.state.liveFlight));
-      var isNowGrounded = !isInFlight(reading);
+    tracker.newReading = function(newReading){
+      // DEBT return null reading if array empty
+      // DEBT throw error if new reading is missing a magnitude property
+      var lastReading = lastInArray(tracker.state.liveFlight)
+      var wasInFlight = lastReading && isInFlight(lastReading);
+      var isNowGrounded = !isInFlight(newReading);
       if (wasInFlight && isNowGrounded) {
         setTimeout(function () {
-          console.log('pause the reading');
-          // pause the reading
+          tracker.holdSnapshot();
+          // pause the newReading
         }, 1000);
       }
 
       var state = tracker.state.update("liveFlight", function(readings){
-        readings = readings.concat(reading);
-        return lastNInArray(5, readings);
+        readings = readings.concat(newReading);
+        // DEBT make configurable
+        return lastNInArray(40, readings);
       });
       // simplest is to just start timer
       // here to add timer controller
       tracker.state = state; // Assign at end to work as transaction
-      showcase(state);
-      logEvent("New reading");
+      // showcase(state);
+      if (tracker.state.flightOutputStatus !== 'HOLDING_SNAPSHOT') {
+        tracker.showcase.addReading(newReading);
+      }
+      // logEvent("New newReading");
     };
 
     tracker.holdSnapshot = function(){
@@ -159,6 +166,9 @@ var Lob = (function () { 'use strict';
     };
 
     tracker.followFlight = function(){
+      if (tracker.state.flightOutputStatus === 'HOLDING_SNAPSHOT') {
+        tracker.showcase.setReadings(tracker.state.liveFlight);
+      }
       var state = tracker.state.set('flightOutputStatus', 'FOLLOWING_FLIGHT');
       state.set('flightSnapshot', null); // probably unnecessary as we can use the flight output status
       tracker.state = state;
@@ -171,6 +181,10 @@ var Lob = (function () { 'use strict';
       tracker.state = state;
       showcase(state);
       logEvent("following live readings");
+    };
+    tracker.resetReadings = function(){
+      // Fundamentally no reason to resetReadings;
+      console.log('resetReadings');
     };
 
     tracker.closeAlert = function(){
@@ -205,8 +219,6 @@ var Lob = (function () { 'use strict';
 
 
 
-    tracker.resetReadings = function(){
-    };
   }
 
   /* jshint esnext: true */
@@ -249,6 +261,98 @@ var Lob = (function () { 'use strict';
 
   /* jshint esnext: true */
 
+  function ready(fn) {
+    if (document.readyState !== "loading"){
+      fn();
+    } else {
+      document.addEventListener("DOMContentLoaded", fn);
+    }
+  }
+
+  /* jshint esnext: true */
+  function UplinkController(options, tracker){
+    var channelName = options.channelName;
+    var token = options.token;
+    var realtime = new Ably.Realtime({ token: token });
+    realtime.connection.on("connected", function(err) {
+      // If we keep explicitly passing channel data to the controller we should pass it to the main app here
+      tracker.uplinkAvailable(channelName);
+    });
+    realtime.connection.on("failed", function(err) {
+      tracker.uplinkFailed(err);
+    });
+    var channel = realtime.channels.get(channelName);
+    channel.subscribe("newReading", function(event){
+      // new Vector(event.data);
+      tracker.newReading(Reading(event.data));
+    });
+    channel.subscribe("resetReadings", function(_event){
+      tracker.resetReadings();
+    });
+  }
+
+  // uplink controller does very little work so it is not separated from uplink
+
+  // function Uplink(options, logger){
+  //   var channelName = options.channel;
+  //   var token = options.token;
+  //   var realtime = new Ably.Realtime({ token: token });
+  //   var channel = realtime.channels.get(channelName);
+  //   realtime.connection.on("connected", function(err) {
+  //     console.log("realtime connected");
+  //   });
+  //   realtime.connection.on("failed", function(err) {
+  //     console.log("realtime connection failed");
+  //   });
+  // }
+
+  function TrackerShowcase(window){
+    if ( !(this instanceof TrackerShowcase) ) { return new TrackerShowcase(window); }
+    var showcase = this;
+    var views = [];
+
+
+    this.update = function(projection){
+      // Values needed in display
+      // isLive
+      // readings
+      // isLockedToLiveReadings
+      // graph lines
+      // uplink statuses
+      // TODO should be projection not this
+      showcase.projection = this;
+      views.forEach(function(view){
+        view.render(projection);
+      });
+    };
+
+    this.addView = function(view){
+      if (showcase.projection) {
+        view.render(showcase.projection);
+      }
+      views.push(view);
+    };
+
+    // DEBT
+    this.addReading = function(newReading){
+      views.forEach(function(view){
+        if (view.addReading) {
+          view.addReading(newReading);
+        }
+      });
+    }
+
+    this.setReadings = function(readings){
+      views.forEach(function(view){
+        if (view.setReadings) {
+          view.setReadings(readings);
+        }
+      });
+    }
+  }
+
+  /* jshint esnext: true */
+
   // Router makes use of current location
   // Router should always return some value of state it does not have the knowledge to regard it as invalid
   // Router is currently untested
@@ -277,83 +381,6 @@ var Lob = (function () { 'use strict';
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
     results = regex.exec(queryString);
     return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-  }
-
-  function TrackerShowcase(window){
-    if ( !(this instanceof TrackerShowcase) ) { return new TrackerShowcase(window); }
-    var showcase = this;
-    var views = [];
-
-
-    this.update = function(projection){
-      // Values needed in display
-      // isLive
-      // readings
-      // isLockedToLiveReadings
-      // graph lines
-      // uplink statuses
-      showcase.projection = this;
-      views.forEach(function(view){
-        view.render(projection);
-      });
-    };
-
-    this.addView = function(view){
-      if (showcase.projection) {
-        view.render(showcase.projection);
-      }
-      views.push(view);
-    };
-  }
-
-  // Could also be called UplinkDriver - might be more suitable
-  // RESPONSIBILITY - Drive the tracker application in response to messages from the Ably uplink
-
-  /* jshint esnext: true */
-  function UplinkController(options, tracker){
-    var channelName = options.channelName;
-    var token = options.token;
-    var realtime = new Ably.Realtime({ token: token });
-    realtime.connection.on("connected", function(err) {
-      // If we keep explicitly passing channel data to the controller we should pass it to the main app here
-      tracker.uplinkAvailable(channelName);
-    });
-    realtime.connection.on("failed", function(err) {
-      tracker.uplinkFailed(err);
-    });
-    var channel = realtime.channels.get(channelName);
-    channel.subscribe("newReading", function(event){
-      // new Vector(event.data);
-      tracker.newReading(event.data);
-    });
-    channel.subscribe("resetReadings", function(_event){
-      tracker.resetReadings();
-    });
-  }
-
-  // uplink controller does very little work so it is not separated from uplink
-
-  // function Uplink(options, logger){
-  //   var channelName = options.channel;
-  //   var token = options.token;
-  //   var realtime = new Ably.Realtime({ token: token });
-  //   var channel = realtime.channels.get(channelName);
-  //   realtime.connection.on("connected", function(err) {
-  //     console.log("realtime connected");
-  //   });
-  //   realtime.connection.on("failed", function(err) {
-  //     console.log("realtime connection failed");
-  //   });
-  // }
-
-  /* jshint esnext: true */
-
-  function ready(fn) {
-    if (document.readyState !== "loading"){
-      fn();
-    } else {
-      document.addEventListener("DOMContentLoaded", fn);
-    }
   }
 
   if (!Object.assign) {
@@ -418,6 +445,8 @@ var Lob = (function () { 'use strict';
   window.Tracker = Tracker;
   window.Tracker.Reading = Reading;
 
+  try {
+
   var router = Router(window.location);
   console.log('Router:', 'Started with initial state:', router.state);
 
@@ -427,6 +456,8 @@ var Lob = (function () { 'use strict';
   tracker.showcase = TrackerShowcase(window);
 
   var uplinkController = new UplinkController(router.state, tracker);
+
+
 
   function uplinkStatusMessageFromProjection(projection) {
     var message = projection.uplinkStatus;
@@ -439,6 +470,78 @@ var Lob = (function () { 'use strict';
     }
   }
 
+  function GraphDisplay($root){
+    if ( !(this instanceof GraphDisplay) ) { return new GraphDisplay($root); }
+    var canvas = $root.querySelector('canvas');
+    var canvasContext = canvas.getContext("2d");
+    console.log(canvas)
+    // DEBT data can come from $root dataset
+    var data = {
+      labels: [],
+      datasets: [{
+        label: "X",
+        fillColor: "rgba(220,220,220,0)",
+        strokeColor: "limegreen",
+        pointColor: "limegreen",
+        data: []
+      }, {
+        label: "Y",
+        fillColor: "rgba(220,220,220,0)",
+        strokeColor: "green",
+        pointColor: "green",
+        data: []
+      }, {
+        label: "Z",
+        fillColor: "rgba(220,220,220,0)",
+        strokeColor: "teal",
+        pointColor: "teal",
+        data: []
+      }, {
+        label: "Magnitude",
+        fillColor: "rgba(220,220,220,0)",
+        strokeColor: "orange",
+        pointColor: "orange",
+        data: []
+      }]
+    };
+    var i = 0.0;
+    // add point
+    // clear
+    var myLineChart = new Chart(canvasContext).Line(data, {animation: false, animationSteps: 4, pointDot : false});
+    window.myLineChart = myLineChart
+    this.addPoint = function(point){
+      window.requestAnimationFrame(function(){
+        var date = new Date(point.timestamp)
+        // TODO plot only some legends
+        if (i % 1 === 0) {
+          myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + ':' + date.getSeconds() + 's');
+        } else {
+          myLineChart.addData([point.x, point.y, point.z, point.magnitude], '');
+        }
+        // DEBT make length part of config
+        if (myLineChart.datasets[0].points.length > 20) {
+          myLineChart.removeData();
+        }
+        i = i + 0.25;
+      })
+    }
+    this.clear = function(){
+      myLineChart.destroy();
+      // i = 0.0;
+      data.labels = [];
+      myLineChart = new Chart(canvasContext).Line(data, {animation: false, animationSteps: 4, pointDot : false});
+    }
+    this.setPoints = function(points){
+      // DEBT remove use of this
+      var self = this;
+      window.requestAnimationFrame(function(){
+        self.clear();
+        points.forEach(function(point){
+          self.addPoint(point);
+        })
+      })
+    }
+  }
   ready(function(){
     var $root = document.documentElement;
     var $uplinkStatusMessage = queryDisplay('uplink-status-message', $root);
@@ -447,10 +550,15 @@ var Lob = (function () { 'use strict';
     var $trackerFollowingFlight = queryDisplay('tracker-following-flight', $root);
     var $alert = queryDisplay('alert', $root);
     var alertDisplay = Display($alert);
+
+    var $graphDisplay = queryDisplay('tracker-graph', $root);
+    var graphDisplay = GraphDisplay($graphDisplay);
+    window.graphDisplay = graphDisplay;
     console.debug('dom is ready', $uplinkStatusMessage);
+
     var mainView = {
       render: function(projection){
-        console.debug('Display rendering:', projection);
+        // console.debug('Display rendering:', projection);
         $uplinkStatusMessage.innerHTML = uplinkStatusMessageFromProjection(projection);
         if (projection.flightOutputStatus === 'HOLDING_SNAPSHOT') {
           $trackerHoldingSnapshot.style.display = '';
@@ -474,6 +582,14 @@ var Lob = (function () { 'use strict';
         } else {
           alertDisplay.active = false;
         }
+        // graphDisplay.setPoints(projection.flightSnapshot || projection.liveFlight);
+        // console.log(projection.flightSnapshot || projection.liveFlight);
+      },
+      addReading(newReading){
+        graphDisplay.addPoint(newReading);
+      },
+      setReadings(readings){
+        graphDisplay.setPoints(readings);
       }
     };
     tracker.showcase.addView(mainView);
@@ -483,6 +599,13 @@ var Lob = (function () { 'use strict';
   // Dom views should be initialized with the ready on certain selectors library
   function queryDisplay(display, element){
     return element.querySelector('[data-display~=' + display + ']');
+  }
+  } catch (err) {
+    alert(err);
+  }
+  alert('hello');
+  window.onerror = function(err){
+    alert(err)
   }
 
   return tracker;

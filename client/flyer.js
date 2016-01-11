@@ -6,6 +6,7 @@ import Presenter from "./avionics/presenter";
 import Display from "./avionics/display";
 import AlertDisplay from "./alert/display";
 import { throttle } from "./utils/fn";
+import { readingPublishLimit } from './config';
 try {
 
 
@@ -43,7 +44,7 @@ function AccelerometerController(global, flyer){
 var accelerometerController = new AccelerometerController(window, flyer);
 
 // import FlyerUplinkController from "./flyer/flyer-uplink-controller";
-function FlyerUplinkController(options, tracker){
+function FlyerUplinkController(options, flyer){
   var channelName = options.channelName;
   var token = options.token;
   var realtime = new Ably.Realtime({ token: token });
@@ -68,8 +69,9 @@ function FlyerUplinkController(options, tracker){
     });
   }
 
-  tracker.uplink = {
-    transmitReading: throttle(transmitReading, 250),
+  console.log('readingPublishLimit', readingPublishLimit, 'ms');
+  flyer.uplink = {
+    transmitReading: throttle(transmitReading, readingPublishLimit),
     transmitResetReadings: function(){
       channel.publish("resetReadings", {}, function(err) {
         // DEBT use provided console for messages

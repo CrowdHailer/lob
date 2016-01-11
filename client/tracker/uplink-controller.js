@@ -1,6 +1,6 @@
 // Could also be called UplinkDriver - might be more suitable
 // RESPONSIBILITY - Drive the tracker application in response to messages from the Ably uplink
-
+import Reading from "../lib/reading";
 /* jshint esnext: true */
 export default function UplinkController(options, tracker){
   var channelName = options.channelName;
@@ -16,7 +16,7 @@ export default function UplinkController(options, tracker){
   var channel = realtime.channels.get(channelName);
   channel.subscribe("newReading", function(event){
     // new Vector(event.data);
-    tracker.newReading(event.data);
+    tracker.newReading(Reading(event.data));
   });
   channel.subscribe("resetReadings", function(_event){
     tracker.resetReadings();

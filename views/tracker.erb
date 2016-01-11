@@ -1,22 +1,20 @@
-<main id="tracker-page">
+<main class="width-limited">
   <form>
     <button type="button" data-display="uplink-status-message">Connecting to Ably</button>
   </form>
   <form data-display="tracker-following-flight" onclick="Lob.followLive()">
     <button type="button">Watching live, click to lock</button>
   </form>
-  <form data-display="tracker-holding-snapshot" onclick="Lob.followFlight()">
+  <form data-display="tracker-holding-snapshot" onclick="Lob.followFlight()" style="display:none;">
     <button type="button">Showing snapshot, click to return to live feed</button>
   </form>
-  <form data-display="tracker-following-live" onclick="Lob.followFlight()">
+  <form data-display="tracker-following-live" onclick="Lob.followFlight()" style="display:none;">
     <button type="button">Locked to live tracking, click to allow pausing</button>
   </form>
-  <a href="/">
-    <h1>Lob</h1>
-  </a>
-  <div id="orientation-tracker" data-display="tracker">
-    <canvas id="myChart" width="960" height="800" style="background-color:#EEE"></canvas>
+  <div id="orientation-tracker" data-display="tracker-graph">
+    <canvas width="760" height="640"></canvas>
   </div>
-  <p>Realtime connection powered by <a href="https://ably.io" target="_blank">Ably.io</a></p>
 </main>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
 <script type="text/javascript" src="/tracker.js"></script>
+<!-- https://github.com/CrowdHailer/lob/blob/2c5de6322d4800553ca80a9d34341b4866e5f918/assets/scripts/boot.ts -->

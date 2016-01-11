@@ -9,10 +9,13 @@ import ConsoleView from "./tracker/console-view";
 import Showcase from "./tracker/showcase";
 import Reading from "./lib/reading";
 import AlertDisplay from "./alert/display";
+import { ready } from "./utils/dom";
 
 // GENERAL CONFIGURATION
 window.Tracker = Tracker;
 window.Tracker.Reading = Reading;
+
+try {
 
 var router = Router(window.location);
 console.log('Router:', 'Started with initial state:', router.state);
@@ -24,9 +27,7 @@ tracker.showcase = Showcase(window);
 
 var uplinkController = new UplinkController(router.state, tracker);
 
-export default tracker;
 
-import { ready } from "./utils/dom";
 
 function uplinkStatusMessageFromProjection(projection) {
   var message = projection.uplinkStatus;
@@ -39,6 +40,78 @@ function uplinkStatusMessageFromProjection(projection) {
   }
 }
 
+function GraphDisplay($root){
+  if ( !(this instanceof GraphDisplay) ) { return new GraphDisplay($root); }
+  var canvas = $root.querySelector('canvas');
+  var canvasContext = canvas.getContext("2d");
+  console.log(canvas)
+  // DEBT data can come from $root dataset
+  var data = {
+    labels: [],
+    datasets: [{
+      label: "X",
+      fillColor: "rgba(220,220,220,0)",
+      strokeColor: "limegreen",
+      pointColor: "limegreen",
+      data: []
+    }, {
+      label: "Y",
+      fillColor: "rgba(220,220,220,0)",
+      strokeColor: "green",
+      pointColor: "green",
+      data: []
+    }, {
+      label: "Z",
+      fillColor: "rgba(220,220,220,0)",
+      strokeColor: "teal",
+      pointColor: "teal",
+      data: []
+    }, {
+      label: "Magnitude",
+      fillColor: "rgba(220,220,220,0)",
+      strokeColor: "orange",
+      pointColor: "orange",
+      data: []
+    }]
+  };
+  var i = 0.0;
+  // add point
+  // clear
+  var myLineChart = new Chart(canvasContext).Line(data, {animation: false, animationSteps: 4, pointDot : false});
+  window.myLineChart = myLineChart
+  this.addPoint = function(point){
+    window.requestAnimationFrame(function(){
+      var date = new Date(point.timestamp)
+      // TODO plot only some legends
+      if (i % 1 === 0) {
+        myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + ':' + date.getSeconds() + 's');
+      } else {
+        myLineChart.addData([point.x, point.y, point.z, point.magnitude], '');
+      }
+      // DEBT make length part of config
+      if (myLineChart.datasets[0].points.length > 20) {
+        myLineChart.removeData();
+      }
+      i = i + 0.25;
+    })
+  }
+  this.clear = function(){
+    myLineChart.destroy();
+    // i = 0.0;
+    data.labels = [];
+    myLineChart = new Chart(canvasContext).Line(data, {animation: false, animationSteps: 4, pointDot : false});
+  }
+  this.setPoints = function(points){
+    // DEBT remove use of this
+    var self = this;
+    window.requestAnimationFrame(function(){
+      self.clear();
+      points.forEach(function(point){
+        self.addPoint(point);
+      })
+    })
+  }
+}
 ready(function(){
   var $root = document.documentElement;
   var $uplinkStatusMessage = queryDisplay('uplink-status-message', $root);
@@ -47,10 +120,15 @@ ready(function(){
   var $trackerFollowingFlight = queryDisplay('tracker-following-flight', $root);
   var $alert = queryDisplay('alert', $root);
   var alertDisplay = AlertDisplay($alert);
+
+  var $graphDisplay = queryDisplay('tracker-graph', $root);
+  var graphDisplay = GraphDisplay($graphDisplay);
+  window.graphDisplay = graphDisplay;
   console.debug('dom is ready', $uplinkStatusMessage);
+
   var mainView = {
     render: function(projection){
-      console.debug('Display rendering:', projection);
+      // console.debug('Display rendering:', projection);
       $uplinkStatusMessage.innerHTML = uplinkStatusMessageFromProjection(projection);
       if (projection.flightOutputStatus === 'HOLDING_SNAPSHOT') {
         $trackerHoldingSnapshot.style.display = '';
@@ -74,6 +152,14 @@ ready(function(){
       } else {
         alertDisplay.active = false;
       }
+      // graphDisplay.setPoints(projection.flightSnapshot || projection.liveFlight);
+      // console.log(projection.flightSnapshot || projection.liveFlight);
+    },
+    addReading(newReading){
+      graphDisplay.addPoint(newReading);
+    },
+    setReadings(readings){
+      graphDisplay.setPoints(readings);
     }
   };
   tracker.showcase.addView(mainView);
@@ -83,4 +169,11 @@ ready(function(){
 // Dom views should be initialized with the ready on certain selectors library
 function queryDisplay(display, element){
   return element.querySelector('[data-display~=' + display + ']');
+}
+} catch (err) {
+  alert(err);
+}
+export default tracker;
+window.onerror = function(err){
+  alert(err)
 }

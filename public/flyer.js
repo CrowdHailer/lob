@@ -512,7 +512,7 @@ var Lob = (function () { 'use strict';
   }
 
   function throttle(fn, threshhold, scope) {
-    threshhold = threshhold || 250;
+    threshhold = threshhold;
     var last,
     deferTimer;
     return function () {
@@ -532,6 +532,8 @@ var Lob = (function () { 'use strict';
       }
     };
   }
+
+  var readingPublishLimit = 250; // ms
 
   try {
 
@@ -570,7 +572,7 @@ var Lob = (function () { 'use strict';
   var accelerometerController = new AccelerometerController(window, flyer);
 
   // import FlyerUplinkController from "./flyer/flyer-uplink-controller";
-  function FlyerUplinkController(options, tracker){
+  function FlyerUplinkController(options, flyer){
     var channelName = options.channelName;
     var token = options.token;
     var realtime = new Ably.Realtime({ token: token });
@@ -595,8 +597,9 @@ var Lob = (function () { 'use strict';
       });
     }
 
-    tracker.uplink = {
-      transmitReading: throttle(transmitReading, 250),
+    console.log('readingPublishLimit', readingPublishLimit, 'ms');
+    flyer.uplink = {
+      transmitReading: throttle(transmitReading, readingPublishLimit),
       transmitResetReadings: function(){
         channel.publish("resetReadings", {}, function(err) {
           // DEBT use provided console for messages
