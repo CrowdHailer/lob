@@ -52,25 +52,28 @@ function Tracker(state, world){
     showcase(tracker.state);
   };
 
-  tracker.newReading = function(reading){
-    var wasInFlight = lastInArray(tracker.state.liveFlight) && isInFlight(lastInArray(tracker.state.liveFlight));
-    var isNowGrounded = !isInFlight(reading);
+  tracker.newReading = function(newReading){
+    // DEBT return null reading if array empty
+    // DEBT throw error if new reading is missing a magnitude property
+    var lastReading = lastInArray(tracker.state.liveFlight)
+    var wasInFlight = lastReading && isInFlight(lastReading);
+    var isNowGrounded = !isInFlight(newReading);
     if (wasInFlight && isNowGrounded) {
       setTimeout(function () {
         console.log('pause the reading');
-        // pause the reading
+        // pause the newReading
       }, 1000);
     }
 
     var state = tracker.state.update("liveFlight", function(readings){
-      readings = readings.concat(reading);
+      readings = readings.concat(newReading);
       return lastNInArray(5, readings);
     });
     // simplest is to just start timer
     // here to add timer controller
     tracker.state = state; // Assign at end to work as transaction
     showcase(state);
-    logEvent("New reading");
+    // logEvent("New newReading");
   };
 
   tracker.holdSnapshot = function(){

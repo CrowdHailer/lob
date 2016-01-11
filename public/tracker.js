@@ -123,25 +123,29 @@ var Lob = (function () { 'use strict';
       showcase(tracker.state);
     };
 
-    tracker.newReading = function(reading){
-      var wasInFlight = lastInArray(tracker.state.liveFlight) && isInFlight(lastInArray(tracker.state.liveFlight));
-      var isNowGrounded = !isInFlight(reading);
+    tracker.newReading = function(newReading){
+      // DEBT return null reading if array empty
+      // DEBT throw error if new reading is missing a magnitude property
+      var lastReading = lastInArray(tracker.state.liveFlight)
+      var wasInFlight = lastReading && isInFlight(lastReading);
+      var isNowGrounded = !isInFlight(newReading);
+      console.log(wasInFlight);
       if (wasInFlight && isNowGrounded) {
         setTimeout(function () {
           console.log('pause the reading');
-          // pause the reading
+          // pause the newReading
         }, 1000);
       }
 
       var state = tracker.state.update("liveFlight", function(readings){
-        readings = readings.concat(reading);
+        readings = readings.concat(newReading);
         return lastNInArray(5, readings);
       });
       // simplest is to just start timer
       // here to add timer controller
       tracker.state = state; // Assign at end to work as transaction
       showcase(state);
-      logEvent("New reading");
+      // logEvent("New newReading");
     };
 
     tracker.holdSnapshot = function(){
@@ -306,9 +310,6 @@ var Lob = (function () { 'use strict';
     };
   }
 
-  // Could also be called UplinkDriver - might be more suitable
-  // RESPONSIBILITY - Drive the tracker application in response to messages from the Ably uplink
-
   /* jshint esnext: true */
   function UplinkController(options, tracker){
     var channelName = options.channelName;
@@ -324,7 +325,7 @@ var Lob = (function () { 'use strict';
     var channel = realtime.channels.get(channelName);
     channel.subscribe("newReading", function(event){
       // new Vector(event.data);
-      tracker.newReading(event.data);
+      tracker.newReading(Reading(event.data));
     });
     channel.subscribe("resetReadings", function(_event){
       tracker.resetReadings();
@@ -450,7 +451,7 @@ var Lob = (function () { 'use strict';
     console.debug('dom is ready', $uplinkStatusMessage);
     var mainView = {
       render: function(projection){
-        console.debug('Display rendering:', projection);
+        // console.debug('Display rendering:', projection);
         $uplinkStatusMessage.innerHTML = uplinkStatusMessageFromProjection(projection);
         if (projection.flightOutputStatus === 'HOLDING_SNAPSHOT') {
           $trackerHoldingSnapshot.style.display = '';
