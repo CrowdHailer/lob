@@ -17,6 +17,7 @@ export default function TrackerShowcase(window){
     // isLockedToLiveReadings
     // graph lines
     // uplink statuses
+    // TODO should be projection not this
     showcase.projection = this;
     views.forEach(function(view){
       view.render(projection);
@@ -29,4 +30,13 @@ export default function TrackerShowcase(window){
     }
     views.push(view);
   };
+
+  // DEBT
+  this.addReading = function(newReading){
+    views.forEach(function(view){
+      if (view.addReading) {
+        view.addReading(newReading);
+      }
+    });
+  }
 }

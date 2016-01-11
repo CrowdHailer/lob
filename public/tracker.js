@@ -144,7 +144,8 @@ var Lob = (function () { 'use strict';
       // simplest is to just start timer
       // here to add timer controller
       tracker.state = state; // Assign at end to work as transaction
-      showcase(state);
+      // showcase(state);
+      tracker.showcase.addReading(newReading);
       // logEvent("New newReading");
     };
 
@@ -296,6 +297,7 @@ var Lob = (function () { 'use strict';
       // isLockedToLiveReadings
       // graph lines
       // uplink statuses
+      // TODO should be projection not this
       showcase.projection = this;
       views.forEach(function(view){
         view.render(projection);
@@ -308,6 +310,15 @@ var Lob = (function () { 'use strict';
       }
       views.push(view);
     };
+
+    // DEBT
+    this.addReading = function(newReading){
+      views.forEach(function(view){
+        if (view.addReading) {
+          view.addReading(newReading);
+        }
+      });
+    }
   }
 
   /* jshint esnext: true */
@@ -481,7 +492,11 @@ var Lob = (function () { 'use strict';
     window.myLineChart = myLineChart
     this.addPoint = function(point){
       var date = new Date(point.timestamp)
-      myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + ':' + date.getSeconds() + 's');
+      if (i % 1 === 0) {
+        myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + ':' + date.getSeconds() + 's');
+      } else {
+        myLineChart.addData([point.x, point.y, point.z, point.magnitude], '');
+      }
       // DEBT make length part of config
       if (myLineChart.datasets[0].points.length > 20) {
         myLineChart.removeData();
@@ -543,7 +558,11 @@ var Lob = (function () { 'use strict';
         } else {
           alertDisplay.active = false;
         }
-        graphDisplay.setPoints(projection.flightSnapshot || projection.liveFlight);
+        // graphDisplay.setPoints(projection.flightSnapshot || projection.liveFlight);
+        // console.log(projection.flightSnapshot || projection.liveFlight);
+      },
+      addReading(newReading){
+        graphDisplay.addPoint(newReading);
       }
     };
     tracker.showcase.addView(mainView);

@@ -80,7 +80,12 @@ function GraphDisplay($root){
   window.myLineChart = myLineChart
   this.addPoint = function(point){
     var date = new Date(point.timestamp)
-    myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + ':' + date.getSeconds() + 's');
+    // TODO plot only some legends
+    if (i % 1 === 0) {
+      myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + ':' + date.getSeconds() + 's');
+    } else {
+      myLineChart.addData([point.x, point.y, point.z, point.magnitude], '');
+    }
     // DEBT make length part of config
     if (myLineChart.datasets[0].points.length > 20) {
       myLineChart.removeData();
@@ -142,7 +147,11 @@ ready(function(){
       } else {
         alertDisplay.active = false;
       }
-      graphDisplay.setPoints(projection.flightSnapshot || projection.liveFlight);
+      // graphDisplay.setPoints(projection.flightSnapshot || projection.liveFlight);
+      // console.log(projection.flightSnapshot || projection.liveFlight);
+    },
+    addReading(newReading){
+      graphDisplay.addPoint(newReading);
     }
   };
   tracker.showcase.addView(mainView);

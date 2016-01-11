@@ -73,7 +73,8 @@ function Tracker(state, world){
     // simplest is to just start timer
     // here to add timer controller
     tracker.state = state; // Assign at end to work as transaction
-    showcase(state);
+    // showcase(state);
+    tracker.showcase.addReading(newReading);
     // logEvent("New newReading");
   };
 
