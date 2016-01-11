@@ -174,7 +174,6 @@ function queryDisplay(display, element){
   alert(err);
 }
 export default tracker;
-alert('hello');
 window.onerror = function(err){
   alert(err)
 }
