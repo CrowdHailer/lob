@@ -9,10 +9,13 @@ import ConsoleView from "./tracker/console-view";
 import Showcase from "./tracker/showcase";
 import Reading from "./lib/reading";
 import AlertDisplay from "./alert/display";
+import { ready } from "./utils/dom";
 
 // GENERAL CONFIGURATION
 window.Tracker = Tracker;
 window.Tracker.Reading = Reading;
+
+try {
 
 var router = Router(window.location);
 console.log('Router:', 'Started with initial state:', router.state);
@@ -24,9 +27,7 @@ tracker.showcase = Showcase(window);
 
 var uplinkController = new UplinkController(router.state, tracker);
 
-export default tracker;
 
-import { ready } from "./utils/dom";
 
 function uplinkStatusMessageFromProjection(projection) {
   var message = projection.uplinkStatus;
@@ -79,18 +80,20 @@ function GraphDisplay($root){
   var myLineChart = new Chart(canvasContext).Line(data, {animation: false, animationSteps: 4, pointDot : false});
   window.myLineChart = myLineChart
   this.addPoint = function(point){
-    var date = new Date(point.timestamp)
-    // TODO plot only some legends
-    if (i % 1 === 0) {
-      myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + ':' + date.getSeconds() + 's');
-    } else {
-      myLineChart.addData([point.x, point.y, point.z, point.magnitude], '');
-    }
-    // DEBT make length part of config
-    if (myLineChart.datasets[0].points.length > 20) {
-      myLineChart.removeData();
-    }
-    i = i + 0.25;
+    window.requestAnimationFrame(function(){
+      var date = new Date(point.timestamp)
+      // TODO plot only some legends
+      if (i % 1 === 0) {
+        myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + ':' + date.getSeconds() + 's');
+      } else {
+        myLineChart.addData([point.x, point.y, point.z, point.magnitude], '');
+      }
+      // DEBT make length part of config
+      if (myLineChart.datasets[0].points.length > 20) {
+        myLineChart.removeData();
+      }
+      i = i + 0.25;
+    })
   }
   this.clear = function(){
     myLineChart.destroy();
@@ -101,9 +104,11 @@ function GraphDisplay($root){
   this.setPoints = function(points){
     // DEBT remove use of this
     var self = this;
-    this.clear();
-    points.forEach(function(point){
-      self.addPoint(point);
+    window.requestAnimationFrame(function(){
+      self.clear();
+      points.forEach(function(point){
+        self.addPoint(point);
+      })
     })
   }
 }
@@ -164,4 +169,12 @@ ready(function(){
 // Dom views should be initialized with the ready on certain selectors library
 function queryDisplay(display, element){
   return element.querySelector('[data-display~=' + display + ']');
+}
+} catch (err) {
+  alert(err);
+}
+export default tracker;
+alert('hello');
+window.onerror = function(err){
+  alert(err)
 }
