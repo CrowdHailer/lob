@@ -2,38 +2,6 @@ var Lob = (function () { 'use strict';
 
   /* jshint esnext: true */
 
-  // Router makes use of current location
-  // Router should always return some value of state it does not have the knowledge to regard it as invalid
-  // Router is currently untested
-  // Router does not follow modifications to the application location.
-  // Router is generic for tracker and flyer at the moment
-  // location is a size cause and might make sense to be lazily applied
-  function Router(location){
-    if ( !(this instanceof Router) ) { return new Router(location); }
-    var router = this;
-    router.location = location;
-
-    function getState(){
-      return {
-        token: getQueryParameter('token', router.location.search),
-        channelName: getQueryParameter('channel-name', router.location.search)
-      };
-    }
-
-    Object.defineProperty(router, 'state', {
-      get: getState
-    });
-  }
-
-  function getQueryParameter(name, queryString) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-    results = regex.exec(queryString);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-  }
-
-  /* jshint esnext: true */
-
   function KeyError(key) {
     this.name = "KeyError";
     this.message = "key \"" + key + "\" not found";
@@ -334,6 +302,38 @@ var Lob = (function () { 'use strict';
   }
   Flyer.State = FlyerState;
 
+  /* jshint esnext: true */
+
+  // Router makes use of current location
+  // Router should always return some value of state it does not have the knowledge to regard it as invalid
+  // Router is currently untested
+  // Router does not follow modifications to the application location.
+  // Router is generic for tracker and flyer at the moment
+  // location is a size cause and might make sense to be lazily applied
+  function Router(location){
+    if ( !(this instanceof Router) ) { return new Router(location); }
+    var router = this;
+    router.location = location;
+
+    function getState(){
+      return {
+        token: getQueryParameter('token', router.location.search),
+        channelName: getQueryParameter('channel-name', router.location.search)
+      };
+    }
+
+    Object.defineProperty(router, 'state', {
+      get: getState
+    });
+  }
+
+  function getQueryParameter(name, queryString) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+    results = regex.exec(queryString);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
+
   if (!Object.assign) {
     Object.defineProperty(Object, 'assign', {
       enumerable: false,
@@ -535,9 +535,6 @@ var Lob = (function () { 'use strict';
 
   var readingPublishLimit = 250; // ms
 
-  try {
-
-
   var flyer = new Flyer();
   flyer.logger = window.console;
   flyer.view = {
@@ -623,12 +620,6 @@ var Lob = (function () { 'use strict';
     token: router.state.token,
     channelName: router.state.channelName
   }, flyer);
-  } catch (e) {
-    alert(e);
-    throw e;
-  } finally {
-
-  }
 
   return flyer;
 

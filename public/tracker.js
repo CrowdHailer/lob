@@ -261,50 +261,35 @@ var Lob = (function () { 'use strict';
 
   /* jshint esnext: true */
 
-  function ready(fn) {
-    if (document.readyState !== "loading"){
-      fn();
-    } else {
-      document.addEventListener("DOMContentLoaded", fn);
+  // Router makes use of current location
+  // Router should always return some value of state it does not have the knowledge to regard it as invalid
+  // Router is currently untested
+  // Router does not follow modifications to the application location.
+  // Router is generic for tracker and flyer at the moment
+  // location is a size cause and might make sense to be lazily applied
+  function Router(location){
+    if ( !(this instanceof Router) ) { return new Router(location); }
+    var router = this;
+    router.location = location;
+
+    function getState(){
+      return {
+        token: getQueryParameter('token', router.location.search),
+        channelName: getQueryParameter('channel-name', router.location.search)
+      };
     }
-  }
 
-  /* jshint esnext: true */
-  function UplinkController(options, tracker){
-    var channelName = options.channelName;
-    var token = options.token;
-    var realtime = new Ably.Realtime({ token: token });
-    realtime.connection.on("connected", function(err) {
-      // If we keep explicitly passing channel data to the controller we should pass it to the main app here
-      tracker.uplinkAvailable(channelName);
-    });
-    realtime.connection.on("failed", function(err) {
-      tracker.uplinkFailed(err);
-    });
-    var channel = realtime.channels.get(channelName);
-    channel.subscribe("newReading", function(event){
-      // new Vector(event.data);
-      tracker.newReading(Reading(event.data));
-    });
-    channel.subscribe("resetReadings", function(_event){
-      tracker.resetReadings();
+    Object.defineProperty(router, 'state', {
+      get: getState
     });
   }
 
-  // uplink controller does very little work so it is not separated from uplink
-
-  // function Uplink(options, logger){
-  //   var channelName = options.channel;
-  //   var token = options.token;
-  //   var realtime = new Ably.Realtime({ token: token });
-  //   var channel = realtime.channels.get(channelName);
-  //   realtime.connection.on("connected", function(err) {
-  //     console.log("realtime connected");
-  //   });
-  //   realtime.connection.on("failed", function(err) {
-  //     console.log("realtime connection failed");
-  //   });
-  // }
+  function getQueryParameter(name, queryString) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+    results = regex.exec(queryString);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
 
   function TrackerShowcase(window){
     if ( !(this instanceof TrackerShowcase) ) { return new TrackerShowcase(window); }
@@ -352,35 +337,50 @@ var Lob = (function () { 'use strict';
   }
 
   /* jshint esnext: true */
-
-  // Router makes use of current location
-  // Router should always return some value of state it does not have the knowledge to regard it as invalid
-  // Router is currently untested
-  // Router does not follow modifications to the application location.
-  // Router is generic for tracker and flyer at the moment
-  // location is a size cause and might make sense to be lazily applied
-  function Router(location){
-    if ( !(this instanceof Router) ) { return new Router(location); }
-    var router = this;
-    router.location = location;
-
-    function getState(){
-      return {
-        token: getQueryParameter('token', router.location.search),
-        channelName: getQueryParameter('channel-name', router.location.search)
-      };
-    }
-
-    Object.defineProperty(router, 'state', {
-      get: getState
+  function UplinkController(options, tracker){
+    var channelName = options.channelName;
+    var token = options.token;
+    var realtime = new Ably.Realtime({ token: token });
+    realtime.connection.on("connected", function(err) {
+      // If we keep explicitly passing channel data to the controller we should pass it to the main app here
+      tracker.uplinkAvailable(channelName);
+    });
+    realtime.connection.on("failed", function(err) {
+      tracker.uplinkFailed(err);
+    });
+    var channel = realtime.channels.get(channelName);
+    channel.subscribe("newReading", function(event){
+      // new Vector(event.data);
+      tracker.newReading(Reading(event.data));
+    });
+    channel.subscribe("resetReadings", function(_event){
+      tracker.resetReadings();
     });
   }
 
-  function getQueryParameter(name, queryString) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-    results = regex.exec(queryString);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  // uplink controller does very little work so it is not separated from uplink
+
+  // function Uplink(options, logger){
+  //   var channelName = options.channel;
+  //   var token = options.token;
+  //   var realtime = new Ably.Realtime({ token: token });
+  //   var channel = realtime.channels.get(channelName);
+  //   realtime.connection.on("connected", function(err) {
+  //     console.log("realtime connected");
+  //   });
+  //   realtime.connection.on("failed", function(err) {
+  //     console.log("realtime connection failed");
+  //   });
+  // }
+
+  /* jshint esnext: true */
+
+  function ready(fn) {
+    if (document.readyState !== "loading"){
+      fn();
+    } else {
+      document.addEventListener("DOMContentLoaded", fn);
+    }
   }
 
   if (!Object.assign) {
@@ -445,7 +445,6 @@ var Lob = (function () { 'use strict';
   window.Tracker = Tracker;
   window.Tracker.Reading = Reading;
 
-  try {
 
   var router = Router(window.location);
   console.log('Router:', 'Started with initial state:', router.state);
@@ -599,13 +598,6 @@ var Lob = (function () { 'use strict';
   // Dom views should be initialized with the ready on certain selectors library
   function queryDisplay(display, element){
     return element.querySelector('[data-display~=' + display + ']');
-  }
-  } catch (err) {
-    alert(err);
-  }
-  alert('hello');
-  window.onerror = function(err){
-    alert(err)
   }
 
   return tracker;
