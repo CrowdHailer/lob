@@ -11,7 +11,8 @@ describe("New grounded reading", function(){
     };
     tracker = Tracker({liveFlight: [{}]}, world);
     tracker.showcase = {
-      update: function(){}
+      update: function(){},
+      addReading: function(){}
     };
     reading = {};
     tracker.newReading(reading);
