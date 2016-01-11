@@ -67,7 +67,8 @@ function Tracker(state, world){
 
     var state = tracker.state.update("liveFlight", function(readings){
       readings = readings.concat(newReading);
-      return lastNInArray(5, readings);
+      // DEBT make configurable
+      return lastNInArray(40, readings);
     });
     // simplest is to just start timer
     // here to add timer controller
