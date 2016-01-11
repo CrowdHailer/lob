@@ -43,7 +43,7 @@ function AccelerometerController(global, flyer){
 var accelerometerController = new AccelerometerController(window, flyer);
 
 // import FlyerUplinkController from "./flyer/flyer-uplink-controller";
-function FlyerUplinkController(options, tracker){
+function FlyerUplinkController(options, flyer){
   var channelName = options.channelName;
   var token = options.token;
   var realtime = new Ably.Realtime({ token: token });
@@ -68,7 +68,7 @@ function FlyerUplinkController(options, tracker){
     });
   }
 
-  tracker.uplink = {
+  flyer.uplink = {
     transmitReading: throttle(transmitReading, 250),
     transmitResetReadings: function(){
       channel.publish("resetReadings", {}, function(err) {

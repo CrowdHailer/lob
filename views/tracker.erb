@@ -54,6 +54,7 @@ myScatterChart = new Chart(ctx).Scatter(data, {
   scaleType: 'date',
   scaleDateFormat: "yyyy mmm d",
   scaleTimeFormat: "MM.ss",
+  animation: false
 });
 
 setTimeout(function () {
@@ -61,5 +62,11 @@ setTimeout(function () {
   console.log(set.length);
   set.setPointData(set.points.length, 1452442412335 + 20 * 10000, 55);
   myScatterChart.update()
-}, 10000);
+  setTimeout(function () {
+    set.addPoint(1452442412335 + 60 * 10000, 43)
+    // set.removePoint(0);
+    myScatterChart.update()
+  }, 1000);
+}, 1000);
 </script>
+<!-- https://github.com/CrowdHailer/lob/blob/2c5de6322d4800553ca80a9d34341b4866e5f918/assets/scripts/boot.ts -->

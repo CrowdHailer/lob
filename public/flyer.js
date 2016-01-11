@@ -570,7 +570,7 @@ var Lob = (function () { 'use strict';
   var accelerometerController = new AccelerometerController(window, flyer);
 
   // import FlyerUplinkController from "./flyer/flyer-uplink-controller";
-  function FlyerUplinkController(options, tracker){
+  function FlyerUplinkController(options, flyer){
     var channelName = options.channelName;
     var token = options.token;
     var realtime = new Ably.Realtime({ token: token });
@@ -595,9 +595,10 @@ var Lob = (function () { 'use strict';
       });
     }
 
-    tracker.uplink = {
+    flyer.uplink = {
       transmitReading: throttle(transmitReading, 250),
       transmitResetReadings: function(){
+        console.log('here');
         channel.publish("resetReadings", {}, function(err) {
           // DEBT use provided console for messages
           // i.e. have message successful as app actions
@@ -605,7 +606,8 @@ var Lob = (function () { 'use strict';
             window.console.warn("Unable to publish message; err = " + err.message);
           } else {
             // TODO comment to ably that if error here then no information released at all.
-            window.console.info("Message successfully sent");
+            window.console.log('oop')
+            window.console.info("Message successfully sent", message);
           }
         });
       }
