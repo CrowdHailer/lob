@@ -39,4 +39,12 @@ export default function TrackerShowcase(window){
       }
     });
   }
+
+  this.setReadings = function(readings){
+    views.forEach(function(view){
+      if (view.setReadings) {
+        view.setReadings(readings);
+      }
+    });
+  }
 }

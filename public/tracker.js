@@ -166,6 +166,9 @@ var Lob = (function () { 'use strict';
     };
 
     tracker.followFlight = function(){
+      if (tracker.state.flightOutputStatus === 'HOLDING_SNAPSHOT') {
+        tracker.showcase.setReadings(tracker.state.liveFlight);
+      }
       var state = tracker.state.set('flightOutputStatus', 'FOLLOWING_FLIGHT');
       state.set('flightSnapshot', null); // probably unnecessary as we can use the flight output status
       tracker.state = state;
@@ -178,6 +181,8 @@ var Lob = (function () { 'use strict';
       tracker.state = state;
       showcase(state);
       logEvent("following live readings");
+    };
+    tracker.resetReadings = function(){
     };
 
     tracker.closeAlert = function(){
@@ -212,8 +217,6 @@ var Lob = (function () { 'use strict';
 
 
 
-    tracker.resetReadings = function(){
-    };
   }
 
   /* jshint esnext: true */
@@ -318,6 +321,14 @@ var Lob = (function () { 'use strict';
       views.forEach(function(view){
         if (view.addReading) {
           view.addReading(newReading);
+        }
+      });
+    }
+
+    this.setReadings = function(readings){
+      views.forEach(function(view){
+        if (view.setReadings) {
+          view.setReadings(readings);
         }
       });
     }
@@ -566,6 +577,9 @@ var Lob = (function () { 'use strict';
       },
       addReading(newReading){
         graphDisplay.addPoint(newReading);
+      },
+      setReadings(readings){
+        graphDisplay.setPoints(readings);
       }
     };
     tracker.showcase.addView(mainView);

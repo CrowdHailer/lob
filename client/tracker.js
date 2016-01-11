@@ -152,6 +152,9 @@ ready(function(){
     },
     addReading(newReading){
       graphDisplay.addPoint(newReading);
+    },
+    setReadings(readings){
+      graphDisplay.setPoints(readings);
     }
   };
   tracker.showcase.addView(mainView);

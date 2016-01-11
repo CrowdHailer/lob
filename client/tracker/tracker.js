@@ -95,6 +95,9 @@ function Tracker(state, world){
   };
 
   tracker.followFlight = function(){
+    if (tracker.state.flightOutputStatus === 'HOLDING_SNAPSHOT') {
+      tracker.showcase.setReadings(tracker.state.liveFlight);
+    }
     var state = tracker.state.set('flightOutputStatus', 'FOLLOWING_FLIGHT');
     state.set('flightSnapshot', null); // probably unnecessary as we can use the flight output status
     tracker.state = state;
@@ -107,6 +110,8 @@ function Tracker(state, world){
     tracker.state = state;
     showcase(state);
     logEvent("following live readings");
+  };
+  tracker.resetReadings = function(){
   };
 
   tracker.closeAlert = function(){
@@ -141,8 +146,6 @@ function Tracker(state, world){
 
 
 
-  tracker.resetReadings = function(){
-  };
 }
 
 export default Tracker;
