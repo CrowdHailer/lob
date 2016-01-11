@@ -7,7 +7,6 @@ import Display from "./avionics/display";
 import AlertDisplay from "./alert/display";
 import { throttle } from "./utils/fn";
 import { readingPublishLimit } from './config';
-try {
 
 
 var flyer = new Flyer();
@@ -95,10 +94,4 @@ var uplinkController = FlyerUplinkController({
   token: router.state.token,
   channelName: router.state.channelName
 }, flyer);
-} catch (e) {
-  alert(e);
-  throw e;
-} finally {
-
-}
 export default flyer;

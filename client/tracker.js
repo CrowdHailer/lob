@@ -15,7 +15,6 @@ import { ready } from "./utils/dom";
 window.Tracker = Tracker;
 window.Tracker.Reading = Reading;
 
-try {
 
 var router = Router(window.location);
 console.log('Router:', 'Started with initial state:', router.state);
@@ -170,10 +169,4 @@ ready(function(){
 function queryDisplay(display, element){
   return element.querySelector('[data-display~=' + display + ']');
 }
-} catch (err) {
-  alert(err);
-}
 export default tracker;
-window.onerror = function(err){
-  alert(err)
-}
