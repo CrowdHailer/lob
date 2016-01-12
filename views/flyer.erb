@@ -12,21 +12,21 @@
     starting
   </p>
   <div id="uplink" class="unknown" data-display="uplink">
-    <form id="starting-uplink" class="" action="#" method="post">
+    <form id="starting-uplink" class="button" action="#" method="post">
       <button type="button" data-display="status">Looking for connection</button>
     </form>
-    <form id="uplink-available" onclick="Lob.startTransmitting()">
+    <form id="uplink-available" class="button" onclick="Lob.startTransmitting()">
       <button type="button">Click to share flight</button>
     </form>
-    <form id="uplink-transmitting" class="" action="#" method="post">
+    <form id="uplink-transmitting" class="button" action="#" method="post">
       <button type="button" >
         <a href="<%= twitter_link %>" target="_blank">Share on Twitter</a><span data-display="channel"> Watch on channel '????'</span></button>
     </form>
-    <form id="uplink-failed">
+    <form id="uplink-failed" class="button">
       <button type="button">Could not start uplink. Try again later.</button>
     </form>
   </div>
-  <form onclick="Lob.resetReadings()">
+  <form onclick="Lob.resetReadings()" class="button">
     <button type="button">Reset</button>
   </form>
   <!-- <form class="" action="/submit" method="post" data-command="submit">

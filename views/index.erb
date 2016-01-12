@@ -1,18 +1,20 @@
 <main class="width-limited">
 
-  <p>How high can you throw? Use Lob to find out.</p>
+  <h2>How high can you throw? Use Lob to find out.</h2>
   <!-- and get onto the Lob leaderboard. -->
-  <ul><b>Ready?</b> Press 'start flight' and throw your phone into the air. Remember to catch it again.</ul>
-  <ul><b>Want to watch?</b> Once a flight has started click 'share'. On a second device enter the channel given and click 'track flight'. This will show a live feed of the acceleration data from your device.</ul>
-  <form class="" action="/new-flight" method="post">
+  <p><b>Ready?</b> Press 'start flight' and throw your phone into the air. Remember to catch it again.</p>
+  <form class="button" action="/new-flight" method="post">
     <button type="submit" name="button">Start Flight</button>
   </form>
-  <form class="" action="/join" method="post">
+  <p><b>Want to watch?</b> Once a flight has started click 'share'. On a second device enter the channel given and click 'track flight'. This will show a live feed of the acceleration data from your device.</p>
+  <form class="button" action="/join" method="post">
     <label>
 
       <input type="text" name="channel-name" autofocus required placeholder="Enter channel">
       <button type="submit">Track Flight</button>
     </label>
   </form>
-  <a href="/about">about</a>
+  <nav>
+    <a class="button" href="/about">About</a>
+  </nav>
 </main>

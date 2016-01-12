@@ -166,17 +166,6 @@ body {
   padding-left: 1em;
   padding-right: 1em; }
 
-footer {
-  background-color: black;
-  color: white; }
-  footer a {
-    font-weight: bold;
-    color: #FC0; }
-
-footer p {
-  padding-left: 1em;
-  padding-right: 1em; }
-
 h1 {
   font-size: 300%;
   text-align: center;
@@ -185,10 +174,8 @@ h1 {
 
 h2 {
   font-size: 120%;
-  text-align: center;
-  font-weight: inherit;
-  color: #444;
-  margin: 0; }
+  margin: 0;
+  text-align: center; }
 
 span {
   width: 50%;
@@ -234,4 +221,37 @@ canvas {
   background-color: #EEE;
   width: 100%;
   border: 2px solid black; }
+
+main form.button {
+  background-image: linear-gradient(to top, #fc0, #FFE788);
+  font-size: 120%;
+  text-align: center; }
+
+main a.button {
+  background-image: linear-gradient(to top, #fc0, #FFE788);
+  font-size: 120%;
+  text-align: center;
+  border: 2px solid;
+  display: block;
+  padding: 0.5em;
+  border-radius: 4px;
+  margin: 1rem auto;
+  max-width: 560px;
+  text-decoration: none;
+  color: black; }
+
+footer {
+  background-color: black;
+  color: white; }
+  footer a {
+    font-weight: bold;
+    color: #FC0; }
+
+footer p {
+  padding-left: 1em;
+  padding-right: 1em;
+  text-align: right; }
+
+footer span {
+  width: 22%; }
 
