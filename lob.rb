@@ -41,8 +41,8 @@ get '/track/:channel' do
 end
 
 get '/flyer' do
-  channel = request.GET["channel"]
-  twitter_link = "https://twitter.com/home?status=Watch%20my%20awesome%20#{base_url}/track/#{channel}"
+  channel_name = request.GET["channel-name"]
+  twitter_link = "https://twitter.com/home?status=Watch%20my%20awesome%20#{base_url}/track/#{channel_name}"
   erb :flyer, locals: {twitter_link: twitter_link}
 end
 
