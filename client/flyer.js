@@ -1,6 +1,5 @@
 /* jshint esnext: true */
 
-// import * as State from "./state";
 import Projection from "./flyer/projection";
 import Reading from "./lib/reading";
 import FlyerState from './flyer/state'
@@ -13,11 +12,10 @@ export default function Flyer(state){
   flyer.state = state;
 
   flyer.uplinkAvailable = function(details){
-    // Set state action can cause projection to exhibit new state
-    flyer.state = flyer.state.set("uplinkStatus", "AVAILABLE");
-    flyer.state = flyer.state.set("uplinkDetails", details);
-    // call log change. test listeners that the state has changed.
-    // stateChange({state: state, action: "Uplink Available", log: debug});
+    flyer.state = flyer.state.merge({
+      "uplinkStatus": "AVAILABLE",
+      "uplinkDetails": details
+    });
     logInfo("Uplink Available", details);
     showcase(flyer.state);
   };
