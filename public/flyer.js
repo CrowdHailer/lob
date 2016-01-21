@@ -2,6 +2,107 @@ var Lob = (function () { 'use strict';
 
   /* jshint esnext: true */
 
+  // Router makes use of current location
+  // Router should always return some value of state it does not have the knowledge to regard it as invalid
+  // Router is currently untested
+  // Router does not follow modifications to the application location.
+  // Router is generic for tracker and flyer at the moment
+  // location is a size cause and might make sense to be lazily applied
+  function Router(location){
+    if ( !(this instanceof Router) ) { return new Router(location); }
+    var router = this;
+    router.location = location;
+
+    function getState(){
+      return {
+        token: getQueryParameter('token', router.location.search),
+        channelName: getQueryParameter('channel-name', router.location.search)
+      };
+    }
+
+    Object.defineProperty(router, 'state', {
+      get: getState
+    });
+  }
+
+  function getQueryParameter(name, queryString) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+    results = regex.exec(queryString);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
+
+  var readingPublishLimit = 250; // ms
+
+  function throttle(fn, threshhold, scope) {
+    threshhold = threshhold;
+    var last,
+    deferTimer;
+    return function () {
+      var context = scope || this;
+      var now = Date.now(), args = arguments;
+
+      if (last && now < last + threshhold) {
+        // hold on to it
+        clearTimeout(deferTimer);
+        deferTimer = setTimeout(function () {
+          last = now;
+          fn.apply(context, args);
+        }, threshhold);
+      } else {
+        last = now;
+        fn.apply(context, args);
+      }
+    };
+  }
+
+  function FlyerUplink(options, logger) {
+    if ( !(this instanceof FlyerUplink) ) { return new FlyerUplink(options, logger); }
+    var uplink = this;
+    logger.info('Starting uplink', options);
+
+    var channelName = options.channelName;
+    var token = options.token;
+    var newReadingRateLimit = options.rateLimit;
+    var client = new Ably.Realtime({ token: token });
+    var channel = client.channels.get(channelName);
+    this._ablyClient = client;
+    this._ablyChannel = channel;
+    this.token = token;
+    this.channelName = channelName;
+    this.onconnected = function(){
+      // DEBT null op;
+    }
+    function transmitReading(reading){
+      channel.publish('newReading', reading, function(err){
+        if (err) {
+          window.console.warn("Unable to send new reading; err = " + err.message);
+        }
+      })
+    }
+
+    this.transmitReading = throttle(transmitReading, newReadingRateLimit);
+    this.transmitResetReadings = function(){
+      channel.publish("resetReadings", {}, function(err) {
+        if(err) {
+          window.console.warn("Unable to send reset readings; err = " + err.message);
+        }
+      });
+    },
+    this.transmitIdentity = function(){
+      console.log('TODO update identity');
+    }
+
+    client.connection.on("connected", function(err) {
+      uplink.onconnected();
+    });
+    client.connection.on("failed", function(err) {
+      console.log('failed', err.reason.message);
+    });
+  }
+
+  /* jshint esnext: true */
+
   function KeyError(key) {
     this.name = "KeyError";
     this.message = "key \"" + key + "\" not found";
@@ -471,38 +572,6 @@ var Lob = (function () { 'use strict';
     }
   }
 
-  /* jshint esnext: true */
-
-  // Router makes use of current location
-  // Router should always return some value of state it does not have the knowledge to regard it as invalid
-  // Router is currently untested
-  // Router does not follow modifications to the application location.
-  // Router is generic for tracker and flyer at the moment
-  // location is a size cause and might make sense to be lazily applied
-  function Router(location){
-    if ( !(this instanceof Router) ) { return new Router(location); }
-    var router = this;
-    router.location = location;
-
-    function getState(){
-      return {
-        token: getQueryParameter('token', router.location.search),
-        channelName: getQueryParameter('channel-name', router.location.search)
-      };
-    }
-
-    Object.defineProperty(router, 'state', {
-      get: getState
-    });
-  }
-
-  function getQueryParameter(name, queryString) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-    results = regex.exec(queryString);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-  }
-
   if (!Object.assign) {
     Object.defineProperty(Object, 'assign', {
       enumerable: false,
@@ -536,100 +605,38 @@ var Lob = (function () { 'use strict';
     });
   }
 
-  function throttle(fn, threshhold, scope) {
-    threshhold = threshhold;
-    var last,
-    deferTimer;
-    return function () {
-      var context = scope || this;
-      var now = Date.now(), args = arguments;
+  var router = Router(window.location);
 
-      if (last && now < last + threshhold) {
-        // hold on to it
-        clearTimeout(deferTimer);
-        deferTimer = setTimeout(function () {
-          last = now;
-          fn.apply(context, args);
-        }, threshhold);
-      } else {
-        last = now;
-        fn.apply(context, args);
-      }
-    };
-  }
-
-  var readingPublishLimit = 250; // ms
+  var uplink = FlyerUplink({
+    token: router.state.token,
+    channelName: router.state.channelName,
+    rateLimit: readingPublishLimit
+  }, window.console);
 
   var flyer = Flyer();
+
   flyer.logger = window.console;
   flyer.view = new FlyerView
+  flyer.uplink = uplink;
 
-  var DEVICEMOTION = "devicemotion";
   function AccelerometerController(global, flyer){
-    global.addEventListener(DEVICEMOTION, function(deviceMotionEvent){
+    global.addEventListener('devicemotion', function(deviceMotionEvent){
       flyer.newReading(deviceMotionEvent.accelerationIncludingGravity);
     });
   }
 
   var accelerometerController = new AccelerometerController(window, flyer);
 
-  // import FlyerUplinkController from "./flyer/flyer-uplink-controller";
-  function FlyerUplinkController(options, flyer){
-    var channelName = options.channelName;
-    var token = options.token;
-    var realtime = new Ably.Realtime({ token: token });
-    realtime.connection.on("connected", function(err) {
-      // If we keep explicitly passing channel data to the controller we should pass it to the main app here
-      flyer.uplinkAvailable({token: token, channelName: channelName});
-    });
-    window.realtime = realtime;
-    realtime.connection.on("failed", function(err) {
-      flyer.uplinkFailed();
-      console.log(err.reason.message);
-    });
-    var channel = realtime.channels.get(channelName);
-    window.channel = channel;
-    function transmitReading(reading){
-      channel.publish("newReading", reading, function(err) {
-        // DEBT use provided console for messages
-        // i.e. have message successful as app actions
-        if(err) {
-          console.warn("Unable to publish message; err = " + err.message);
-        } else {
-          console.info("Reding Message successfully sent", reading);
-        }
-      });
+  function UplinkController(uplink, application){
+    uplink.onconnected = function(){
+      application.uplinkAvailable({token: uplink.token, channelName: uplink.channelName});
     }
-
-    console.log('readingPublishLimit', readingPublishLimit, 'ms');
-    flyer.uplink = {
-      transmitReading: throttle(transmitReading, readingPublishLimit),
-      transmitResetReadings: function(){
-        channel.publish("resetReadings", {}, function(err) {
-          // DEBT use provided console for messages
-          // i.e. have message successful as app actions
-          if(err) {
-            window.console.warn("Unable to publish message; err = " + err.message);
-          } else {
-            // TODO comment to ably that if error here then no information released at all.
-            window.console.info("Message successfully sent");
-          }
-        });
-      },
-      transmitIdentity: function(){
-        console.log('TODO update identity');
-      }
-    };
+    uplink.onconnectionFailed = function(){
+      application.uplinkFailed();
+    }
   }
 
-
-  var router = Router(window.location);
-  console.log('Router:', 'Started with initial state:', router.state);
-
-  var uplinkController = FlyerUplinkController({
-    token: router.state.token,
-    channelName: router.state.channelName
-  }, flyer);
+  var uplinkController = new UplinkController(uplink, flyer);
 
   return flyer;
 
