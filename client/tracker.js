@@ -49,34 +49,26 @@ function GraphDisplay($root){
     labels: [],
     datasets: [{
       label: "X",
-      fillColor: "rgba(220,220,220,0)",
-      strokeColor: "limegreen",
-      pointColor: "limegreen",
+      strokeColor: "#BBB",
       data: []
     }, {
       label: "Y",
-      fillColor: "rgba(220,220,220,0)",
-      strokeColor: "green",
-      pointColor: "green",
+      strokeColor: "#BBB",
       data: []
     }, {
       label: "Z",
-      fillColor: "rgba(220,220,220,0)",
-      strokeColor: "teal",
-      pointColor: "teal",
+      strokeColor: "#BBB",
       data: []
     }, {
       label: "Magnitude",
-      fillColor: "rgba(220,220,220,0)",
-      strokeColor: "orange",
-      pointColor: "orange",
+      strokeColor: "#FFCC00",
       data: []
     }]
   };
   var i = 0.0;
   // add point
   // clear
-  var myLineChart = new Chart(canvasContext).Line(data, {animation: false, animationSteps: 4, pointDot : false});
+  var myLineChart = new Chart(canvasContext).Line(data, {animation: false, animationSteps: 4, pointDot : false, datasetFill: false});
   window.myLineChart = myLineChart
   this.addPoint = function(point){
     window.requestAnimationFrame(function(){
