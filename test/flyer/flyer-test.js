@@ -1,6 +1,6 @@
 /* jshint esnext: true */
 
-import { createTranscriptLogger, createTranscriptFunction, freefallReading } from "../support";
+import { createTranscriptLogger, createTranscriptFunction } from "../support";
 import Flyer from "../../client/flyer/flyer";
 
 describe("Initialising Flyer", function(){

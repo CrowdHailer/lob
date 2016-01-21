@@ -1,6 +1,5 @@
 /* jshint esnext: true */
 
-import { freefallReading, stationaryReading } from "../support";
 import Presenter from "../../client/avionics/presenter";
 import { format } from "../../client/avionics/presenter";
 
