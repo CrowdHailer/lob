@@ -107,6 +107,7 @@ export default function Flyer(state){
   flyer.updateIdentity = function(newIdentity){
     flyer.state = flyer.state.set('identity', newIdentity);
     logInfo('Updated identity', newIdentity);
+    transmitIdentity(newIdentity);
     // showcase(flyer.state);
   }
 
@@ -127,6 +128,9 @@ export default function Flyer(state){
     if (flyer.state.uplinkStatus === "TRANSMITTING") {
       flyer.uplink.transmitResetReadings();
     }
+  }
+  function transmitIdentity(identity){
+    flyer.uplink.transmitIdentity(identity);
   }
   function showcase(state){
     flyer.view.render(Projection(state));

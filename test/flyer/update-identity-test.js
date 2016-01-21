@@ -11,8 +11,7 @@ describe("update identity", function(){
       flyer.logger = createTranscriptLogger();
       flyer.view = {render: function(){}};
       flyer.uplink = {
-        transmitReading: createTranscriptFunction(),
-        transmitResetReadings: createTranscriptFunction()
+        transmitIdentity: createTranscriptFunction(),
       };
       flyer.updateIdentity('New identity');
     });
@@ -21,6 +20,9 @@ describe("update identity", function(){
     });
     it('should log the change', function(){
       expect(flyer.logger.info.lastCall).toEqual(['Updated identity', 'New identity']);
-    })
+    });
+    it("should transmit the updated identity", function(){
+      expect(flyer.uplink.transmitIdentity.lastCall).toEqual(['New identity']);
+    });
   });
 });
