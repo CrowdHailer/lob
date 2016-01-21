@@ -12,6 +12,7 @@ var FLYER_STATE_DEFAULTS = {
   latestReading: null, // DEBT best place a null object here
   currentFlight: [],
   flightHistory: [],
+  identity: '',
   alert: ""
 };
 // DEBT not quite sure why this can't just be named state;
@@ -102,6 +103,12 @@ export default function Flyer(state){
     showcase(flyer.state);
     logInfo("[Uplink Failed]");
   };
+
+  flyer.updateIdentity = function(newIdentity){
+    flyer.state = flyer.state.set('identity', newIdentity);
+    logInfo('Updated identity', newIdentity);
+    // showcase(flyer.state);
+  }
 
   flyer.closeAlert = function(){
     // DEBT untested
