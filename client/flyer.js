@@ -77,7 +77,8 @@ export default function Flyer(state){
     flyer.state = flyer.state.set('identity', newIdentity);
     logInfo('Updated identity', newIdentity);
     transmitIdentity(newIdentity);
-    // showcase(flyer.state);
+    localStorage.setItem('lobIdentity', newIdentity);
+    showcase(flyer.state);
   }
 
   flyer.closeAlert = function(){
