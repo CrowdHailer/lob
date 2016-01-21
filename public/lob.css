@@ -177,15 +177,17 @@ h2 {
   margin: 0;
   text-align: center; }
 
-span {
+span.right {
   width: 50%;
-  display: inline-block; }
-  span.right {
-    padding-right: 0.4em;
-    text-align: right; }
-  span.left {
-    padding-left: 0.4em;
-    text-align: left; }
+  display: inline-block;
+  padding-right: 0.4em;
+  text-align: right; }
+
+span.left {
+  width: 50%;
+  display: inline-block;
+  padding-left: 0.4em;
+  text-align: left; }
 
 form {
   border: 2px solid;
@@ -217,10 +219,13 @@ input {
   background-color: transparent;
   font-family: raleway; }
 
+#tracker-graph {
+  background-color: #EEE;
+  border: 2px solid black; }
+
 canvas {
   background-color: #EEE;
-  width: 100%;
-  border: 2px solid black; }
+  width: 100%; }
 
 main form.button {
   background-image: linear-gradient(to top, #fc0, #FFE788);

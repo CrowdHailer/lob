@@ -63,13 +63,15 @@ h2 {
 }
 
 span {
-  width: 50%;
-  display: inline-block;
   &.right {
+    width: 50%;
+    display: inline-block;
     padding-right: 0.4em;
     text-align: right;
   }
   &.left {
+    width: 50%;
+    display: inline-block;
     padding-left: 0.4em;
     text-align: left;
   }
@@ -109,10 +111,13 @@ input {
   font-family: raleway;
 }
 
+#tracker-graph {
+  background-color: #EEE;
+  border: 2px solid black;
+}
 canvas {
   background-color: #EEE;
   width: 100%;
-  border: 2px solid black;
 }
 main {
   form.button {
