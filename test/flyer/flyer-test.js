@@ -1,7 +1,7 @@
 /* jshint esnext: true */
 
 import { createTranscriptLogger, createTranscriptFunction } from "../support";
-import Flyer from "../../client/flyer/flyer";
+import Flyer from "../../client/flyer";
 
 describe("Initialising Flyer", function(){
   it("should require an valid initial state", function(){
