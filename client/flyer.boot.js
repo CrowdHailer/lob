@@ -1,37 +1,16 @@
 /* jshint esnext: true */
 import "./utils/polyfill";
 import Flyer from "./flyer";
+import FlyerView from "./flyer/view";
 import Router from "./router";
-import Presenter from "./avionics/presenter";
-import Display from "./avionics/display";
-import AlertDisplay from "./alert/display";
+
+
 import { throttle } from "./utils/fn";
 import { readingPublishLimit } from './config';
 
-
-var flyer = new Flyer();
+var flyer = Flyer();
 flyer.logger = window.console;
-flyer.view = {
-  render: function(projection){
-    var presentation = Presenter(projection);
-    var $avionics = document.querySelector("[data-interface~=avionics]");
-    var $alert = document.querySelector("[data-display~=alert]");
-    var display = new Display($avionics);
-    for (var attribute in display) {
-      if (display.hasOwnProperty(attribute)) {
-        display[attribute] = presentation[attribute];
-      }
-    }
-    var alertDisplay = AlertDisplay($alert);
-    var alertMessage = projection.alert;
-    if (alertMessage) {
-      alertDisplay.message = alertMessage;
-      alertDisplay.active = true;
-    } else {
-      alertDisplay.active = false;
-    }
-  }
-};
+flyer.view = new FlyerView
 
 var DEVICEMOTION = "devicemotion";
 function AccelerometerController(global, flyer){
@@ -85,7 +64,7 @@ function FlyerUplinkController(options, flyer){
         }
       });
     },
-    updateIdentity: function(){
+    transmitIdentity: function(){
       console.log('TODO update identity');
     }
   };

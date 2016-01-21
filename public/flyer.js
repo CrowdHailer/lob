@@ -55,6 +55,27 @@ var Lob = (function () { 'use strict';
     return Struct(this, other);
   };
 
+  var FLYER_STATE_DEFAULTS = {
+    uplinkStatus: "UNKNOWN",
+    uplinkDetails: {},
+    latestReading: null, // DEBT best place a null object here
+    currentFlight: [],
+    flightHistory: [],
+    identity: '',
+    alert: ""
+  };
+  // DEBT not quite sure why this can't just be named state;
+  function FlyerState(raw){
+    if ( !(this instanceof FlyerState) ) { return new FlyerState(raw); }
+
+    // DEBT with return statement is not an instance of FlyerState.
+    // without return statement does not work at all.
+    return Struct.call(this, FLYER_STATE_DEFAULTS, raw);
+  }
+
+  FlyerState.prototype = Object.create(Struct.prototype);
+  FlyerState.prototype.constructor = FlyerState;
+
   /* jshint esnext: true */
 
   function readingsDuration(readings){
@@ -176,47 +197,18 @@ var Lob = (function () { 'use strict';
     }
   });
 
-  var FLYER_STATE_DEFAULTS = {
-    uplinkStatus: "UNKNOWN",
-    uplinkDetails: {},
-    latestReading: null, // DEBT best place a null object here
-    currentFlight: [],
-    flightHistory: [],
-    identity: '',
-    alert: ""
-  };
-  // DEBT not quite sure why this can't just be named state;
-  function FlyerState(raw){
-    if ( !(this instanceof FlyerState) ) { return new FlyerState(raw); }
-
-    // DEBT with return statement is not an instance of FlyerState.
-    // without return statement does not work at all.
-    return Struct.call(this, FLYER_STATE_DEFAULTS, raw);
-  }
-
-  FlyerState.prototype = Object.create(Struct.prototype);
-  FlyerState.prototype.constructor = FlyerState;
-
-  var INVALID_STATE_MESSAGE = "Flyer did not recieve valid initial state";
-
   function Flyer(state){
     if ( !(this instanceof Flyer) ) { return new Flyer(state); }
-    try {
-      state = FlyerState(state || {});
-    } catch (e) {
-      // alert(e); DEBT throws in tests
-      throw new TypeError(INVALID_STATE_MESSAGE);
-    }
+    state = FlyerState(state || {});
 
     var flyer = this;
     flyer.state = state;
 
     flyer.uplinkAvailable = function(details){
-      // Set state action can cause projection to exhibit new state
-      flyer.state = flyer.state.set("uplinkStatus", "AVAILABLE");
-      flyer.state = flyer.state.set("uplinkDetails", details);
-      // call log change. test listeners that the state has changed.
-      // stateChange({state: state, action: "Uplink Available", log: debug});
+      flyer.state = flyer.state.merge({
+        "uplinkStatus": "AVAILABLE",
+        "uplinkDetails": details
+      });
       logInfo("Uplink Available", details);
       showcase(flyer.state);
     };
@@ -315,71 +307,6 @@ var Lob = (function () { 'use strict';
 
   /* jshint esnext: true */
 
-  // Router makes use of current location
-  // Router should always return some value of state it does not have the knowledge to regard it as invalid
-  // Router is currently untested
-  // Router does not follow modifications to the application location.
-  // Router is generic for tracker and flyer at the moment
-  // location is a size cause and might make sense to be lazily applied
-  function Router(location){
-    if ( !(this instanceof Router) ) { return new Router(location); }
-    var router = this;
-    router.location = location;
-
-    function getState(){
-      return {
-        token: getQueryParameter('token', router.location.search),
-        channelName: getQueryParameter('channel-name', router.location.search)
-      };
-    }
-
-    Object.defineProperty(router, 'state', {
-      get: getState
-    });
-  }
-
-  function getQueryParameter(name, queryString) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-    results = regex.exec(queryString);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-  }
-
-  if (!Object.assign) {
-    Object.defineProperty(Object, 'assign', {
-      enumerable: false,
-      configurable: true,
-      writable: true,
-      value: function(target) {
-        'use strict';
-        if (target === undefined || target === null) {
-          throw new TypeError('Cannot convert first argument to object');
-        }
-
-        var to = Object(target);
-        for (var i = 1; i < arguments.length; i++) {
-          var nextSource = arguments[i];
-          if (nextSource === undefined || nextSource === null) {
-            continue;
-          }
-          nextSource = Object(nextSource);
-
-          var keysArray = Object.keys(nextSource);
-          for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
-            var nextKey = keysArray[nextIndex];
-            var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
-            if (desc !== undefined && desc.enumerable) {
-              to[nextKey] = nextSource[nextKey];
-            }
-          }
-        }
-        return to;
-      }
-    });
-  }
-
-  /* jshint esnext: true */
-
   function format(i){
     var fixed = i.toFixed(2);
     var signed = i < 0 ? fixed : "+" + fixed;
@@ -443,7 +370,7 @@ var Lob = (function () { 'use strict';
 
   /* jshint esnext: true */
 
-  function Display($root){
+  function Display$1($root){
     var $maxFlightTime = $root.querySelector("[data-hook~=flight-time]");
     var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
     var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
@@ -499,7 +426,7 @@ var Lob = (function () { 'use strict';
 
   /* jshint esnext: true */
 
-  function Display$1($root){
+  function Display($root){
     var $message = $root.querySelector("[data-display~=message]");
     return Object.create({}, {
       active: {
@@ -518,6 +445,93 @@ var Lob = (function () { 'use strict';
           console.log(message);
           $message.innerHTML = message;
         }
+      }
+    });
+  }
+
+  function FlyerView(){
+    this.render = function render(projection){
+      var presentation = present(projection);
+      var $avionics = document.querySelector("[data-interface~=avionics]");
+      var $alert = document.querySelector("[data-display~=alert]");
+      var display = new Display$1($avionics);
+      for (var attribute in display) {
+        if (display.hasOwnProperty(attribute)) {
+          display[attribute] = presentation[attribute];
+        }
+      }
+      var alertDisplay = Display($alert);
+      var alertMessage = projection.alert;
+      if (alertMessage) {
+        alertDisplay.message = alertMessage;
+        alertDisplay.active = true;
+      } else {
+        alertDisplay.active = false;
+      }
+    }
+  }
+
+  /* jshint esnext: true */
+
+  // Router makes use of current location
+  // Router should always return some value of state it does not have the knowledge to regard it as invalid
+  // Router is currently untested
+  // Router does not follow modifications to the application location.
+  // Router is generic for tracker and flyer at the moment
+  // location is a size cause and might make sense to be lazily applied
+  function Router(location){
+    if ( !(this instanceof Router) ) { return new Router(location); }
+    var router = this;
+    router.location = location;
+
+    function getState(){
+      return {
+        token: getQueryParameter('token', router.location.search),
+        channelName: getQueryParameter('channel-name', router.location.search)
+      };
+    }
+
+    Object.defineProperty(router, 'state', {
+      get: getState
+    });
+  }
+
+  function getQueryParameter(name, queryString) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+    results = regex.exec(queryString);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
+
+  if (!Object.assign) {
+    Object.defineProperty(Object, 'assign', {
+      enumerable: false,
+      configurable: true,
+      writable: true,
+      value: function(target) {
+        'use strict';
+        if (target === undefined || target === null) {
+          throw new TypeError('Cannot convert first argument to object');
+        }
+
+        var to = Object(target);
+        for (var i = 1; i < arguments.length; i++) {
+          var nextSource = arguments[i];
+          if (nextSource === undefined || nextSource === null) {
+            continue;
+          }
+          nextSource = Object(nextSource);
+
+          var keysArray = Object.keys(nextSource);
+          for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
+            var nextKey = keysArray[nextIndex];
+            var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
+            if (desc !== undefined && desc.enumerable) {
+              to[nextKey] = nextSource[nextKey];
+            }
+          }
+        }
+        return to;
       }
     });
   }
@@ -546,29 +560,9 @@ var Lob = (function () { 'use strict';
 
   var readingPublishLimit = 250; // ms
 
-  var flyer = new Flyer();
+  var flyer = Flyer();
   flyer.logger = window.console;
-  flyer.view = {
-    render: function(projection){
-      var presentation = present(projection);
-      var $avionics = document.querySelector("[data-interface~=avionics]");
-      var $alert = document.querySelector("[data-display~=alert]");
-      var display = new Display($avionics);
-      for (var attribute in display) {
-        if (display.hasOwnProperty(attribute)) {
-          display[attribute] = presentation[attribute];
-        }
-      }
-      var alertDisplay = Display$1($alert);
-      var alertMessage = projection.alert;
-      if (alertMessage) {
-        alertDisplay.message = alertMessage;
-        alertDisplay.active = true;
-      } else {
-        alertDisplay.active = false;
-      }
-    }
-  };
+  flyer.view = new FlyerView
 
   var DEVICEMOTION = "devicemotion";
   function AccelerometerController(global, flyer){
@@ -622,7 +616,7 @@ var Lob = (function () { 'use strict';
           }
         });
       },
-      updateIdentity: function(){
+      transmitIdentity: function(){
         console.log('TODO update identity');
       }
     };
