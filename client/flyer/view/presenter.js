@@ -55,6 +55,11 @@ function Presenter(projection){
       return projection.channelName;
     }
   });
+  Object.defineProperty(this, "identity", {
+    get: function(){
+      return projection.identity;
+    }
+  });
 }
 
 export function present(app){

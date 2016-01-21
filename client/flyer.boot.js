@@ -7,6 +7,14 @@ import FlyerUplink from './flyer/uplink';
 
 import { readingPublishLimit } from './config';
 
+var lobIdentity = localStorage.getItem('lobIdentity');
+if (!lobIdentity) {
+  var parser = new UAParser();
+  var result = parser.getResult();
+  lobIdentity = result.device.model || result.browser.name;
+  localStorage.setItem('lobIdentity', lobIdentity);
+}
+
 var router = Router(window.location);
 
 var uplink = FlyerUplink({
@@ -15,7 +23,10 @@ var uplink = FlyerUplink({
   rateLimit: readingPublishLimit
 }, window.console);
 
-var flyer = Flyer();
+var flyer = Flyer({
+  identity: lobIdentity
+});
+
 
 flyer.logger = window.console;
 flyer.view = new FlyerView
@@ -37,6 +48,5 @@ function UplinkController(uplink, application){
     application.uplinkFailed();
   }
 }
-
 var uplinkController = new UplinkController(uplink, flyer);
 export default flyer;

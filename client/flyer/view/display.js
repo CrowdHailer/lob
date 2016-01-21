@@ -7,6 +7,7 @@ function Display($root){
   var $instruction = $root.querySelector("[data-display~=instruction]");
   var $uplink = $root.querySelector("[data-display~=uplink]");
   var $channel = $root.querySelector("[data-display~=channel]");
+  var $identity = $root.querySelector("[data-display~=identity]");
 
   return Object.create({}, {
     maxFlightTime: {
@@ -47,6 +48,12 @@ function Display($root){
         $uplink.classList.remove("transmitting");
         $uplink.classList.remove("failed");
         $uplink.classList.add(status);
+      },
+      enumerable: true
+    },
+    identity: {
+      set: function(identity){
+        $identity.value = identity;
       },
       enumerable: true
     }

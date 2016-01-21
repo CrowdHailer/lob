@@ -70,6 +70,8 @@ var Lob = (function () { 'use strict';
     this._ablyChannel = channel;
     this.token = token;
     this.channelName = channelName;
+    this.newReadingRateLimit = newReadingRateLimit;
+    
     this.onconnected = function(){
       // DEBT null op;
     }
@@ -252,6 +254,11 @@ var Lob = (function () { 'use strict';
     Object.defineProperty(this, "alert", {
       get: function(){
         return rawState.alert;
+      }
+    });
+    Object.defineProperty(this, "identity", {
+      get: function(){
+        return rawState.identity;
       }
     });
   }
@@ -463,6 +470,11 @@ var Lob = (function () { 'use strict';
         return projection.channelName;
       }
     });
+    Object.defineProperty(this, "identity", {
+      get: function(){
+        return projection.identity;
+      }
+    });
   }
 
   function present(app){
@@ -478,6 +490,7 @@ var Lob = (function () { 'use strict';
     var $instruction = $root.querySelector("[data-display~=instruction]");
     var $uplink = $root.querySelector("[data-display~=uplink]");
     var $channel = $root.querySelector("[data-display~=channel]");
+    var $identity = $root.querySelector("[data-display~=identity]");
 
     return Object.create({}, {
       maxFlightTime: {
@@ -518,6 +531,12 @@ var Lob = (function () { 'use strict';
           $uplink.classList.remove("transmitting");
           $uplink.classList.remove("failed");
           $uplink.classList.add(status);
+        },
+        enumerable: true
+      },
+      identity: {
+        set: function(identity){
+          $identity.value = identity;
         },
         enumerable: true
       }
@@ -605,6 +624,14 @@ var Lob = (function () { 'use strict';
     });
   }
 
+  var lobIdentity = localStorage.getItem('lobIdentity');
+  if (!lobIdentity) {
+    var parser = new UAParser();
+    var result = parser.getResult();
+    lobIdentity = result.device.model || result.browser.name;
+    localStorage.setItem('lobIdentity', lobIdentity);
+  }
+
   var router = Router(window.location);
 
   var uplink = FlyerUplink({
@@ -613,7 +640,10 @@ var Lob = (function () { 'use strict';
     rateLimit: readingPublishLimit
   }, window.console);
 
-  var flyer = Flyer();
+  var flyer = Flyer({
+    identity: lobIdentity
+  });
+
 
   flyer.logger = window.console;
   flyer.view = new FlyerView
@@ -635,7 +665,6 @@ var Lob = (function () { 'use strict';
       application.uplinkFailed();
     }
   }
-
   var uplinkController = new UplinkController(uplink, flyer);
 
   return flyer;

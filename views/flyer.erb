@@ -35,13 +35,4 @@
   <a href="/">home</a>
 </main>
 <script type="text/javascript" src="/ua-parse.js"></script>
-<script type="text/javascript">
-  var lobIdentity = localStorage.getItem('lobIdentity');
-  if (!lobIdentity) {
-    var parser = new UAParser();
-    var result = parser.getResult();
-    lobIdentity = result.device.model || result.browser.name;
-    localStorage.setItem('lobIdentity', lobIdentity);
-  }
-</script>
 <script type="text/javascript" src="/flyer.js"></script>
