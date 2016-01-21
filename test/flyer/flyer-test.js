@@ -7,7 +7,7 @@ describe("Initialising Flyer", function(){
   it("should require an valid initial state", function(){
     expect(function(){
       Flyer("invalid state");
-    }).toThrowError(TypeError, "Flyer did not recieve valid initial state");
+    }).toThrowError(KeyError);
   });
 });
 describe("Initialised Flyer", function(){

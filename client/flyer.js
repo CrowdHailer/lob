@@ -3,40 +3,11 @@
 // import * as State from "./state";
 import Projection from "./flyer/projection";
 import Reading from "./lib/reading";
-
-import Struct from "./carbide/struct";
-
-var FLYER_STATE_DEFAULTS = {
-  uplinkStatus: "UNKNOWN",
-  uplinkDetails: {},
-  latestReading: null, // DEBT best place a null object here
-  currentFlight: [],
-  flightHistory: [],
-  identity: '',
-  alert: ""
-};
-// DEBT not quite sure why this can't just be named state;
-function FlyerState(raw){
-  if ( !(this instanceof FlyerState) ) { return new FlyerState(raw); }
-
-  // DEBT with return statement is not an instance of FlyerState.
-  // without return statement does not work at all.
-  return Struct.call(this, FLYER_STATE_DEFAULTS, raw);
-}
-
-FlyerState.prototype = Object.create(Struct.prototype);
-FlyerState.prototype.constructor = FlyerState;
-
-var INVALID_STATE_MESSAGE = "Flyer did not recieve valid initial state";
+import FlyerState from './flyer/state'
 
 export default function Flyer(state){
   if ( !(this instanceof Flyer) ) { return new Flyer(state); }
-  try {
-    state = FlyerState(state || {});
-  } catch (e) {
-    // alert(e); DEBT throws in tests
-    throw new TypeError(INVALID_STATE_MESSAGE);
-  }
+  state = FlyerState(state || {});
 
   var flyer = this;
   flyer.state = state;
