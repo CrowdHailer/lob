@@ -18,9 +18,8 @@ class LobApp < Sinatra::Base
     erb :about
   end
 
-  History = []
   get '/leaderboard' do
-    erb :leaderboard, locals: {flights: History}
+    erb :leaderboard, locals: {leaderboard: Leaderboard.best_today}
   end
 
   post '/new-flight' do

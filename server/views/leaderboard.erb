@@ -3,8 +3,8 @@
     <h1>Legends</h1>
   </a>
   <ol>
-    <% flights.each do |name, time, max_altitude| %>
-    <li><%= name %>: <%= max_altitude %>m</li>
+    <% leaderboard.each do |flight| %>
+    <li><%= flight.username %>: <%= flight.max_altitude %>m</li>
     <% end %>
   </ol>
 </main>
