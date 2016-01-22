@@ -29,6 +29,16 @@ class AppTest < MiniTest::Test
     assert last_response.ok?
   end
 
+  def test_the_week_leaderboard_page_is_available
+    get '/leaderboard/week'
+    assert last_response.ok?
+  end
+
+  def test_the_month_leaderboard_page_is_available
+    get '/leaderboard/month'
+    assert last_response.ok?
+  end
+
   def test_posting_new_flight_redirects_with_token_and_channel
     # DEBT start flight
     post '/new-flight'

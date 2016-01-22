@@ -19,7 +19,15 @@ class LobApp < Sinatra::Base
   end
 
   get '/leaderboard' do
-    erb :leaderboard, locals: {leaderboard: Leaderboard.best_today}
+    erb :leaderboard, locals: {leaderboard: Leaderboard.best_today, past: '24 hrs'}
+  end
+
+  get '/leaderboard/week' do
+    erb :leaderboard, locals: {leaderboard: Leaderboard.best_this_week, past: '7 days'}
+  end
+
+  get '/leaderboard/month' do
+    erb :leaderboard, locals: {leaderboard: Leaderboard.best_this_month, past: '30 days'}
   end
 
   post '/new-flight' do
