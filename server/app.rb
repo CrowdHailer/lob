@@ -1,8 +1,9 @@
 require "sinatra/base"
 
 class LobApp < Sinatra::Base
+  set :public_folder, 'public'
   get '/' do
-    'TODO return index page'
+    erb :index
   end
 
 end
