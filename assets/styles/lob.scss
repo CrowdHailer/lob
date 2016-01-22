@@ -12,20 +12,8 @@
 @include scut-sticky-footer-fluid(body, footer);
 // @include scut-reset-semanticize;
 
-
-.center {
-  text-align: center;
-}
-.readout {
-  text-align: center;
-  font-family: monospace;
-}
-
-hr {
-  border: 1px solid black;
-}
-
-// Structure
+// STRUCTURE
+// styling added to semantic elements
 
 html, body {
   margin: 0;
@@ -36,8 +24,33 @@ body {
   font-weight: 300;
   background-color: #FFCC00;
   font-size: 1.2rem;
-  // TODO make bigger on large screen
 }
+
+h1 {
+  font-size: 300%;
+  text-align: center;
+  font-weight: inherit;
+  margin: 0;
+}
+
+h2 {
+  font-size: 120%;
+  margin: 0;
+  text-align: center;
+}
+
+hr {
+  border: 1px solid black;
+}
+
+.center {
+  text-align: center;
+}
+.readout {
+  text-align: center;
+  font-family: monospace;
+}
+
 
 .width-limited {
   max-width: 760px;
@@ -47,17 +60,6 @@ body {
 }
 
 
-h1 {
-  font-size: 300%;
-  text-align: center;
-  font-weight: inherit;
-  margin: 0;
-}
-h2 {
-  font-size: 120%;
-  margin: 0;
-  text-align: center;
-}
 
 span {
   &.right {
