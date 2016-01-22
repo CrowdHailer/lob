@@ -27,4 +27,10 @@ class AppTest < MiniTest::Test
     post '/new-flight'
     assert_match(/flyer\?channel-name=[A-Z0-9]{4}&token=/, last_response.location)
   end
+
+  def test_page_for_new_flyer_is_available
+    # DEBT should check for channel name and token
+    get '/flyer'
+    assert last_response.ok?
+  end
 end
