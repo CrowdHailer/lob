@@ -151,6 +151,9 @@ a.clean {
   text-align: center;
   font-family: monospace; }
 
+hr {
+  border: 1px solid black; }
+
 html, body {
   margin: 0; }
 
