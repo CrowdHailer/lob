@@ -1,12 +1,6 @@
 require_relative './test_config'
 
-require "sinatra/base"
-class LobApp < Sinatra::Base
-  get '/' do
-    'TODO return index page'
-  end
-
-end
+require_relative '../app'
 
 class AppTest < MiniTest::Test
   include Rack::Test::Methods
