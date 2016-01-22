@@ -59,6 +59,6 @@ class LobApp < Sinatra::Base
   end
 
   def create_channel_name
-    (1...(36 ** 4)).to_a.sample.to_s(36).upcase
+    ((36 ** 3)...(36 ** 4 - 1)).to_a.sample.to_s(36).upcase
   end
 end
