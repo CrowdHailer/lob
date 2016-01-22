@@ -36,12 +36,14 @@ GEM
     msgpack (0.7.1)
     multi_json (1.11.2)
     multipart-post (2.0.0)
+    pg (0.18.4)
     rack (1.6.4)
     rack-protection (1.5.3)
       rack
     rack-test (0.6.3)
       rack (>= 1.0)
     ruby-progressbar (1.7.5)
+    sequel (4.30.0)
     sinatra (1.4.6)
       rack (~> 1.4)
       rack-protection (~> 1.4)
@@ -66,7 +68,9 @@ DEPENDENCIES
   ably
   minitest
   minitest-reporters
+  pg
   rack-test
+  sequel
   sinatra
   sinatra-contrib
 
