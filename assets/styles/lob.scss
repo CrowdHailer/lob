@@ -43,6 +43,29 @@ hr {
   border: 1px solid black;
 }
 
+
+// LAYOUT
+// elements used across pages
+
+nav {
+  padding-top: 1em;
+  text-align: center;
+}
+.nav-item {
+  border: 2px solid;
+  border-radius: 4px;
+  padding: 0.1em 0.5em;
+  background-image: linear-gradient(to top, #fc0, #FFE788);
+  color: black;
+  text-decoration: none;
+  display: inline-block;
+  margin: 0.5em;
+  &:focus, &:active {
+    background-image: linear-gradient(to bottom, #fc0, #FFE788);
+    text-decoration: underline;
+  }
+}
+
 .center {
   text-align: center;
 }
