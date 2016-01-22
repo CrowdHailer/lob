@@ -1,11 +1,17 @@
 require_relative './test_config'
 
+require_relative '../boot'
 require_relative '../app'
 
 class AppTest < MiniTest::Test
   include Rack::Test::Methods
+
   def app
     LobApp
+  end
+
+  def run(*args, &block)
+    Sequel::Model.db.transaction(:rollback=>:always, :auto_savepoint=>true){super}
   end
 
   def test_the_index_page_is_available
