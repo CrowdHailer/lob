@@ -6,4 +6,13 @@ class LobApp < Sinatra::Base
     erb :index
   end
 
+  get '/about' do
+    erb :about
+  end
+
+  History = []
+  get '/leaderboard' do
+    erb :leaderboard, locals: {flights: History}
+  end
+
 end

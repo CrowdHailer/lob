@@ -12,4 +12,14 @@ class AppTest < MiniTest::Test
     get '/'
     assert last_response.ok?
   end
+
+  def test_the_about_page_is_available
+    get '/about'
+    assert last_response.ok?
+  end
+
+  def test_the_leaderboard_page_is_available
+    get '/leaderboard'
+    assert last_response.ok?
+  end
 end
