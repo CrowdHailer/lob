@@ -90,11 +90,6 @@ header.width-limited {
   header.width-limited svg {
     overflow: visible; }
 
-main.width-limited {
-  overflow: visible; }
-  main.width-limited form {
-    background: #FFCC00; }
-
 html {
   box-sizing: border-box; }
 
@@ -180,6 +175,20 @@ nav {
     background-image: linear-gradient(to bottom, #fc0, #FFE788);
     text-decoration: underline; }
 
+form.button {
+  display: block;
+  max-width: 560px;
+  background-image: linear-gradient(to top, #fc0, #FFE788);
+  font-size: 120%;
+  text-align: center;
+  margin: 1rem auto;
+  border: 2px solid;
+  border-radius: 4px; }
+  form.button button {
+    padding: 0.5em; }
+    form.button button:focus, form.button button:active {
+      text-decoration: underline; }
+
 .center {
   text-align: center; }
 
@@ -204,15 +213,6 @@ span.left {
   display: inline-block;
   padding-left: 0.4em;
   text-align: left; }
-
-form {
-  border: 2px solid;
-  display: block;
-  padding: 0.5em;
-  text-align: right;
-  border-radius: 4px;
-  margin: 1rem auto;
-  max-width: 560px; }
 
 ::-webkit-input-placeholder {
   color: #777; }
@@ -242,11 +242,6 @@ input {
 canvas {
   background-color: #EEE;
   width: 100%; }
-
-main form.button {
-  background-image: linear-gradient(to top, #fc0, #FFE788);
-  font-size: 120%;
-  text-align: center; }
 
 main a.button {
   background-image: linear-gradient(to top, #fc0, #FFE788);
@@ -284,8 +279,8 @@ footer span {
 /* ================================================================================
 Example showing how to change the color/size of the icons:
 .icon-name {
-	font-size: 32px; // works because "width" & "height" were set using em units
-	color: red; // works because "fill" was set to "currentColor"
+font-size: 32px; // works because "width" & "height" were set using em units
+color: red; // works because "fill" was set to "currentColor"
 }
 ================================================================================ */
 .icon-twitter {
