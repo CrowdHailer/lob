@@ -33,6 +33,27 @@ class LobApp < Sinatra::Base
     erb :flyer, locals: {twitter_link: twitter_link}
   end
 
+  post '/track-flight' do
+    channel_name = request.POST["channel-name"].upcase
+    token = client.auth.request_token.token
+    redirect "/tracker?channel-name=#{channel_name}&token=#{token}"
+  end
+
+  get '/track/:channel_name' do
+    channel_name = params[:channel_name].upcase
+    token = client.auth.request_token.token
+    redirect "/tracker?channel-name=#{channel_name}&token=#{token}"
+  end
+
+  # post /track-flight is for use from form on index page
+  # get /tracker/:channel_name is for links from twitter etc
+  # Could be better ways to combine these
+  # All get /tracker/:channel-name?token=<token> redirect if token not present
+
+  get '/tracker' do
+    erb :tracker
+  end
+
   def client
     @client ||= Ably::Rest.new(key: ENV.fetch("ABLY_API_KEY"))
   end
