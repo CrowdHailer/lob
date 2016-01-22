@@ -3,6 +3,28 @@ require "sinatra/cookies"
 
 require "ably"
 
+class Flight < Sequel::Model(:flights)
+  plugin :timestamps, :create => :submitted_at
+  def max_altitude=(meters)
+    centimeters = (meters.to_f*100).to_i
+    super(centimeters)
+  end
+
+  def max_altitude
+    super.to_f / 100
+  end
+end
+
+class Leaderboard
+  def last_day
+    Flight.all
+  end
+
+  def self.submit_flight(flight)
+    flight.save
+  end
+end
+
 class LobApp < Sinatra::Base
   helpers Sinatra::Cookies
 
@@ -52,6 +74,14 @@ class LobApp < Sinatra::Base
 
   get '/tracker' do
     erb :tracker
+  end
+
+  post '/submit-flight' do
+    username = request.POST['username'];
+    max_altitude = request.POST['max-altitude']; # m
+    flight = Flight.new(username: username, max_altitude: max_altitude)
+    Leaderboard.submit_flight(flight)
+    erb :submission
   end
 
   def client

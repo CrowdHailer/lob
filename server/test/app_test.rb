@@ -58,4 +58,12 @@ class AppTest < MiniTest::Test
     get '/tracker'
     assert last_response.ok?
   end
+
+  def test_submitting_a_new_flight_record_should_add_it_leaderboard
+    leaderboard = Leaderboard.new
+    post '/submit-flight', {'max-altitude': 12.10, username: 'my iPhone'}
+    assert_equal leaderboard.last_day.first.max_altitude, 12.10
+    assert leaderboard.last_day.first.submitted_at
+    assert last_response.ok?
+  end
 end
