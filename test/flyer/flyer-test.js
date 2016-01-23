@@ -1,13 +1,13 @@
 /* jshint esnext: true */
 
-import { createTranscriptLogger, createTranscriptFunction, freefallReading } from "../support";
-import Flyer from "../../client/flyer/flyer";
+import { createTranscriptLogger, createTranscriptFunction } from "../support";
+import Flyer from "../../client/flyer";
 
 describe("Initialising Flyer", function(){
   it("should require an valid initial state", function(){
     expect(function(){
       Flyer("invalid state");
-    }).toThrowError(TypeError, "Flyer did not recieve valid initial state");
+    }).toThrowError(KeyError);
   });
 });
 describe("Initialised Flyer", function(){

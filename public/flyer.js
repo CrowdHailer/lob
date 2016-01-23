@@ -2,6 +2,109 @@ var Lob = (function () { 'use strict';
 
   /* jshint esnext: true */
 
+  // Router makes use of current location
+  // Router should always return some value of state it does not have the knowledge to regard it as invalid
+  // Router is currently untested
+  // Router does not follow modifications to the application location.
+  // Router is generic for tracker and flyer at the moment
+  // location is a size cause and might make sense to be lazily applied
+  function Router(location){
+    if ( !(this instanceof Router) ) { return new Router(location); }
+    var router = this;
+    router.location = location;
+
+    function getState(){
+      return {
+        token: getQueryParameter('token', router.location.search),
+        channelName: getQueryParameter('channel-name', router.location.search)
+      };
+    }
+
+    Object.defineProperty(router, 'state', {
+      get: getState
+    });
+  }
+
+  function getQueryParameter(name, queryString) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+    results = regex.exec(queryString);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
+
+  var readingPublishLimit = 250; // ms
+
+  function throttle(fn, threshhold, scope) {
+    threshhold = threshhold;
+    var last,
+    deferTimer;
+    return function () {
+      var context = scope || this;
+      var now = Date.now(), args = arguments;
+
+      if (last && now < last + threshhold) {
+        // hold on to it
+        clearTimeout(deferTimer);
+        deferTimer = setTimeout(function () {
+          last = now;
+          fn.apply(context, args);
+        }, threshhold);
+      } else {
+        last = now;
+        fn.apply(context, args);
+      }
+    };
+  }
+
+  function FlyerUplink(options, logger) {
+    if ( !(this instanceof FlyerUplink) ) { return new FlyerUplink(options, logger); }
+    var uplink = this;
+    logger.info('Starting uplink', options);
+
+    var channelName = options.channelName;
+    var token = options.token;
+    var newReadingRateLimit = options.rateLimit;
+    var client = new Ably.Realtime({ token: token });
+    var channel = client.channels.get(channelName);
+    this._ablyClient = client;
+    this._ablyChannel = channel;
+    this.token = token;
+    this.channelName = channelName;
+    this.newReadingRateLimit = newReadingRateLimit;
+    
+    this.onconnected = function(){
+      // DEBT null op;
+    }
+    function transmitReading(reading){
+      channel.publish('newReading', reading, function(err){
+        if (err) {
+          window.console.warn("Unable to send new reading; err = " + err.message);
+        }
+      })
+    }
+
+    this.transmitReading = throttle(transmitReading, newReadingRateLimit);
+    this.transmitResetReadings = function(){
+      channel.publish("resetReadings", {}, function(err) {
+        if(err) {
+          window.console.warn("Unable to send reset readings; err = " + err.message);
+        }
+      });
+    },
+    this.transmitIdentity = function(){
+      console.log('TODO update identity');
+    }
+
+    client.connection.on("connected", function(err) {
+      uplink.onconnected();
+    });
+    client.connection.on("failed", function(err) {
+      console.log('failed', err.reason.message);
+    });
+  }
+
+  /* jshint esnext: true */
+
   function KeyError(key) {
     this.name = "KeyError";
     this.message = "key \"" + key + "\" not found";
@@ -54,6 +157,27 @@ var Lob = (function () { 'use strict';
   Struct.prototype.merge = function (other) {
     return Struct(this, other);
   };
+
+  var FLYER_STATE_DEFAULTS = {
+    uplinkStatus: "UNKNOWN",
+    uplinkDetails: {},
+    latestReading: null, // DEBT best place a null object here
+    currentFlight: [],
+    flightHistory: [],
+    identity: '',
+    alert: ""
+  };
+  // DEBT not quite sure why this can't just be named state;
+  function FlyerState(raw){
+    if ( !(this instanceof FlyerState) ) { return new FlyerState(raw); }
+
+    // DEBT with return statement is not an instance of FlyerState.
+    // without return statement does not work at all.
+    return Struct.call(this, FLYER_STATE_DEFAULTS, raw);
+  }
+
+  FlyerState.prototype = Object.create(Struct.prototype);
+  FlyerState.prototype.constructor = FlyerState;
 
   /* jshint esnext: true */
 
@@ -132,6 +256,11 @@ var Lob = (function () { 'use strict';
         return rawState.alert;
       }
     });
+    Object.defineProperty(this, "identity", {
+      get: function(){
+        return rawState.identity;
+      }
+    });
   }
 
   function project(app){
@@ -176,46 +305,18 @@ var Lob = (function () { 'use strict';
     }
   });
 
-  var FLYER_STATE_DEFAULTS = {
-    uplinkStatus: "UNKNOWN",
-    uplinkDetails: {},
-    latestReading: null, // DEBT best place a null object here
-    currentFlight: [],
-    flightHistory: [],
-    alert: ""
-  };
-  // DEBT not quite sure why this can't just be named state;
-  function FlyerState(raw){
-    if ( !(this instanceof FlyerState) ) { return new FlyerState(raw); }
-
-    // DEBT with return statement is not an instance of FlyerState.
-    // without return statement does not work at all.
-    return Struct.call(this, FLYER_STATE_DEFAULTS, raw);
-  }
-
-  FlyerState.prototype = Object.create(Struct.prototype);
-  FlyerState.prototype.constructor = FlyerState;
-
-  var INVALID_STATE_MESSAGE = "Flyer did not recieve valid initial state";
-
   function Flyer(state){
     if ( !(this instanceof Flyer) ) { return new Flyer(state); }
-    try {
-      state = FlyerState(state || {});
-    } catch (e) {
-      // alert(e); DEBT throws in tests
-      throw new TypeError(INVALID_STATE_MESSAGE);
-    }
+    state = FlyerState(state || {});
 
     var flyer = this;
     flyer.state = state;
 
     flyer.uplinkAvailable = function(details){
-      // Set state action can cause projection to exhibit new state
-      flyer.state = flyer.state.set("uplinkStatus", "AVAILABLE");
-      flyer.state = flyer.state.set("uplinkDetails", details);
-      // call log change. test listeners that the state has changed.
-      // stateChange({state: state, action: "Uplink Available", log: debug});
+      flyer.state = flyer.state.merge({
+        "uplinkStatus": "AVAILABLE",
+        "uplinkDetails": details
+      });
       logInfo("Uplink Available", details);
       showcase(flyer.state);
     };
@@ -273,6 +374,14 @@ var Lob = (function () { 'use strict';
       logInfo("[Uplink Failed]");
     };
 
+    flyer.updateIdentity = function(newIdentity){
+      flyer.state = flyer.state.set('identity', newIdentity);
+      logInfo('Updated identity', newIdentity);
+      transmitIdentity(newIdentity);
+      localStorage.setItem('lobIdentity', newIdentity);
+      showcase(flyer.state);
+    }
+
     flyer.closeAlert = function(){
       // DEBT untested
       flyer.state = flyer.state.set("alert", "");
@@ -291,6 +400,9 @@ var Lob = (function () { 'use strict';
         flyer.uplink.transmitResetReadings();
       }
     }
+    function transmitIdentity(identity){
+      flyer.uplink.transmitIdentity(identity);
+    }
     function showcase(state){
       flyer.view.render(project(state));
     }
@@ -301,71 +413,6 @@ var Lob = (function () { 'use strict';
     flyer.clock = window.Date;
   }
   Flyer.State = FlyerState;
-
-  /* jshint esnext: true */
-
-  // Router makes use of current location
-  // Router should always return some value of state it does not have the knowledge to regard it as invalid
-  // Router is currently untested
-  // Router does not follow modifications to the application location.
-  // Router is generic for tracker and flyer at the moment
-  // location is a size cause and might make sense to be lazily applied
-  function Router(location){
-    if ( !(this instanceof Router) ) { return new Router(location); }
-    var router = this;
-    router.location = location;
-
-    function getState(){
-      return {
-        token: getQueryParameter('token', router.location.search),
-        channelName: getQueryParameter('channel-name', router.location.search)
-      };
-    }
-
-    Object.defineProperty(router, 'state', {
-      get: getState
-    });
-  }
-
-  function getQueryParameter(name, queryString) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-    results = regex.exec(queryString);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
-  }
-
-  if (!Object.assign) {
-    Object.defineProperty(Object, 'assign', {
-      enumerable: false,
-      configurable: true,
-      writable: true,
-      value: function(target) {
-        'use strict';
-        if (target === undefined || target === null) {
-          throw new TypeError('Cannot convert first argument to object');
-        }
-
-        var to = Object(target);
-        for (var i = 1; i < arguments.length; i++) {
-          var nextSource = arguments[i];
-          if (nextSource === undefined || nextSource === null) {
-            continue;
-          }
-          nextSource = Object(nextSource);
-
-          var keysArray = Object.keys(nextSource);
-          for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
-            var nextKey = keysArray[nextIndex];
-            var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
-            if (desc !== undefined && desc.enumerable) {
-              to[nextKey] = nextSource[nextKey];
-            }
-          }
-        }
-        return to;
-      }
-    });
-  }
 
   /* jshint esnext: true */
 
@@ -407,10 +454,17 @@ var Lob = (function () { 'use strict';
 
     Object.defineProperty(this, "instruction", {
       get: function(){
+        console.log(this)
         if (!this.hasThrow) {
           return "Lob phone to get started";
         }
         return "OK! can you lob any higher";
+      }
+    });
+
+    Object.defineProperty(this, "hasThrow", {
+      get: function(){
+        return projection.hasThrow;
       }
     });
 
@@ -424,6 +478,11 @@ var Lob = (function () { 'use strict';
         return projection.channelName;
       }
     });
+    Object.defineProperty(this, "identity", {
+      get: function(){
+        return projection.identity;
+      }
+    });
   }
 
   function present(app){
@@ -432,13 +491,16 @@ var Lob = (function () { 'use strict';
 
   /* jshint esnext: true */
 
-  function Display($root){
+  function Display$1($root){
     var $maxFlightTime = $root.querySelector("[data-hook~=flight-time]");
     var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
+    var $SubmittedMaxAltitude = $root.querySelector("[data-display~=submitted-max-altitude]");
     var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
     var $instruction = $root.querySelector("[data-display~=instruction]");
     var $uplink = $root.querySelector("[data-display~=uplink]");
     var $channel = $root.querySelector("[data-display~=channel]");
+    var $identity = $root.querySelector("[data-display~=identity]");
+    var $submittedIdentity = $root.querySelector("[data-display~=submitted-identity]");
 
     return Object.create({}, {
       maxFlightTime: {
@@ -450,6 +512,8 @@ var Lob = (function () { 'use strict';
       maxAltitude: {
         set: function(maxAltitude){
           $maxAltitude.innerHTML = maxAltitude;
+          // DEBT logic in display to be removed
+          $SubmittedMaxAltitude.value = maxAltitude.split(' ')[0];
         },
         enumerable: true
       },
@@ -481,6 +545,13 @@ var Lob = (function () { 'use strict';
           $uplink.classList.add(status);
         },
         enumerable: true
+      },
+      identity: {
+        set: function(identity){
+          $identity.value = identity;
+          $submittedIdentity.value = identity;
+        },
+        enumerable: true
       }
     });
 
@@ -488,7 +559,7 @@ var Lob = (function () { 'use strict';
 
   /* jshint esnext: true */
 
-  function Display$1($root){
+  function Display($root){
     var $message = $root.querySelector("[data-display~=message]");
     return Object.create({}, {
       active: {
@@ -511,44 +582,18 @@ var Lob = (function () { 'use strict';
     });
   }
 
-  function throttle(fn, threshhold, scope) {
-    threshhold = threshhold;
-    var last,
-    deferTimer;
-    return function () {
-      var context = scope || this;
-      var now = Date.now(), args = arguments;
-
-      if (last && now < last + threshhold) {
-        // hold on to it
-        clearTimeout(deferTimer);
-        deferTimer = setTimeout(function () {
-          last = now;
-          fn.apply(context, args);
-        }, threshhold);
-      } else {
-        last = now;
-        fn.apply(context, args);
-      }
-    };
-  }
-
-  var readingPublishLimit = 250; // ms
-
-  var flyer = new Flyer();
-  flyer.logger = window.console;
-  flyer.view = {
-    render: function(projection){
+  function FlyerView(){
+    this.render = function render(projection){
       var presentation = present(projection);
       var $avionics = document.querySelector("[data-interface~=avionics]");
       var $alert = document.querySelector("[data-display~=alert]");
-      var display = new Display($avionics);
+      var display = new Display$1($avionics);
       for (var attribute in display) {
         if (display.hasOwnProperty(attribute)) {
           display[attribute] = presentation[attribute];
         }
       }
-      var alertDisplay = Display$1($alert);
+      var alertDisplay = Display($alert);
       var alertMessage = projection.alert;
       if (alertMessage) {
         alertDisplay.message = alertMessage;
@@ -557,69 +602,83 @@ var Lob = (function () { 'use strict';
         alertDisplay.active = false;
       }
     }
-  };
+  }
 
-  var DEVICEMOTION = "devicemotion";
+  if (!Object.assign) {
+    Object.defineProperty(Object, 'assign', {
+      enumerable: false,
+      configurable: true,
+      writable: true,
+      value: function(target) {
+        'use strict';
+        if (target === undefined || target === null) {
+          throw new TypeError('Cannot convert first argument to object');
+        }
+
+        var to = Object(target);
+        for (var i = 1; i < arguments.length; i++) {
+          var nextSource = arguments[i];
+          if (nextSource === undefined || nextSource === null) {
+            continue;
+          }
+          nextSource = Object(nextSource);
+
+          var keysArray = Object.keys(nextSource);
+          for (var nextIndex = 0, len = keysArray.length; nextIndex < len; nextIndex++) {
+            var nextKey = keysArray[nextIndex];
+            var desc = Object.getOwnPropertyDescriptor(nextSource, nextKey);
+            if (desc !== undefined && desc.enumerable) {
+              to[nextKey] = nextSource[nextKey];
+            }
+          }
+        }
+        return to;
+      }
+    });
+  }
+
+  var lobIdentity = localStorage.getItem('lobIdentity');
+  if (!lobIdentity) {
+    var parser = new UAParser();
+    var result = parser.getResult();
+    lobIdentity = result.device.model || result.browser.name;
+    localStorage.setItem('lobIdentity', lobIdentity);
+  }
+
+  var router = Router(window.location);
+
+  var uplink = FlyerUplink({
+    token: router.state.token,
+    channelName: router.state.channelName,
+    rateLimit: readingPublishLimit
+  }, window.console);
+
+  var flyer = Flyer({
+    identity: lobIdentity
+  });
+
+
+  flyer.logger = window.console;
+  flyer.view = new FlyerView
+  flyer.uplink = uplink;
+
   function AccelerometerController(global, flyer){
-    global.addEventListener(DEVICEMOTION, function(deviceMotionEvent){
+    global.addEventListener('devicemotion', function(deviceMotionEvent){
       flyer.newReading(deviceMotionEvent.accelerationIncludingGravity);
     });
   }
 
   var accelerometerController = new AccelerometerController(window, flyer);
 
-  // import FlyerUplinkController from "./flyer/flyer-uplink-controller";
-  function FlyerUplinkController(options, flyer){
-    var channelName = options.channelName;
-    var token = options.token;
-    var realtime = new Ably.Realtime({ token: token });
-    realtime.connection.on("connected", function(err) {
-      // If we keep explicitly passing channel data to the controller we should pass it to the main app here
-      flyer.uplinkAvailable({token: token, channelName: channelName});
-    });
-    realtime.connection.on("failed", function(err) {
-      flyer.uplinkFailed();
-      console.log(err.reason.message);
-    });
-    var channel = realtime.channels.get(channelName);
-    function transmitReading(reading){
-      channel.publish("newReading", reading, function(err) {
-        // DEBT use provided console for messages
-        // i.e. have message successful as app actions
-        if(err) {
-          console.warn("Unable to publish message; err = " + err.message);
-        } else {
-          console.info("Reding Message successfully sent", reading);
-        }
-      });
+  function UplinkController(uplink, application){
+    uplink.onconnected = function(){
+      application.uplinkAvailable({token: uplink.token, channelName: uplink.channelName});
     }
-
-    console.log('readingPublishLimit', readingPublishLimit, 'ms');
-    flyer.uplink = {
-      transmitReading: throttle(transmitReading, readingPublishLimit),
-      transmitResetReadings: function(){
-        channel.publish("resetReadings", {}, function(err) {
-          // DEBT use provided console for messages
-          // i.e. have message successful as app actions
-          if(err) {
-            window.console.warn("Unable to publish message; err = " + err.message);
-          } else {
-            // TODO comment to ably that if error here then no information released at all.
-            window.console.info("Message successfully sent");
-          }
-        });
-      }
-    };
+    uplink.onconnectionFailed = function(){
+      application.uplinkFailed();
+    }
   }
-
-
-  var router = Router(window.location);
-  console.log('Router:', 'Started with initial state:', router.state);
-
-  var uplinkController = FlyerUplinkController({
-    token: router.state.token,
-    channelName: router.state.channelName
-  }, flyer);
+  var uplinkController = new UplinkController(uplink, flyer);
 
   return flyer;
 

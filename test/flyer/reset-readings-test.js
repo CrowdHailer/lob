@@ -1,7 +1,7 @@
 /* jshint esnext: true */
 import { createTranscriptLogger, createTranscriptFunction } from "../support";
 
-import Flyer from "../../client/flyer/flyer";
+import Flyer from "../../client/flyer";
 
 describe("Reset Readings", function(){
   describe("for flyer with flight date", function(){

@@ -1,97 +1,114 @@
 /* jshint esnext: true */
-import "./utils/polyfill";
-import Flyer from "./flyer/flyer";
-import Router from "./router";
-import Presenter from "./avionics/presenter";
-import Display from "./avionics/display";
-import AlertDisplay from "./alert/display";
-import { throttle } from "./utils/fn";
-import { readingPublishLimit } from './config';
 
+import Projection from "./flyer/projection";
+import Reading from "./lib/reading";
+import FlyerState from './flyer/state'
 
-var flyer = new Flyer();
-flyer.logger = window.console;
-flyer.view = {
-  render: function(projection){
-    var presentation = Presenter(projection);
-    var $avionics = document.querySelector("[data-interface~=avionics]");
-    var $alert = document.querySelector("[data-display~=alert]");
-    var display = new Display($avionics);
-    for (var attribute in display) {
-      if (display.hasOwnProperty(attribute)) {
-        display[attribute] = presentation[attribute];
-      }
-    }
-    var alertDisplay = AlertDisplay($alert);
-    var alertMessage = projection.alert;
-    if (alertMessage) {
-      alertDisplay.message = alertMessage;
-      alertDisplay.active = true;
-    } else {
-      alertDisplay.active = false;
-    }
-  }
-};
+export default function Flyer(state){
+  if ( !(this instanceof Flyer) ) { return new Flyer(state); }
+  state = FlyerState(state || {});
 
-var DEVICEMOTION = "devicemotion";
-function AccelerometerController(global, flyer){
-  global.addEventListener(DEVICEMOTION, function(deviceMotionEvent){
-    flyer.newReading(deviceMotionEvent.accelerationIncludingGravity);
-  });
-}
+  var flyer = this;
+  flyer.state = state;
 
-var accelerometerController = new AccelerometerController(window, flyer);
-
-// import FlyerUplinkController from "./flyer/flyer-uplink-controller";
-function FlyerUplinkController(options, flyer){
-  var channelName = options.channelName;
-  var token = options.token;
-  var realtime = new Ably.Realtime({ token: token });
-  realtime.connection.on("connected", function(err) {
-    // If we keep explicitly passing channel data to the controller we should pass it to the main app here
-    flyer.uplinkAvailable({token: token, channelName: channelName});
-  });
-  realtime.connection.on("failed", function(err) {
-    flyer.uplinkFailed();
-    console.log(err.reason.message);
-  });
-  var channel = realtime.channels.get(channelName);
-  function transmitReading(reading){
-    channel.publish("newReading", reading, function(err) {
-      // DEBT use provided console for messages
-      // i.e. have message successful as app actions
-      if(err) {
-        console.warn("Unable to publish message; err = " + err.message);
-      } else {
-        console.info("Reding Message successfully sent", reading);
-      }
+  flyer.uplinkAvailable = function(details){
+    flyer.state = flyer.state.merge({
+      "uplinkStatus": "AVAILABLE",
+      "uplinkDetails": details
     });
+    logInfo("Uplink Available", details);
+    showcase(flyer.state);
+  };
+  this.startTransmitting = function(){
+    // TODO test and handle case when uplink not available.
+    flyer.state = flyer.state.set("uplinkStatus", "TRANSMITTING");
+    showcase(flyer.state);
+  };
+  flyer.newReading = function(raw){
+    try {
+      raw.timestamp = Date.now();
+      var reading = Reading(raw);
+      var state = flyer.state.set("latestReading", reading);
+      var currentFlight = state.currentFlight;
+      var flightHistory = state.flightHistory;
+      if (reading.magnitude < 4) {
+        currentFlight =  currentFlight.concat(reading);
+      } else if(currentFlight[0]) {
+        // DEBT concat splits array so we double wrap the flight
+        flightHistory = flightHistory.concat([currentFlight]);
+        currentFlight = [];
+      }
+      state = state.set("currentFlight", currentFlight);
+      state = state.set("flightHistory", flightHistory);
+      flyer.state = state;
+      transmitReading(reading);
+    } catch (err) {
+      // Debt change to invalid reading
+      if (err instanceof TypeError) {
+        flyer.state = flyer.state.set("alert", "Accelerometer not found for this device. Please try again on a different mobile");
+        showcase(flyer.state);
+        logInfo("Bad reading", raw); // Untested
+      } else {
+        throw err;
+      }
+    }
+    // logInfo("[New reading]", reading); DONT log this
+    showcase(flyer.state);
+  };
+  flyer.resetReadings = function(){
+    flyer.state = flyer.state.merge({
+      latestReading: null,
+      currentFlight: [],
+      flightHistory: []
+    });
+    // transmit
+    transmitResetReadings();
+    showcase(flyer.state); // Untested
+    logInfo("Reset readings"); // Untested
+  };
+
+  flyer.uplinkFailed = function(){
+    flyer.state = flyer.state.set("uplinkStatus", "FAILED");
+    showcase(flyer.state);
+    logInfo("[Uplink Failed]");
+  };
+
+  flyer.updateIdentity = function(newIdentity){
+    flyer.state = flyer.state.set('identity', newIdentity);
+    logInfo('Updated identity', newIdentity);
+    transmitIdentity(newIdentity);
+    localStorage.setItem('lobIdentity', newIdentity);
+    showcase(flyer.state);
   }
 
-  console.log('readingPublishLimit', readingPublishLimit, 'ms');
-  flyer.uplink = {
-    transmitReading: throttle(transmitReading, readingPublishLimit),
-    transmitResetReadings: function(){
-      channel.publish("resetReadings", {}, function(err) {
-        // DEBT use provided console for messages
-        // i.e. have message successful as app actions
-        if(err) {
-          window.console.warn("Unable to publish message; err = " + err.message);
-        } else {
-          // TODO comment to ably that if error here then no information released at all.
-          window.console.info("Message successfully sent");
-        }
-      });
-    }
+  flyer.closeAlert = function(){
+    // DEBT untested
+    flyer.state = flyer.state.set("alert", "");
+    showcase(flyer.state);
+    logInfo("Alert closed");
   };
+
+  // DEBT what to do before other values are set
+  function transmitReading(reading){
+    if (flyer.state.uplinkStatus === "TRANSMITTING") {
+      flyer.uplink.transmitReading(reading);
+    }
+  }
+  function transmitResetReadings(){
+    if (flyer.state.uplinkStatus === "TRANSMITTING") {
+      flyer.uplink.transmitResetReadings();
+    }
+  }
+  function transmitIdentity(identity){
+    flyer.uplink.transmitIdentity(identity);
+  }
+  function showcase(state){
+    flyer.view.render(Projection(state));
+  }
+  function logInfo() {
+    flyer.logger.info.apply(flyer.logger, arguments);
+  }
+  // DEBT should be set separatly for Testing
+  flyer.clock = window.Date;
 }
-
-
-var router = Router(window.location);
-console.log('Router:', 'Started with initial state:', router.state);
-
-var uplinkController = FlyerUplinkController({
-  token: router.state.token,
-  channelName: router.state.channelName
-}, flyer);
-export default flyer;
+Flyer.State = FlyerState;

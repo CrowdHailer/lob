@@ -90,11 +90,6 @@ header.width-limited {
   header.width-limited svg {
     overflow: visible; }
 
-main.width-limited {
-  overflow: visible; }
-  main.width-limited form {
-    background: #FFCC00; }
-
 html {
   box-sizing: border-box; }
 
@@ -140,17 +135,6 @@ footer {
   display: table-row;
   height: 1px; }
 
-a.clean {
-  text-decoration: none;
-  color: inherit; }
-
-.center {
-  text-align: center; }
-
-.readout {
-  text-align: center;
-  font-family: monospace; }
-
 html, body {
   margin: 0; }
 
@@ -159,12 +143,6 @@ body {
   font-weight: 300;
   background-color: #FFCC00;
   font-size: 1.2rem; }
-
-.width-limited {
-  max-width: 760px;
-  margin: 0 auto;
-  padding-left: 1em;
-  padding-right: 1em; }
 
 h1 {
   font-size: 300%;
@@ -177,24 +155,64 @@ h2 {
   margin: 0;
   text-align: center; }
 
-span {
-  width: 50%;
-  display: inline-block; }
-  span.right {
-    padding-right: 0.4em;
-    text-align: right; }
-  span.left {
-    padding-left: 0.4em;
-    text-align: left; }
+hr {
+  border: 1px solid black; }
 
-form {
+nav {
+  padding-top: 1em;
+  text-align: center; }
+
+.nav-item {
   border: 2px solid;
-  display: block;
-  padding: 0.5em;
-  text-align: right;
   border-radius: 4px;
+  padding: 0.1em 0.5em;
+  background-image: linear-gradient(to top, #fc0, #FFE788);
+  color: black;
+  text-decoration: none;
+  display: inline-block;
+  margin: 0.5em; }
+  .nav-item:focus, .nav-item:active {
+    background-image: linear-gradient(to bottom, #fc0, #FFE788);
+    text-decoration: underline; }
+
+form.button {
+  display: block;
+  max-width: 560px;
+  background-image: linear-gradient(to top, #fc0, #FFE788);
+  font-size: 120%;
+  text-align: center;
   margin: 1rem auto;
-  max-width: 560px; }
+  border: 2px solid;
+  border-radius: 4px; }
+  form.button button {
+    padding: 0.5em; }
+    form.button button:focus, form.button button:active {
+      text-decoration: underline; }
+
+.center {
+  text-align: center; }
+
+.readout {
+  text-align: center;
+  font-family: monospace; }
+
+.width-limited {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-left: 1em;
+  padding-right: 1em; }
+
+span.right {
+  width: 50%;
+  display: inline-block;
+  padding-right: 0.4em;
+  text-align: right; }
+
+span.left {
+  width: 50%;
+  display: inline-block;
+  padding-left: 0.4em;
+  text-align: left; }
 
 ::-webkit-input-placeholder {
   color: #777; }
@@ -217,15 +235,13 @@ input {
   background-color: transparent;
   font-family: raleway; }
 
-canvas {
+#tracker-graph {
   background-color: #EEE;
-  width: 100%;
   border: 2px solid black; }
 
-main form.button {
-  background-image: linear-gradient(to top, #fc0, #FFE788);
-  font-size: 120%;
-  text-align: center; }
+canvas {
+  background-color: #EEE;
+  width: 100%; }
 
 main a.button {
   background-image: linear-gradient(to top, #fc0, #FFE788);
@@ -263,8 +279,8 @@ footer span {
 /* ================================================================================
 Example showing how to change the color/size of the icons:
 .icon-name {
-	font-size: 32px; // works because "width" & "height" were set using em units
-	color: red; // works because "fill" was set to "currentColor"
+font-size: 32px; // works because "width" & "height" were set using em units
+color: red; // works because "fill" was set to "currentColor"
 }
 ================================================================================ */
 .icon-twitter {

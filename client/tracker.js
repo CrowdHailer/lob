@@ -49,34 +49,27 @@ function GraphDisplay($root){
     labels: [],
     datasets: [{
       label: "X",
-      fillColor: "rgba(220,220,220,0)",
-      strokeColor: "limegreen",
-      pointColor: "limegreen",
+      strokeColor: "#BBB",
       data: []
     }, {
       label: "Y",
-      fillColor: "rgba(220,220,220,0)",
-      strokeColor: "green",
-      pointColor: "green",
+      strokeColor: "#BBB",
       data: []
     }, {
       label: "Z",
-      fillColor: "rgba(220,220,220,0)",
-      strokeColor: "teal",
-      pointColor: "teal",
+      strokeColor: "#BBB",
       data: []
     }, {
       label: "Magnitude",
-      fillColor: "rgba(220,220,220,0)",
-      strokeColor: "orange",
-      pointColor: "orange",
+      strokeColor: "#FFCC00",
       data: []
     }]
   };
   var i = 0.0;
   // add point
   // clear
-  var myLineChart = new Chart(canvasContext).Line(data, {animation: false, animationSteps: 4, pointDot : false});
+  var chartOptions = {animation: false, animationSteps: 4, pointDot : false, datasetFill: false};
+  var myLineChart = new Chart(canvasContext).Line(data, chartOptions);
   window.myLineChart = myLineChart
   this.addPoint = function(point){
     window.requestAnimationFrame(function(){
@@ -98,7 +91,7 @@ function GraphDisplay($root){
     myLineChart.destroy();
     // i = 0.0;
     data.labels = [];
-    myLineChart = new Chart(canvasContext).Line(data, {animation: false, animationSteps: 4, pointDot : false});
+    myLineChart = new Chart(canvasContext).Line(data, chartOptions);
   }
   this.setPoints = function(points){
     // DEBT remove use of this

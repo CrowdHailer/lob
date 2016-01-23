@@ -75,6 +75,11 @@ function Projection(rawState){
       return rawState.alert;
     }
   });
+  Object.defineProperty(this, "identity", {
+    get: function(){
+      return rawState.identity;
+    }
+  });
 }
 
 export function project(app){

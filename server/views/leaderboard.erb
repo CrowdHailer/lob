@@ -1,0 +1,25 @@
+<main class="width-limited">
+  <p>
+    See the results for the last:
+    <ul>
+      <li>
+        <a href="/leaderboard">day</a>
+      </li>
+      <li>
+        <a href="/leaderboard/week">week</a>
+      </li>
+      <li>
+        <a href="leaderboard/month">month</a>.
+      </li>
+    </ul>
+  </p>
+  <hr>
+  <p>
+    These are the best results from the past <%= past %>.
+  </p>
+  <ol>
+    <% leaderboard.each do |flight| %>
+    <li><%= flight.username %>: <%= flight.max_altitude %>m</li>
+    <% end %>
+  </ol>
+</main>

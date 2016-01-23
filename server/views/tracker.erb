@@ -2,16 +2,17 @@
   <form>
     <button type="button" data-display="uplink-status-message">Connecting to Ably</button>
   </form>
-  <form data-display="tracker-following-flight" onclick="Lob.followLive()">
+  <form class="button" data-display="tracker-following-flight" onclick="Lob.followLive()">
     <button type="button">Watching live, click to lock</button>
   </form>
-  <form data-display="tracker-holding-snapshot" onclick="Lob.followFlight()" style="display:none;">
+  <form class="button" data-display="tracker-holding-snapshot" onclick="Lob.followFlight()" style="display:none;">
     <button type="button">Showing snapshot, click to return to live feed</button>
   </form>
-  <form data-display="tracker-following-live" onclick="Lob.followFlight()" style="display:none;">
+  <form class="button" data-display="tracker-following-live" onclick="Lob.followFlight()" style="display:none;">
     <button type="button">Locked to live tracking, click to allow pausing</button>
   </form>
-  <div id="orientation-tracker" data-display="tracker-graph">
+  <div id="tracker-graph" data-display="tracker-graph">
+    <span>Tracking Chromium on channel "TODO"</span>
     <canvas width="760" height="640"></canvas>
   </div>
 </main>

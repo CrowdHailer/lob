@@ -7,16 +7,10 @@
     <button type="submit" name="button">Start Flight</button>
   </form>
   <p><b>Want to watch?</b> Once a flight has started click 'share'. On a second device enter the channel given and click 'track flight'. This will show a live feed of the acceleration data from your device.</p>
-  <form class="button" action="/join" method="post">
+  <form class="button" action="/track-flight" method="post">
     <label>
-
-      <input type="text" name="channel-name" autofocus required placeholder="Enter channel">
+      <input type="text" name="channel-name" required placeholder="Enter channel">
       <button type="submit">Track Flight</button>
     </label>
   </form>
-  <nav>
-    <a class="button" href="/about">About</a>
-  </nav>
-  <svg class="icon icon-facebook"><use xlink:href="#icon-facebook"></use></svg>
-  <svg class="icon icon-facebook"><use xlink:href="#icon-twitter"></use></svg>
 </main>

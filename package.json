@@ -10,7 +10,7 @@
     "build:styles": "node-sass assets/styles/lob.scss > public/lob.css",
     "build:scripts": "npm run build:scripts:flyer && npm run build:scripts:tracker",
     "build:scripts:tracker": "rollup -c --input ./client/tracker.js --output public/tracker.js",
-    "build:scripts:flyer": "rollup -c --input ./client/flyer.js --output public/flyer.js",
+    "build:scripts:flyer": "rollup -c --input ./client/flyer.boot.js --output public/flyer.js",
     "fetch": "npm run fetch:scut -s",
     "fetch:scut": "curl https://raw.githubusercontent.com/davidtheclark/scut/master/dist/_scut.scss > ./assets/styles/vendor/_scut.scss"
   },
