@@ -11,6 +11,18 @@
   <p class="readout" data-hook="current-reading">
     starting
   </p>
+  <label style="    border: 1px solid;
+    border-radius: 2px;
+    background: #F5F7CB;
+    padding: 0.1em 0.5em;
+    width: 100%;
+    display: inline-block;">
+    <span>
+
+    Name:
+    </span>
+    <input type="text" name="username" autofocus value="" onkeyup="Lob.updateIdentity(this.value)" data-display="identity" required placeholder="Enter name">
+  </label>
   <div id="uplink" class="unknown" data-display="uplink">
     <form id="starting-uplink" class="button" action="#" method="post">
       <button type="button" data-display="status">Looking for connection</button>
@@ -26,15 +38,13 @@
       <button type="button">Could not start uplink. Try again later.</button>
     </form>
   </div>
+  <form class="button" action="/submit-flight" method="post">
+    <input type="hidden" name="max-altitude" data-display="submitted-max-altitude" value="0">
+    <input type="hidden" name="username" data-display="submitted-identity" required placeholder="Enter name">
+    <button type="submit" data-display="submit-flight">Submit flight to leaderboard</button>
+  </form>
   <form onclick="Lob.resetReadings()" class="button">
     <button type="button">Reset</button>
-  </form>
-  <div>
-  </div>
-  <form class="" action="/submit-flight" method="post" data-command="submit">
-    <input type="hidden" name="max-altitude" value="0">
-    <input type="text" name="username" value="" onkeyup="Lob.updateIdentity(this.value)" data-display="identity" required placeholder="Enter name">
-    <button type="submit">Submit</button>
   </form>
 </main>
 <script type="text/javascript" src="/ua-parse.js"></script>

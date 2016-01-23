@@ -494,11 +494,13 @@ var Lob = (function () { 'use strict';
   function Display$1($root){
     var $maxFlightTime = $root.querySelector("[data-hook~=flight-time]");
     var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
+    var $SubmittedMaxAltitude = $root.querySelector("[data-display~=submitted-max-altitude]");
     var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
     var $instruction = $root.querySelector("[data-display~=instruction]");
     var $uplink = $root.querySelector("[data-display~=uplink]");
     var $channel = $root.querySelector("[data-display~=channel]");
     var $identity = $root.querySelector("[data-display~=identity]");
+    var $submittedIdentity = $root.querySelector("[data-display~=submitted-identity]");
 
     return Object.create({}, {
       maxFlightTime: {
@@ -510,6 +512,8 @@ var Lob = (function () { 'use strict';
       maxAltitude: {
         set: function(maxAltitude){
           $maxAltitude.innerHTML = maxAltitude;
+          // DEBT logic in display to be removed
+          $SubmittedMaxAltitude.value = maxAltitude.split(' ')[0];
         },
         enumerable: true
       },
@@ -545,6 +549,7 @@ var Lob = (function () { 'use strict';
       identity: {
         set: function(identity){
           $identity.value = identity;
+          $submittedIdentity.value = identity;
         },
         enumerable: true
       }
