@@ -68,7 +68,8 @@ function GraphDisplay($root){
   var i = 0.0;
   // add point
   // clear
-  var myLineChart = new Chart(canvasContext).Line(data, {animation: false, animationSteps: 4, pointDot : false, datasetFill: false});
+  var chartOptions = {animation: false, animationSteps: 4, pointDot : false, datasetFill: false};
+  var myLineChart = new Chart(canvasContext).Line(data, chartOptions);
   window.myLineChart = myLineChart
   this.addPoint = function(point){
     window.requestAnimationFrame(function(){
@@ -90,7 +91,7 @@ function GraphDisplay($root){
     myLineChart.destroy();
     // i = 0.0;
     data.labels = [];
-    myLineChart = new Chart(canvasContext).Line(data, {animation: false, animationSteps: 4, pointDot : false});
+    myLineChart = new Chart(canvasContext).Line(data, chartOptions);
   }
   this.setPoints = function(points){
     // DEBT remove use of this

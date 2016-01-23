@@ -498,14 +498,15 @@ var Lob = (function () { 'use strict';
     var i = 0.0;
     // add point
     // clear
-    var myLineChart = new Chart(canvasContext).Line(data, {animation: false, animationSteps: 4, pointDot : false, datasetFill: false});
+    var chartOptions = {animation: false, animationSteps: 4, pointDot : false, datasetFill: false};
+    var myLineChart = new Chart(canvasContext).Line(data, chartOptions);
     window.myLineChart = myLineChart
     this.addPoint = function(point){
       window.requestAnimationFrame(function(){
         var date = new Date(point.timestamp)
         // TODO plot only some legends
         if (i % 1 === 0) {
-          myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + ':' + date.getSeconds() + 's');
+          myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + '.' + date.getSeconds() + 's');
         } else {
           myLineChart.addData([point.x, point.y, point.z, point.magnitude], '');
         }
@@ -520,7 +521,7 @@ var Lob = (function () { 'use strict';
       myLineChart.destroy();
       // i = 0.0;
       data.labels = [];
-      myLineChart = new Chart(canvasContext).Line(data, {animation: false, animationSteps: 4, pointDot : false});
+      myLineChart = new Chart(canvasContext).Line(data, chartOptions);
     }
     this.setPoints = function(points){
       // DEBT remove use of this
