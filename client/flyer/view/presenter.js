@@ -38,10 +38,17 @@ function Presenter(projection){
 
   Object.defineProperty(this, "instruction", {
     get: function(){
+      console.log(this)
       if (!this.hasThrow) {
         return "Lob phone to get started";
       }
       return "OK! can you lob any higher";
+    }
+  });
+
+  Object.defineProperty(this, "hasThrow", {
+    get: function(){
+      return projection.hasThrow;
     }
   });
 
