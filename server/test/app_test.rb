@@ -77,10 +77,10 @@ class AppTest < MiniTest::Test
   end
 
   def test_submitting_an_invalid_flight_will_fail
-    skip
     leaderboard = Leaderboard.new
     post '/submit-flight', {'max-altitude': 12.10, username: ''}
-    refute_equal Leaderboard.best_today.first.max_altitude, 12.10
-    assert last_response.ok?
+    assert_equal [], Leaderboard.best_today
+    assert_equal 400, last_response.status
+    assert_match /Username is invalid/, last_response.body
   end
 end
