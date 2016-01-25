@@ -188,6 +188,8 @@ form.button {
     padding: 0.5em; }
     form.button button:focus, form.button button:active {
       text-decoration: underline; }
+  form.button button[disabled] {
+    color: #AAA; }
 
 .center {
   text-align: center; }

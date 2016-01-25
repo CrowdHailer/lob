@@ -42,8 +42,8 @@
   </div>
   <form class="button" action="/submit-flight" method="post">
     <input type="hidden" name="max-altitude" data-display="submitted-max-altitude" value="0">
-    <input type="hidden" name="username" data-display="submitted-identity" required placeholder="Enter name">
-    <button type="submit" data-display="submit-flight">Submit flight to leaderboard</button>
+    <input type="hidden" name="username" data-display="submitted-identity">
+    <button type="submit" data-display="submit-flight" disabled>Submit flight to leaderboard</button>
   </form>
   <form onclick="Lob.resetReadings()" class="button">
     <button type="button">Reset</button>

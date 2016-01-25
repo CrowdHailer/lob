@@ -81,6 +81,9 @@ form.button {
       text-decoration: underline;
     }
   }
+  button[disabled] {
+    color: #AAA;
+  }
 }
 .center {
   text-align: center;

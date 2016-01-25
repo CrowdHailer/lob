@@ -10,6 +10,7 @@ function Display($root){
   var $channel = $root.querySelector("[data-display~=channel]");
   var $identity = $root.querySelector("[data-display~=identity]");
   var $submittedIdentity = $root.querySelector("[data-display~=submitted-identity]");
+  var $submitFlight = $root.querySelector("[data-display~=submit-flight]");
 
   return Object.create({}, {
     maxFlightTime: {
@@ -23,6 +24,11 @@ function Display($root){
         $maxAltitude.innerHTML = maxAltitude;
         // DEBT logic in display to be removed
         $SubmittedMaxAltitude.value = maxAltitude.split(' ')[0];
+        if (maxAltitude === '0 m') {
+          $submitFlight.disabled = true;
+        } else {
+          $submitFlight.disabled = false;
+        }
       },
       enumerable: true
     },
