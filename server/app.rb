@@ -3,7 +3,7 @@ require "sinatra/cookies"
 
 require "ably"
 
-require_relative './leaderboard'
+require_relative './lib/leaderboard'
 
 class LobApp < Sinatra::Base
   helpers Sinatra::Cookies

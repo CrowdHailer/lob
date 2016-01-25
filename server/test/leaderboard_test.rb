@@ -1,6 +1,6 @@
 require_relative './test_config'
 
-require_relative '../leaderboard'
+require_relative '../lib/leaderboard'
 
 class AppTest < MiniTest::Test
   def run(*args, &block)
