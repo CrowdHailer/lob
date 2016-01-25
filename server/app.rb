@@ -3,7 +3,7 @@ require "sinatra/cookies"
 
 require "ably"
 
-require_relative './leaderboard'
+require_relative './lib/leaderboard'
 
 class LobApp < Sinatra::Base
   helpers Sinatra::Cookies
@@ -64,11 +64,16 @@ class LobApp < Sinatra::Base
   end
 
   post '/submit-flight' do
-    username = request.POST['username'];
-    max_altitude = request.POST['max-altitude']; # m
-    flight = Flight.new(username: username, max_altitude: max_altitude)
-    Leaderboard.submit_flight(flight)
-    erb :submission
+    begin
+      username = request.POST['username'];
+      max_altitude = request.POST['max-altitude']; # m
+      flight = Flight.new(username: username, max_altitude: max_altitude)
+      Leaderboard.submit_flight(flight)
+      erb :submission
+    rescue ArgumentError => err
+      status 400
+      erb :failed_submission, :locals => {message: err.message}
+    end
   end
 
   def client

@@ -501,6 +501,7 @@ var Lob = (function () { 'use strict';
     var $channel = $root.querySelector("[data-display~=channel]");
     var $identity = $root.querySelector("[data-display~=identity]");
     var $submittedIdentity = $root.querySelector("[data-display~=submitted-identity]");
+    var $submitFlight = $root.querySelector("[data-display~=submit-flight]");
 
     return Object.create({}, {
       maxFlightTime: {
@@ -514,6 +515,11 @@ var Lob = (function () { 'use strict';
           $maxAltitude.innerHTML = maxAltitude;
           // DEBT logic in display to be removed
           $SubmittedMaxAltitude.value = maxAltitude.split(' ')[0];
+          if (maxAltitude === '0 m') {
+            $submitFlight.disabled = true;
+          } else {
+            $submitFlight.disabled = false;
+          }
         },
         enumerable: true
       },
@@ -548,7 +554,6 @@ var Lob = (function () { 'use strict';
       },
       identity: {
         set: function(identity){
-          console.log($identity.value)
           if ($identity.value == '') {
             $identity.value = identity;
           }
