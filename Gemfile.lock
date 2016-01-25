@@ -37,6 +37,7 @@ GEM
     multi_json (1.11.2)
     multipart-post (2.0.0)
     pg (0.18.4)
+    puma (2.15.3)
     rack (1.6.4)
     rack-protection (1.5.3)
       rack
@@ -69,6 +70,7 @@ DEPENDENCIES
   minitest
   minitest-reporters
   pg
+  puma
   rack-test
   sequel
   sinatra

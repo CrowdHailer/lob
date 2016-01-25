@@ -8,6 +8,7 @@ gem "sinatra-contrib"
 gem "ably"
 gem 'pg'
 gem 'sequel'
+gem 'puma'
 
 gem 'rack-test', :require => 'rack/test'
 group :test do
