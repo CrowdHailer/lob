@@ -548,7 +548,10 @@ var Lob = (function () { 'use strict';
       },
       identity: {
         set: function(identity){
-          $identity.value = identity;
+          console.log($identity.value)
+          if ($identity.value == '') {
+            $identity.value = identity;
+          }
           $submittedIdentity.value = identity;
         },
         enumerable: true

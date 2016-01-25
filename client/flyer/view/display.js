@@ -57,7 +57,9 @@ function Display($root){
     },
     identity: {
       set: function(identity){
-        $identity.value = identity;
+        if ($identity.value == '') {
+          $identity.value = identity;
+        }
         $submittedIdentity.value = identity;
       },
       enumerable: true

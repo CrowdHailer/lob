@@ -506,7 +506,7 @@ var Lob = (function () { 'use strict';
         var date = new Date(point.timestamp)
         // TODO plot only some legends
         if (i % 1 === 0) {
-          myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + '.' + date.getSeconds() + 's');
+          myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + ':' + date.getSeconds() + 's');
         } else {
           myLineChart.addData([point.x, point.y, point.z, point.magnitude], '');
         }
