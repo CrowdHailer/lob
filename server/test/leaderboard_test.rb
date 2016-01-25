@@ -2,7 +2,7 @@ require_relative './test_config'
 
 require_relative '../lib/leaderboard'
 
-class AppTest < MiniTest::Test
+class LeaderboardTest < MiniTest::Test
   def run(*args, &block)
     Sequel::Model.db.transaction(:rollback=>:always, :auto_savepoint=>true){super}
   end
