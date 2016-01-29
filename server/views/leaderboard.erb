@@ -14,6 +14,13 @@
     </ul>
   </p>
   <hr>
+  <% if leaderboard.empty? %>
+  <p>
+    <i>
+      No data from the last <%= past %>. Try another leaderboard.
+    </i>
+  </p>
+  <% else %>
   <p>
     These are the best results from the past <%= past %>.
   </p>
@@ -22,4 +29,5 @@
     <li><%= flight.username %>: <%= flight.max_altitude %>m</li>
     <% end %>
   </ol>
+  <% end %>
 </main>
