@@ -1,5 +1,5 @@
 # lob
-Demonstrating realtime connection between web browsers. Powered by ably.io
+Demonstrating realtime connection between web browsers. Powered by [Ably, simply better realtime messaging](https://www.ably.io)
 
 ### Installation
 
@@ -39,9 +39,11 @@ Run migrations `sequel -m database/migrations postgres://localhost/lob_developme
 Run the local version by executing `heroku local`.
 The application will the be available on port 5000
 
-### Notes
+Compiling assets relies on `npm`.
 
-- Use [Level Project](https://github.com/CrowdHailer/level) as demo for accessing acceleration data.
-- Use [Chart JS](http://www.chartjs.org/) to plot the output data.
-  - [Fiddle on updating points on chart-js](http://jsbin.com/yitep/4/edit?html,js,output)
-  - [Fiddle on appending points to a chart-js line graph](http://jsfiddle.net/qs0gpLa2/)
+Pre-requisites:
+* `npm install` to set up dependencies
+* `git submodule init && git submodule update`
+
+Then build your assets:
+`npm build` to build and copy assets

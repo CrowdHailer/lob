@@ -650,7 +650,11 @@ var Lob = (function () { 'use strict';
     var parser = new UAParser();
     var result = parser.getResult();
     lobIdentity = result.device.model || result.browser.name;
-    localStorage.setItem('lobIdentity', lobIdentity);
+    try {
+      localStorage.setItem('lobIdentity', lobIdentity);
+    } catch (err) {
+      console.warn('set local storage failed');
+    }
   }
 
   var router = Router(window.location);
