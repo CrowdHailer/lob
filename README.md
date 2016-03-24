@@ -34,6 +34,8 @@ Run all the tests through rake and npm.
 rake test && npm test
 ```
 
+Create dev db `lob_development`
+Run migrations `sequel -m database/migrations postgres://localhost/lob_development`
 Run the local version by executing `heroku local`.
 The application will the be available on port 5000
 
