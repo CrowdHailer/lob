@@ -26,18 +26,3 @@ export default function UplinkController(options, tracker){
     tracker.resetReadings();
   });
 }
-
-// uplink controller does very little work so it is not separated from uplink
-
-// function Uplink(options, logger){
-//   var channelName = options.channel;
-//   var token = options.token;
-//   var realtime = new Ably.Realtime({ token: token });
-//   var channel = realtime.channels.get(channelName);
-//   realtime.connection.on("connected", function(err) {
-//     console.log("realtime connected");
-//   });
-//   realtime.connection.on("failed", function(err) {
-//     console.log("realtime connection failed");
-//   });
-// }
