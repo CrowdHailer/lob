@@ -8,14 +8,14 @@ Demonstrating realtime connection between web browsers. Powered by [Ably, simply
 
 Requires Ruby, RubyGems, Node.js and Npm to be installed.
 
-1. Clone source from [github](https://github.com/CrowdHailer/lob)
+1. Clone source from [github](https://github.com/CrowdHailer/lob).
 
 ```
 git clone git@github.com:CrowdHailer/lob.git
 cd lob
 ```
 
-2. Fetch dependencies
+2. Fetch dependencies.
 
 ```
 bundle
@@ -32,9 +32,9 @@ rake db:migrate:up
 
 4. Obtain an [Ably API key](https://www.ably.io) and add to [.env](.env). See [.env.example](.env.example) for an example of how to configure this file.
 
-5. Build your assets. `npm run build` to build and copy assets
+5. Build your assets. `npm run build` to build and copy assets.
 
-6. Run the local version by executing `puma`. If you want the app to reload automatically when changes are made, try `rerun puma`. The application will the be available on all network interfaces on port 5000.
+6. Run the local version by executing `puma`. If you want the app to reload automatically when changes are made, try `rerun -d client,config,server puma`. The application will the be available on all network interfaces on port 5000.
 
 ### Tests
 
