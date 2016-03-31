@@ -120,7 +120,6 @@ function Phone() {
     }
 
     $phone.style.cssText = cssText;
-    console.log($phone.style.cssText, position, xDegrees, yDegrees, zDegrees);
   }
 }
 
