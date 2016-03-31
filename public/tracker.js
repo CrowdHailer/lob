@@ -151,6 +151,10 @@ var Lob = (function () { 'use strict';
       // logEvent("New newReading");
     };
 
+    tracker.newOrientation = function(position){
+      tracker.showcase.orientatePhones(position);
+    };
+
     tracker.holdSnapshot = function(){
       // Take and hold a snapshot only if the tracker is tracking flights
       if (tracker.state.flightOutputStatus !== 'FOLLOWING_FLIGHT') {
@@ -295,7 +299,7 @@ var Lob = (function () { 'use strict';
     if ( !(this instanceof TrackerShowcase) ) { return new TrackerShowcase(window); }
     var showcase = this;
     var views = [];
-
+    var phones = [];
 
     this.update = function(projection){
       // Values needed in display
@@ -318,11 +322,23 @@ var Lob = (function () { 'use strict';
       views.push(view);
     };
 
+    this.addPhone = function(phone) {
+      phones.push(phone);
+    }
+
     // DEBT
     this.addReading = function(newReading){
       views.forEach(function(view){
         if (view.addReading) {
           view.addReading(newReading);
+        }
+      });
+    }
+
+    this.orientatePhones = function(position) {
+      phones.forEach(function(phone){
+        if (phone.setOrientation) {
+          phone.setOrientation(position);
         }
       });
     }
@@ -350,8 +366,10 @@ var Lob = (function () { 'use strict';
     });
     var channel = realtime.channels.get(channelName);
     channel.subscribe("newReading", function(event){
-      // new Vector(event.data);
       tracker.newReading(Reading(event.data));
+    });
+    channel.subscribe("newOrientation", function(event){
+      tracker.newOrientation(event.data);
     });
     channel.subscribe("resetReadings", function(_event){
       tracker.resetReadings();
@@ -456,8 +474,6 @@ var Lob = (function () { 'use strict';
 
   var uplinkController = new UplinkController(router.state, tracker);
 
-
-
   function uplinkStatusMessageFromProjection(projection) {
     var message = projection.uplinkStatus;
     if (message === 'AVAILABLE') {
@@ -473,32 +489,31 @@ var Lob = (function () { 'use strict';
     if ( !(this instanceof GraphDisplay) ) { return new GraphDisplay($root); }
     var canvas = $root.querySelector('canvas');
     var canvasContext = canvas.getContext("2d");
-    console.log(canvas)
+
     // DEBT data can come from $root dataset
     var data = {
       labels: [],
       datasets: [{
-        label: "X",
-        strokeColor: "#BBB",
-        data: []
-      }, {
-        label: "Y",
-        strokeColor: "#BBB",
-        data: []
-      }, {
-        label: "Z",
-        strokeColor: "#BBB",
-        data: []
-      }, {
         label: "Magnitude",
         strokeColor: "#FFCC00",
         data: []
       }]
     };
+
     var i = 0.0;
     // add point
     // clear
-    var chartOptions = {animation: false, animationSteps: 4, pointDot : false, datasetFill: false};
+    var chartOptions = {
+      animation: false,
+      pointDot : false,
+      datasetFill: false,
+      showToolTips: false,
+      scaleOverride: true,
+      scaleStartValue: 0,
+      scaleSteps: 9,
+      scaleStepWidth: 10,
+      scaleLabel: "    <%=value%>"
+    };
     var myLineChart = new Chart(canvasContext).Line(data, chartOptions);
     window.myLineChart = myLineChart
     this.addPoint = function(point){
@@ -506,9 +521,9 @@ var Lob = (function () { 'use strict';
         var date = new Date(point.timestamp)
         // TODO plot only some legends
         if (i % 1 === 0) {
-          myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + ':' + date.getSeconds() + 's');
+          myLineChart.addData([point.magnitude], date.getSeconds() + 's');
         } else {
-          myLineChart.addData([point.x, point.y, point.z, point.magnitude], '');
+          myLineChart.addData([point.magnitude], '');
         }
         // DEBT make length part of config
         if (myLineChart.datasets[0].points.length > 20) {
@@ -534,6 +549,29 @@ var Lob = (function () { 'use strict';
       })
     }
   }
+
+  function Phone() {
+    if ( !(this instanceof Phone) ) { return new Phone($root); }
+    var $phone = document.documentElement.querySelector('#tridiv .scene');
+    var prefixes = ["-webkit-", "-moz-", "-ms-", ""];
+
+    this.setOrientation = function(position) {
+      /* Don't rotate on Y axis so that phone rotates on X & Y axis in front of user */
+      var xRotation = (90 - position.beta) + 270,
+          zRotation = position.gamma;
+
+      var cssText = '';
+
+      for (var prefixIndex = 0; prefixIndex < prefixes.length; prefixIndex++) {
+        var prefix = prefixes[prefixIndex];
+        cssText += prefix + 'transform: rotateX(' + xRotation + 'deg) rotateY(0deg) rotateZ(' + zRotation + 'deg);';
+      }
+
+      $phone.style.cssText = cssText;
+      console.log($phone.style.cssText, position, xDegrees, yDegrees, zDegrees);
+    }
+  }
+
   ready(function(){
     var $root = document.documentElement;
     var $uplinkStatusMessage = queryDisplay('uplink-status-message', $root);
@@ -547,6 +585,8 @@ var Lob = (function () { 'use strict';
     var graphDisplay = GraphDisplay($graphDisplay);
     window.graphDisplay = graphDisplay;
     console.debug('dom is ready', $uplinkStatusMessage);
+
+    var phone = new Phone();
 
     var mainView = {
       render: function(projection){
@@ -585,6 +625,7 @@ var Lob = (function () { 'use strict';
       }
     };
     tracker.showcase.addView(mainView);
+    tracker.showcase.addPhone(phone);
   });
 
 

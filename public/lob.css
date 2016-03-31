@@ -161,19 +161,21 @@ hr {
 nav {
   padding-top: 1em;
   text-align: center; }
-
-.nav-item {
-  border: 2px solid;
-  border-radius: 4px;
-  padding: 0.1em 0.5em;
-  background-image: linear-gradient(to top, #fc0, #FFE788);
-  color: black;
-  text-decoration: none;
-  display: inline-block;
-  margin: 0.5em; }
-  .nav-item:focus, .nav-item:active {
-    background-image: linear-gradient(to bottom, #fc0, #FFE788);
-    text-decoration: underline; }
+  nav.footer-nav {
+    clear: both;
+    max-width: 760px; }
+  nav .nav-item {
+    border: 2px solid;
+    border-radius: 4px;
+    padding: 0.1em 0.5em;
+    background-image: linear-gradient(to top, #fc0, #FFE788);
+    color: black;
+    text-decoration: none;
+    display: inline-block;
+    margin: 0.5em; }
+    nav .nav-item:focus, nav .nav-item:active {
+      background-image: linear-gradient(to bottom, #fc0, #FFE788);
+      text-decoration: underline; }
 
 form.button {
   display: block;
@@ -237,13 +239,31 @@ input {
   background-color: transparent;
   font-family: raleway; }
 
-#tracker-graph {
-  background-color: #EEE;
-  border: 2px solid black; }
-
-canvas {
-  background-color: #EEE;
-  width: 100%; }
+.tracker {
+  text-align: center;
+  width: 960px;
+  margin: 0 auto; }
+  .tracker .graph-and-phone {
+    overflow: hidden; }
+    .tracker .graph-and-phone #tracker-graph {
+      background-color: #EEE;
+      border: 1px solid #AAA;
+      float: left;
+      margin: 25px 0;
+      border-radius: 8px;
+      padding: 5px; }
+      .tracker .graph-and-phone #tracker-graph canvas {
+        background-color: #EEE;
+        width: 590px;
+        height: 290px; }
+    .tracker .graph-and-phone #tridiv {
+      float: right;
+      position: relative;
+      width: 350px;
+      height: 350px;
+      font-size: 37.5%; }
+  .tracker .lock-unlock {
+    clear: both; }
 
 main a.button {
   background-image: linear-gradient(to top, #fc0, #FFE788);

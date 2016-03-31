@@ -40,6 +40,9 @@ function AccelerometerController(global, flyer){
   global.addEventListener('devicemotion', function(deviceMotionEvent){
     flyer.newReading(deviceMotionEvent.accelerationIncludingGravity);
   });
+  global.addEventListener('deviceorientation', function(deviceOrientationEvent){
+    flyer.newOrientation({ alpha: deviceOrientationEvent.alpha, beta: deviceOrientationEvent.beta, gamma: deviceOrientationEvent.gamma });
+  });
 }
 
 var accelerometerController = new AccelerometerController(window, flyer);

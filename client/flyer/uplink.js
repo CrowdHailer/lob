@@ -15,10 +15,11 @@ export default function FlyerUplink(options, logger) {
   this.token = token;
   this.channelName = channelName;
   this.newReadingRateLimit = newReadingRateLimit;
-  
+
   this.onconnected = function(){
     // DEBT null op;
   }
+
   function transmitReading(reading){
     channel.publish('newReading', reading, function(err){
       if (err) {
@@ -27,7 +28,17 @@ export default function FlyerUplink(options, logger) {
     })
   }
 
+  function transmitOrientation(position){
+    channel.publish('newOrientation', position, function(err) {
+      if (err) {
+        window.console.warn("Unable to send new orientation; err = " + err.message);
+      }
+    })
+  }
+
   this.transmitReading = throttle(transmitReading, newReadingRateLimit);
+  this.transmitOrientation = throttle(transmitOrientation, newReadingRateLimit);
+
   this.transmitResetReadings = function(){
     channel.publish("resetReadings", {}, function(err) {
       if(err) {

@@ -55,6 +55,10 @@ export default function Flyer(state){
     // logInfo("[New reading]", reading); DONT log this
     showcase(flyer.state);
   };
+  flyer.newOrientation = function(position) {
+    position.timestamp = Date.now();
+    transmitOrientation(position);
+  }
   flyer.resetReadings = function(){
     flyer.state = flyer.state.merge({
       latestReading: null,
@@ -92,6 +96,11 @@ export default function Flyer(state){
   function transmitReading(reading){
     if (flyer.state.uplinkStatus === "TRANSMITTING") {
       flyer.uplink.transmitReading(reading);
+    }
+  }
+  function transmitOrientation(position){
+    if (flyer.state.uplinkStatus === "TRANSMITTING") {
+      flyer.uplink.transmitOrientation(position);
     }
   }
   function transmitResetReadings(){

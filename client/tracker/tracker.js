@@ -80,6 +80,10 @@ function Tracker(state, world){
     // logEvent("New newReading");
   };
 
+  tracker.newOrientation = function(position){
+    tracker.showcase.orientatePhones(position);
+  };
+
   tracker.holdSnapshot = function(){
     // Take and hold a snapshot only if the tracker is tracking flights
     if (tracker.state.flightOutputStatus !== 'FOLLOWING_FLIGHT') {

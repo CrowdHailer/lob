@@ -38,7 +38,6 @@ function Presenter(projection){
 
   Object.defineProperty(this, "instruction", {
     get: function(){
-      console.log(this)
       if (!this.hasThrow) {
         return "Lob phone to get started";
       }

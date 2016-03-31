@@ -1,21 +1,29 @@
-<main class="width-limited">
+<main class="tracker">
   <form>
     <button type="button" data-display="uplink-status-message">Connecting to Ably</button>
   </form>
-  <form class="button" data-display="tracker-following-flight" onclick="Lob.followLive()">
-    <button type="button">Watching live, click to lock</button>
-  </form>
-  <form class="button" data-display="tracker-holding-snapshot" onclick="Lob.followFlight()" style="display:none;">
-    <button type="button">Showing snapshot, click to return to live feed</button>
-  </form>
-  <form class="button" data-display="tracker-following-live" onclick="Lob.followFlight()" style="display:none;">
-    <button type="button">Locked to live tracking, click to allow pausing</button>
-  </form>
-  <div id="tracker-graph" data-display="tracker-graph">
-    <span>Tracking Chromium on channel "TODO"</span>
-    <canvas width="760" height="640"></canvas>
+
+  <div class="graph-and-phone">
+    <div id="tracker-graph" data-display="tracker-graph">
+      <canvas></canvas>
+    </div>
+    <%= erb :_phone %>
+  </div>
+
+  <div class="lock-unlock">
+    <form class="button" data-display="tracker-following-flight" onclick="Lob.followLive()">
+      <button type="button">Watching live, click to lock</button>
+    </form>
+    <form class="button" data-display="tracker-holding-snapshot" onclick="Lob.followFlight()" style="display:none;">
+      <button type="button">Showing snapshot, click to return to live feed</button>
+    </form>
+    <form class="button" data-display="tracker-following-live" onclick="Lob.followFlight()" style="display:none;">
+      <button type="button">Locked to live tracking, click to allow pausing</button>
+    </form>
   </div>
 </main>
+
+<link rel="stylesheet" href="/phone.css" media="screen" title="Phone styling" charset="utf-8">
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+<script type="text/javascript" src="/vendor.js"></script>
 <script type="text/javascript" src="/tracker.js"></script>
-<!-- https://github.com/CrowdHailer/lob/blob/2c5de6322d4800553ca80a9d34341b4866e5f918/assets/scripts/boot.ts -->

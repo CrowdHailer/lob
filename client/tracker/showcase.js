@@ -8,7 +8,7 @@ export default function TrackerShowcase(window){
   if ( !(this instanceof TrackerShowcase) ) { return new TrackerShowcase(window); }
   var showcase = this;
   var views = [];
-
+  var phones = [];
 
   this.update = function(projection){
     // Values needed in display
@@ -31,11 +31,23 @@ export default function TrackerShowcase(window){
     views.push(view);
   };
 
+  this.addPhone = function(phone) {
+    phones.push(phone);
+  }
+
   // DEBT
   this.addReading = function(newReading){
     views.forEach(function(view){
       if (view.addReading) {
         view.addReading(newReading);
+      }
+    });
+  }
+
+  this.orientatePhones = function(position) {
+    phones.forEach(function(phone){
+      if (phone.setOrientation) {
+        phone.setOrientation(position);
       }
     });
   }

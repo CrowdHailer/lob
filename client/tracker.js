@@ -26,8 +26,6 @@ tracker.showcase = Showcase(window);
 
 var uplinkController = new UplinkController(router.state, tracker);
 
-
-
 function uplinkStatusMessageFromProjection(projection) {
   var message = projection.uplinkStatus;
   if (message === 'AVAILABLE') {
@@ -43,32 +41,31 @@ function GraphDisplay($root){
   if ( !(this instanceof GraphDisplay) ) { return new GraphDisplay($root); }
   var canvas = $root.querySelector('canvas');
   var canvasContext = canvas.getContext("2d");
-  console.log(canvas)
+
   // DEBT data can come from $root dataset
   var data = {
     labels: [],
     datasets: [{
-      label: "X",
-      strokeColor: "#BBB",
-      data: []
-    }, {
-      label: "Y",
-      strokeColor: "#BBB",
-      data: []
-    }, {
-      label: "Z",
-      strokeColor: "#BBB",
-      data: []
-    }, {
       label: "Magnitude",
       strokeColor: "#FFCC00",
       data: []
     }]
   };
+
   var i = 0.0;
   // add point
   // clear
-  var chartOptions = {animation: false, animationSteps: 4, pointDot : false, datasetFill: false};
+  var chartOptions = {
+    animation: false,
+    pointDot : false,
+    datasetFill: false,
+    showToolTips: false,
+    scaleOverride: true,
+    scaleStartValue: 0,
+    scaleSteps: 9,
+    scaleStepWidth: 10,
+    scaleLabel: "    <%=value%>"
+  };
   var myLineChart = new Chart(canvasContext).Line(data, chartOptions);
   window.myLineChart = myLineChart
   this.addPoint = function(point){
@@ -76,9 +73,9 @@ function GraphDisplay($root){
       var date = new Date(point.timestamp)
       // TODO plot only some legends
       if (i % 1 === 0) {
-        myLineChart.addData([point.x, point.y, point.z, point.magnitude], date.getMinutes() + ':' + date.getSeconds() + 's');
+        myLineChart.addData([point.magnitude], date.getSeconds() + 's');
       } else {
-        myLineChart.addData([point.x, point.y, point.z, point.magnitude], '');
+        myLineChart.addData([point.magnitude], '');
       }
       // DEBT make length part of config
       if (myLineChart.datasets[0].points.length > 20) {
@@ -104,6 +101,29 @@ function GraphDisplay($root){
     })
   }
 }
+
+function Phone() {
+  if ( !(this instanceof Phone) ) { return new Phone($root); }
+  var $phone = document.documentElement.querySelector('#tridiv .scene');
+  var prefixes = ["-webkit-", "-moz-", "-ms-", ""];
+
+  this.setOrientation = function(position) {
+    /* Don't rotate on Y axis so that phone rotates on X & Y axis in front of user */
+    var xRotation = (90 - position.beta) + 270,
+        zRotation = position.gamma;
+
+    var cssText = '';
+
+    for (var prefixIndex = 0; prefixIndex < prefixes.length; prefixIndex++) {
+      var prefix = prefixes[prefixIndex];
+      cssText += prefix + 'transform: rotateX(' + xRotation + 'deg) rotateY(0deg) rotateZ(' + zRotation + 'deg);';
+    }
+
+    $phone.style.cssText = cssText;
+    console.log($phone.style.cssText, position, xDegrees, yDegrees, zDegrees);
+  }
+}
+
 ready(function(){
   var $root = document.documentElement;
   var $uplinkStatusMessage = queryDisplay('uplink-status-message', $root);
@@ -117,6 +137,8 @@ ready(function(){
   var graphDisplay = GraphDisplay($graphDisplay);
   window.graphDisplay = graphDisplay;
   console.debug('dom is ready', $uplinkStatusMessage);
+
+  var phone = new Phone();
 
   var mainView = {
     render: function(projection){
@@ -155,6 +177,7 @@ ready(function(){
     }
   };
   tracker.showcase.addView(mainView);
+  tracker.showcase.addPhone(phone);
 });
 
 
@@ -163,3 +186,4 @@ function queryDisplay(display, element){
   return element.querySelector('[data-display~=' + display + ']');
 }
 export default tracker;
+

@@ -71,10 +71,11 @@ var Lob = (function () { 'use strict';
     this.token = token;
     this.channelName = channelName;
     this.newReadingRateLimit = newReadingRateLimit;
-    
+
     this.onconnected = function(){
       // DEBT null op;
     }
+
     function transmitReading(reading){
       channel.publish('newReading', reading, function(err){
         if (err) {
@@ -83,7 +84,17 @@ var Lob = (function () { 'use strict';
       })
     }
 
+    function transmitOrientation(position){
+      channel.publish('newOrientation', position, function(err) {
+        if (err) {
+          window.console.warn("Unable to send new orientation; err = " + err.message);
+        }
+      })
+    }
+
     this.transmitReading = throttle(transmitReading, newReadingRateLimit);
+    this.transmitOrientation = throttle(transmitOrientation, newReadingRateLimit);
+
     this.transmitResetReadings = function(){
       channel.publish("resetReadings", {}, function(err) {
         if(err) {
@@ -356,6 +367,10 @@ var Lob = (function () { 'use strict';
       // logInfo("[New reading]", reading); DONT log this
       showcase(flyer.state);
     };
+    flyer.newOrientation = function(position) {
+      position.timestamp = Date.now();
+      transmitOrientation(position);
+    }
     flyer.resetReadings = function(){
       flyer.state = flyer.state.merge({
         latestReading: null,
@@ -393,6 +408,11 @@ var Lob = (function () { 'use strict';
     function transmitReading(reading){
       if (flyer.state.uplinkStatus === "TRANSMITTING") {
         flyer.uplink.transmitReading(reading);
+      }
+    }
+    function transmitOrientation(position){
+      if (flyer.state.uplinkStatus === "TRANSMITTING") {
+        flyer.uplink.transmitOrientation(position);
       }
     }
     function transmitResetReadings(){
@@ -454,7 +474,6 @@ var Lob = (function () { 'use strict';
 
     Object.defineProperty(this, "instruction", {
       get: function(){
-        console.log(this)
         if (!this.hasThrow) {
           return "Lob phone to get started";
         }
@@ -677,6 +696,9 @@ var Lob = (function () { 'use strict';
   function AccelerometerController(global, flyer){
     global.addEventListener('devicemotion', function(deviceMotionEvent){
       flyer.newReading(deviceMotionEvent.accelerationIncludingGravity);
+    });
+    global.addEventListener('deviceorientation', function(deviceOrientationEvent){
+      flyer.newOrientation({ alpha: deviceOrientationEvent.alpha, beta: deviceOrientationEvent.beta, gamma: deviceOrientationEvent.gamma });
     });
   }
 

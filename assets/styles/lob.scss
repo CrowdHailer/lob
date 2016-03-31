@@ -10,7 +10,6 @@
 @include scut-reset-border-box;
 @include scut-reset-button;
 @include scut-sticky-footer-fluid(body, footer);
-// @include scut-reset-semanticize;
 
 // STRUCTURE
 // styling added to semantic elements
@@ -50,19 +49,25 @@ hr {
 nav {
   padding-top: 1em;
   text-align: center;
-}
-.nav-item {
-  border: 2px solid;
-  border-radius: 4px;
-  padding: 0.1em 0.5em;
-  background-image: linear-gradient(to top, #fc0, #FFE788);
-  color: black;
-  text-decoration: none;
-  display: inline-block;
-  margin: 0.5em;
-  &:focus, &:active {
-    background-image: linear-gradient(to bottom, #fc0, #FFE788);
-    text-decoration: underline;
+
+  &.footer-nav {
+    clear: both;
+    max-width: 760px;
+  }
+
+  .nav-item {
+    border: 2px solid;
+    border-radius: 4px;
+    padding: 0.1em 0.5em;
+    background-image: linear-gradient(to top, #fc0, #FFE788);
+    color: black;
+    text-decoration: none;
+    display: inline-block;
+    margin: 0.5em;
+    &:focus, &:active {
+      background-image: linear-gradient(to bottom, #fc0, #FFE788);
+      text-decoration: underline;
+    }
   }
 }
 
@@ -141,14 +146,43 @@ input {
   font-family: raleway;
 }
 
-#tracker-graph {
-  background-color: #EEE;
-  border: 2px solid black;
+.tracker {
+  text-align: center;
+  width: 960px;
+  margin: 0 auto;
+
+  .graph-and-phone {
+    overflow: hidden;
+
+    #tracker-graph {
+      background-color: #EEE;
+      border: 1px solid #AAA;
+      float: left;
+      margin: 25px 0;
+      border-radius: 8px;
+      padding: 5px;
+
+      canvas {
+        background-color: #EEE;
+        width: 590px;
+        height: 290px;
+      }
+    }
+
+    #tridiv {
+      float: right;
+      position: relative;
+      width: 350px;
+      height: 350px;
+      font-size: 37.5%;
+    }
+  }
+
+  .lock-unlock {
+    clear: both;
+  }
 }
-canvas {
-  background-color: #EEE;
-  width: 100%;
-}
+
 main {
   a.button {
     background-image: linear-gradient(to top, #fc0, #FFE788);
