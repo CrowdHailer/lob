@@ -53,6 +53,9 @@ function UplinkController(uplink, application){
   uplink.onconnectionFailed = function(){
     application.uplinkFailed();
   }
+  uplink.onconnectionDisconnected = function(){
+    application.uplinkDisconnected({ channelName: uplink.channelName });
+  }
 }
 var uplinkController = new UplinkController(uplink, flyer);
 export default flyer;

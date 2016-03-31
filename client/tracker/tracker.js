@@ -41,14 +41,22 @@ function Tracker(state, world){
     showcase(tracker.state);
   };
 
-  tracker.uplinkFailed = function(err){
-    console.log(err);
+  tracker.uplinkFailed = function(err ){
+    console.error(err);
     // Set state action can cause projection to exhibit new state
     var state = tracker.state.set("uplinkStatus", "FAILED");
     tracker.state = state.set("alert", "Could not connect to Ably realtime service. Please try again later");
-    // tracker.state = tracker.state.set("uplinkChannelName", channelName);
-    // // call log change. test listeners that the state has changed.
     logInfo("Uplink failed to connect", err);
+    showcase(tracker.state);
+  };
+
+  tracker.uplinkDisconnected = function(err) {
+    if (tracker.state.uplinkStatus === 'DISCONNECTED') { return; }
+    console.warn(err);
+    // Set state action can cause projection to exhibit new state
+    var state = tracker.state.set("uplinkStatus", "DISCONNECTED");
+    tracker.state = state.set("alert", "Hold on, we've been disconnected from Ably, attempting to reconnect");
+    logInfo("Uplink has been disconnected", err);
     showcase(tracker.state);
   };
 
@@ -149,9 +157,6 @@ function Tracker(state, world){
   //   // The tracker just cares that its state is shown somewhere
   //   tracker.showcase.dispatch(state);
   // }
-
-
-
 }
 
 export default Tracker;

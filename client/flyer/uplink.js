@@ -32,8 +32,13 @@ export default function FlyerUplink(options, logger) {
     uplink.onconnected();
   });
 
+  client.connection.on("disconnected", function(err) {
+    console.log("core disconnected");
+    uplink.onconnectionDisconnected();
+  });
+
   client.connection.on("failed", function(err) {
-    console.log('failed', err.reason.message);
+    uplink.onconnectionFailed();
   });
 
   this.channelName = channelName;
@@ -41,6 +46,8 @@ export default function FlyerUplink(options, logger) {
   /* These callbacks events are specified by the creator of this object */
   this.onconnected = noop;
   this.onconnectionFailed = noop;
+  this.onconnectionDisconnected = noop;
+
   this.transmitReading = throttle(transmitReading, newReadingRateLimit);
   this.transmitOrientation = throttle(transmitOrientation, newReadingRateLimit);
 

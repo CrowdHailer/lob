@@ -32,6 +32,8 @@ function uplinkStatusMessageFromProjection(projection) {
     return 'Connection made to channel "' + projection.uplinkChannelName +'"';
   } else if (message === 'FAILED') {
     return 'Could not connect to Ably service';
+  } else if (message === 'DISCONNECTED') {
+    return 'Hold on, we\'re currently disconnected from Ably';
   } else {
     return 'Unknown';
   }

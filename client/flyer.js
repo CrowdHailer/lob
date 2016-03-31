@@ -19,6 +19,20 @@ export default function Flyer(state){
     logInfo("Uplink Available", details);
     showcase(flyer.state);
   };
+
+  flyer.uplinkFailed = function(){
+    flyer.state = flyer.state.set("uplinkStatus", "FAILED");
+    showcase(flyer.state);
+    logInfo("[Uplink Failed]");
+  };
+
+  flyer.uplinkDisconnected = function(){
+    console.log("disconnected");
+    flyer.state = flyer.state.set("uplinkStatus", "DISCONNECTED");
+    showcase(flyer.state);
+    logInfo("[Uplink Disconnected]");
+  };
+
   this.startTransmitting = function(){
     // TODO test and handle case when uplink not available.
     flyer.state = flyer.state.set("uplinkStatus", "TRANSMITTING");
@@ -69,12 +83,6 @@ export default function Flyer(state){
     transmitResetReadings();
     showcase(flyer.state); // Untested
     logInfo("Reset readings"); // Untested
-  };
-
-  flyer.uplinkFailed = function(){
-    flyer.state = flyer.state.set("uplinkStatus", "FAILED");
-    showcase(flyer.state);
-    logInfo("[Uplink Failed]");
   };
 
   flyer.updateIdentity = function(newIdentity){
