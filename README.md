@@ -46,4 +46,4 @@ Pre-requisites:
 * `git submodule init && git submodule update`
 
 Then build your assets:
-`npm build` to build and copy assets
+`npm run build` to build and copy assets
