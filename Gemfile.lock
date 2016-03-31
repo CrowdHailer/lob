@@ -14,6 +14,7 @@ GEM
     backports (3.6.7)
     builder (3.2.2)
     cookiejar (0.3.2)
+    dotenv (2.0.2)
     em-http-request (1.1.2)
       addressable (>= 2.3.4)
       cookiejar
@@ -67,6 +68,7 @@ PLATFORMS
 
 DEPENDENCIES
   ably
+  dotenv
   minitest
   minitest-reporters
   pg
