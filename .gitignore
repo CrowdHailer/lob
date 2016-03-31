@@ -39,3 +39,6 @@ node_modules
 vendor
 *.log
 otest/*
+
+## Do not commit local ENV file used by heroku local
+.env
