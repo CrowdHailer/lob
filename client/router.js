@@ -13,7 +13,6 @@ export default function Router(location){
 
   function getState(){
     return {
-      token: getQueryParameter('token', router.location.search),
       channelName: getQueryParameter('channel-name', router.location.search)
     };
   }

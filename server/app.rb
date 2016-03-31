@@ -31,33 +31,43 @@ class LobApp < Sinatra::Base
   end
 
   post '/new-flight' do
-    token = client.auth.request_token.token
     channel_name = cookies[:channel_name] ||= create_channel_name
-    redirect "/flyer?channel-name=#{channel_name}&token=#{token}"
+    redirect "/flyer?channel-name=#{channel_name}"
   end
 
   get '/flyer' do
     channel_name = request.GET["channel-name"]
     twitter_link = "https://twitter.com/home?status=I'm%20lobbing%20my%20phone%20with%20http%3A//lob.workshop14.io/.%20Track%20my%20flight%20http%3A//lob.workshop14.io/track/#{channel_name}%20%23giveitalob"
-    erb :flyer, locals: {twitter_link: twitter_link}
+    erb :flyer, locals: { twitter_link: twitter_link }
+  end
+
+  get '/flyer/:channel_name/token' do
+    channel_name = params[:channel_name].upcase
+    if !channel_name
+      status 400
+      'Invalid channel name'
+    else
+      content_type :json
+      capability = { '*' => ['subscribe', 'history'], channel_name => ['subscribe', 'publish', 'history'] }
+      client.auth.create_token_request(client_id: channel_name, capability: capability).to_json
+    end
   end
 
   post '/track-flight' do
     channel_name = request.POST["channel-name"].upcase
-    token = client.auth.request_token.token
-    redirect "/tracker?channel-name=#{channel_name}&token=#{token}"
+    redirect "/tracker?channel-name=#{channel_name}"
   end
 
   get '/track/:channel_name' do
     channel_name = params[:channel_name].upcase
-    token = client.auth.request_token.token
-    redirect "/tracker?channel-name=#{channel_name}&token=#{token}"
+    redirect "/tracker?channel-name=#{channel_name}"
   end
 
-  # post /track-flight is for use from form on index page
-  # get /tracker/:channel_name is for links from twitter etc
-  # Could be better ways to combine these
-  # All get /tracker/:channel-name?token=<token> redirect if token not present
+  get '/token' do
+    content_type :json
+    capability = { '*' => ['subscribe', 'history'] }
+    client.auth.create_token_request(capability: capability).to_json
+  end
 
   get '/tracker' do
     erb :tracker

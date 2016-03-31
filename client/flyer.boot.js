@@ -22,7 +22,6 @@ if (!lobIdentity) {
 var router = Router(window.location);
 
 var uplink = FlyerUplink({
-  token: router.state.token,
   channelName: router.state.channelName,
   rateLimit: readingPublishLimit
 }, window.console);
@@ -49,7 +48,7 @@ var accelerometerController = new AccelerometerController(window, flyer);
 
 function UplinkController(uplink, application){
   uplink.onconnected = function(){
-    application.uplinkAvailable({token: uplink.token, channelName: uplink.channelName});
+    application.uplinkAvailable({ channelName: uplink.channelName });
   }
   uplink.onconnectionFailed = function(){
     application.uplinkFailed();
