@@ -62,6 +62,10 @@ function Display($root){
             $uplinkStatus.innerHTML = "Oops, we've failed to establish a realtime connection. Try reloading this app.";
             setLoading(true);
             break;
+          case "incompatible":
+            $uplinkStatus.innerHTML = "Unfortunately no accelerometer was found on this device. Please try again on a different mobile";
+            setLoading(true);
+            break;
           case "transmitting":
             $uplinkStatus.innerHTML = "Live streaming this with id <b>" + this.channel + "</b>. <a href='/why-stream'>Why?</a>";
             setLoading(false);

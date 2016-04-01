@@ -11,7 +11,9 @@ export default function Flyer(state){
   var flyer = this;
   flyer.state = state;
 
-  flyer.uplinkAvailable = function(channelName){
+  flyer.uplinkAvailable = function(channelName) {
+    if (flyer.state.uplinkStatus === 'INCOMPATIBLE') { return; }
+
     flyer.state = flyer.state.merge({
       "uplinkStatus": "TRANSMITTING",
       "uplinkDetails": channelName
@@ -20,49 +22,50 @@ export default function Flyer(state){
     showcase(flyer.state);
   };
 
-  flyer.uplinkFailed = function(){
+  flyer.uplinkFailed = function() {
+    if (flyer.state.uplinkStatus === 'INCOMPATIBLE') { return; }
+
     flyer.state = flyer.state.set("uplinkStatus", "FAILED");
     showcase(flyer.state);
     logInfo("[Uplink Failed]");
   };
 
-  flyer.uplinkDisconnected = function(){
-    console.log("disconnected");
+  flyer.uplinkDisconnected = function() {
+    if (flyer.state.uplinkStatus === 'INCOMPATIBLE') { return; }
+
     flyer.state = flyer.state.set("uplinkStatus", "DISCONNECTED");
     showcase(flyer.state);
     logInfo("[Uplink Disconnected]");
   };
 
-  flyer.newReading = function(raw){
-    var flightCompleted = false;
-    try {
-      raw.timestamp = Date.now();
-      var reading = Reading(raw);
-      var state = flyer.state.set("latestReading", reading);
-      var currentFlight = state.currentFlight;
-      var flightHistory = state.flightHistory;
-      if (reading.magnitude < 4) {
-        currentFlight = currentFlight.concat(reading);
-      } else if(currentFlight[0]) {
-        // DEBT concat splits array so we double wrap the flight
-        flightHistory = flightHistory.concat([currentFlight]);
-        currentFlight = [];
-        flightCompleted = true;
-      }
-      state = state.set("currentFlight", currentFlight);
-      state = state.set("flightHistory", flightHistory);
-      flyer.state = state;
-      transmitReading(reading);
-    } catch (err) {
-      // Debt change to invalid reading
-      if (err instanceof TypeError) {
-        flyer.state = flyer.state.set("alert", "Accelerometer not found for this device. Please try again on a different mobile");
-        showcase(flyer.state);
-        logInfo("Bad reading", raw); // Untested
-      } else {
-        throw err;
-      }
+  flyer.newReading = function(raw) {
+    if (isNaN(parseInt(raw.x))) {
+      flyer.state = flyer.state.merge({
+        "alert": "Accelerometer not found for this device. Please try again on a different mobile",
+        "uplinkStatus": "INCOMPATIBLE"
+      });
+      showcase(flyer.state);
+      return;
     }
+
+    var flightCompleted = false;
+    raw.timestamp = Date.now();
+    var reading = Reading(raw);
+    var state = flyer.state.set("latestReading", reading);
+    var currentFlight = state.currentFlight;
+    var flightHistory = state.flightHistory;
+    if (reading.magnitude < 4) {
+      currentFlight = currentFlight.concat(reading);
+    } else if(currentFlight[0]) {
+      // DEBT concat splits array so we double wrap the flight
+      flightHistory = flightHistory.concat([currentFlight]);
+      currentFlight = [];
+      flightCompleted = true;
+    }
+    state = state.set("currentFlight", currentFlight);
+    state = state.set("flightHistory", flightHistory);
+    flyer.state = state;
+    transmitReading(reading);
 
     if (flightCompleted) {
       /* Don't update all UI elements for every cycle, hugely CPU intensive */
