@@ -8,11 +8,11 @@ function Display($root){
   var $uplinkStatus = $root.querySelector("[data-display~=uplink-status]");
   var $submitFlight = $root.querySelector("[data-display~=submit-flight]");
   var $loader = $root.querySelector("[data-display~=connecting-loader]");
-  var $phoneReadingPanels = $root.querySelector("[data-display~=phone-reading-panels]");
+  var $connectionActive = $root.querySelector("[data-display~=connection-active]");
 
   function setLoading(isLoading) {
     $loader.style.display = isLoading ? 'block' : 'none';
-    $phoneReadingPanels.style.display = isLoading ? 'none' : 'block';
+    $connectionActive.style.display = isLoading ? 'none' : 'block';
   }
 
   return Object.create({}, {

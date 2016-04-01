@@ -14,45 +14,46 @@
     <%= erb :_loader %>
   </div>
 
-  <div class="phone-reading-panels" data-display="phone-reading-panels">
-    <div class="guage-widget">
-      <ul class="labels">
-        <li>0%</li>
-        <li>25%</li>
-        <li>50%</li>
-        <li>75%</li>
-        <li>100%</li>
-      </ul>
-      <div class="guage">
-        <div class="inner"></div>
+  <div class="connection-active" data-display="connection-active">
+    <div class="phone-reading-panels">
+      <div class="guage-widget">
+        <ul class="labels">
+          <li>0%</li>
+          <li>25%</li>
+          <li>50%</li>
+          <li>75%</li>
+          <li>100%</li>
+        </ul>
+        <div class="guage">
+          <div class="inner"></div>
+        </div>
+        <div class="needle"></div>
+        <div class="caption">
+          Lob momentum
+        </div>
       </div>
-      <div class="needle"></div>
-      <div class="caption">
-        Lob momentum
+
+      <div class="phone">
+        <%= erb :_phone %>
       </div>
     </div>
 
-    <div class="phone">
-      <%= erb :_phone %>
-    </div>
+    <p data-display="instruction"></p>
+
+    <p>
+      <span class="title">Flight time:</span><span class="value" data-hook="flight-time"></span>
+    </p>
+    <p>
+      <span class="title">Max height:</span><span class="value" data-hook="max-altitude"></span>
+    </p>
+
+    <form class="panel" action="/submit-flight" method="post">
+      <input type="hidden" name="max-altitude" data-display="submitted-max-altitude" value="0">
+      <button type="submit" data-display="submit-flight" disabled>Submit flight to leaderboard</button>
+    </form>
+    <form class="panel">
+      <button type="button" onclick="Lob.resetReadings()">Reset</button>
+    </form>
   </div>
-
-  <p data-display="instruction"></p>
-
-  <p>
-    <span class="title">Flight time:</span><span class="value" data-hook="flight-time"></span>
-  </p>
-  <p>
-    <span class="title">Max height:</span><span class="value" data-hook="max-altitude"></span>
-  </p>
-
-  <form class="panel" action="/submit-flight" method="post">
-    <input type="hidden" name="max-altitude" data-display="submitted-max-altitude" value="0">
-    <button type="submit" data-display="submit-flight" disabled>Submit flight to leaderboard</button>
-  </form>
-  <form class="panel">
-    <button type="button" onclick="Lob.resetReadings()">Reset</button>
-  </form>
-
 </main>
 

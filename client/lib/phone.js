@@ -1,5 +1,5 @@
 export default function Phone() {
-  if ( !(this instanceof Phone) ) { return new Phone($root); }
+  if ( !(this instanceof Phone) ) { return new Phone(); }
   var $phone = document.documentElement.querySelector('#tridiv .scene');
   var prefixes = ["-webkit-", "-moz-", "-ms-", ""];
 

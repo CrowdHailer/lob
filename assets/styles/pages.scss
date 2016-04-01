@@ -19,10 +19,13 @@
   max-width: $max-width;
   text-align: center;
 
-  .phone-reading-panels {
+  .connection-active {
     display: none;
+  }
+
+  .phone-reading-panels {
     position: relative;
-    min-height: 200px;
+    min-height: 175px;
     overflow: hidden;
 
     .guage-widget {
@@ -72,6 +75,7 @@
 
   .uplink-status {
     font-size: 80%;
+    margin-bottom: 1em;
   }
 
   .connecting-loader {

@@ -1,7 +1,7 @@
 import Reading from "./reading";
 
 export default function Guage() {
-  if ( !(this instanceof Guage) ) { return new Guage($root); }
+  if ( !(this instanceof Guage) ) { return new Guage(); }
   var $guage = document.documentElement.querySelector('.guage-widget .needle');
   var prefixes = ["-webkit-", "-moz-", "-ms-", ""];
 
