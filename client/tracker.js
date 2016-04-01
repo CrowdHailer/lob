@@ -30,7 +30,7 @@ var uplinkController = new UplinkController(router.state, tracker);
 function uplinkStatusMessageFromProjection(projection) {
   var message = projection.uplinkStatus;
   if (message === 'AVAILABLE') {
-    return 'Connection made to live Lob "' + projection.uplinkChannelName +'". Waiting for device to stream its position in real time';
+    return 'Connection made to live Lob "' + projection.uplinkChannelName +'".<br> Waiting for device to stream its position in real time';
   } else if (message === 'STREAMING') {
     return 'Streaming live Lob <b>' + projection.uplinkChannelName + "</b>";
   } else if (message === 'FAILED') {

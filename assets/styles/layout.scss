@@ -2,7 +2,7 @@
 
 /* Generic content area */
 main {
-  margin: 0 auto 30px auto;
+  margin: 0 auto 2.5em auto;
   padding: 0 1em;
   box-sizing: border-box;
 
@@ -100,6 +100,7 @@ footer {
   background-color: black;
   color: white;
   text-align: center;
+  font-size: 90%;
 
   a {
     color: #FC0;
@@ -126,22 +127,36 @@ footer {
     ul {
       li {
         padding: 10px 15px 10px 10px;
-        font-size: 80%;
+        font-size: 85%;
       }
     }
   }
 
   @media screen and (max-width: $tablet-width) {
     ul {
-      padding: 5px 0;
+      padding: 0 0 5px 0;
       li {
         padding: 5px 10px 5px 10px;
         border: none;
         clear: left;
         display: block;
         border-bottom: 1px solid #333;
+        box-sizing: border-box;
+
         &:last-child {
           border-bottom: none
+        }
+
+        &.nav {
+          width: 50%;
+          display: block;
+          box-sizing: border-box;
+          clear: none;
+          float: left;
+          border-left: 1px solid #333;
+          &:first-child {
+            border-left: none;
+          }
         }
       }
     }
