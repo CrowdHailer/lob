@@ -13,6 +13,19 @@
   }
 }
 
+@mixin preloader {
+  padding-top: 2em;
+
+  .loader {
+    left: calc(50% - 24px);
+    position: relative;
+  }
+
+  .back {
+    padding-top: 2em;
+  }
+}
+
 /* Throw your phone flying page */
 
 .flyer {
@@ -35,8 +48,9 @@
       z-index: -1;
 
       .caption {
-        padding: 15px;
+        padding: 20px;
         font-weight: bold;
+        font-size: 110%;
       }
     }
 
@@ -57,34 +71,13 @@
     }
   }
 
-  // TODO: Check if still needed
-  span {
-    &.title {
-      width: 50%;
-      display: inline-block;
-      padding-right: 0.4em;
-      text-align: right;
-    }
-    &.value {
-      width: 50%;
-      display: inline-block;
-      padding-left: 0.4em;
-      text-align: left;
-    }
-  }
-
   .uplink-status {
     font-size: 80%;
     margin-bottom: 1em;
   }
 
   .connecting-loader {
-    padding-top: 2em;
-
-    .loader {
-      left: calc(50% - 24px);
-      position: relative;
-    }
+    @include preloader;
   }
 }
 
@@ -168,11 +161,6 @@
   }
 
   .connecting-loader {
-    padding-top: 2em;
-
-    .loader {
-      left: calc(50% - 24px);
-      position: relative;
-    }
+    @include preloader;
   }
 }
