@@ -46,6 +46,7 @@
 
   .graph-and-phone {
     overflow: hidden;
+    display: none;
 
     #tracker-graph {
       background-color: #EEE;
@@ -113,5 +114,14 @@
 
   .lock-unlock {
     clear: both;
+  }
+
+  .connecting-loader {
+    padding-top: 2em;
+
+    .loader {
+      left: calc(50% - 24px);
+      position: relative;
+    }
   }
 }

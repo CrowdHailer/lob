@@ -12,11 +12,15 @@
     <button type="button" data-display="uplink-status-message">Connecting to Ably</button>
   </form>
 
-  <div class="graph-and-phone">
+  <div class="graph-and-phone" data-display="graph-and-phone">
     <div id="tracker-graph" data-display="tracker-graph">
       <canvas></canvas>
     </div>
     <%= erb :_phone %>
+  </div>
+
+  <div class="connecting-loader" data-display="connecting-loader">
+    <%= erb :_loader %>
   </div>
 
   <div class="lock-unlock">

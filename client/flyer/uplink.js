@@ -8,7 +8,8 @@ export default function FlyerUplink(options, logger) {
   var uplink = this;
   var channelName = options.channelName;
   var newReadingRateLimit = options.rateLimit;
-  var client = new Ably.Realtime({ authUrl: '/flyer/' + channelName + '/token' });
+  // TODO: Remove clientId when https://github.com/ably/ably-js/issues/252 resolved
+  var client = new Ably.Realtime({ authUrl: '/flyer/' + channelName + '/token', clientId: channelName });
   var channel = client.channels.get(channelName);
   var noop = function() {};
 
@@ -38,8 +39,19 @@ export default function FlyerUplink(options, logger) {
   });
 
   client.connection.on("failed", function(err) {
-    uplink.onconnectionFailed();
+    uplink.onconnectionFailed(err);
   });
+
+  /* Be present on the channel so that subscribers know a publisher is here */
+  channel.presence.enter(function(err) {
+    if (err) {
+      console.error("Could not enter presence", err);
+      uplink.onconnectionFailed(err);
+    } else {
+      console.log("Present on channel", channelName);
+    }
+  });
+
 
   this.channelName = channelName;
 

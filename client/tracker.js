@@ -29,18 +29,21 @@ var uplinkController = new UplinkController(router.state, tracker);
 function uplinkStatusMessageFromProjection(projection) {
   var message = projection.uplinkStatus;
   if (message === 'AVAILABLE') {
-    return 'Connection made to channel "' + projection.uplinkChannelName +'"';
+    return 'Connection made to live Lob "' + projection.uplinkChannelName +'". Waiting for device to stream its position in real time';
+  } else if (message === 'STREAMING') {
+    return 'Streaming live Lob "' + projection.uplinkChannelName +'"';
   } else if (message === 'FAILED') {
-    return 'Could not connect to Ably service';
+    return 'Could not connect to live Lob realtime service';
   } else if (message === 'DISCONNECTED') {
-    return 'Hold on, we\'re currently disconnected from Ably';
+    return 'Hold on, we\'re currently disconnected from the live Lob';
   } else {
     return 'Unknown';
   }
 }
 
-function GraphDisplay($root){
+function GraphDisplay($root) {
   if ( !(this instanceof GraphDisplay) ) { return new GraphDisplay($root); }
+
   var canvas = $root.querySelector('canvas');
   var canvasContext = canvas.getContext("2d");
 
@@ -68,6 +71,7 @@ function GraphDisplay($root){
     scaleStepWidth: 10,
     scaleLabel: "    <%=value%>"
   };
+
   var myLineChart = new Chart(canvasContext).Line(data, chartOptions);
   window.myLineChart = myLineChart
   this.addPoint = function(point){
@@ -131,13 +135,16 @@ ready(function(){
   var $trackerHoldingSnapshot = queryDisplay('tracker-holding-snapshot', $root);
   var $trackerFollowingLive = queryDisplay('tracker-following-live', $root);
   var $trackerFollowingFlight = queryDisplay('tracker-following-flight', $root);
+  var $graphAndPhone = queryDisplay('graph-and-phone', $root);
+  var $preloader = queryDisplay('connecting-loader', $root);
   var $alert = queryDisplay('alert', $root);
   var alertDisplay = AlertDisplay($alert);
+  var graphDisplay;
 
-  var $graphDisplay = queryDisplay('tracker-graph', $root);
-  var graphDisplay = GraphDisplay($graphDisplay);
-  window.graphDisplay = graphDisplay;
-  console.debug('dom is ready', $uplinkStatusMessage);
+  function setupGraphDisplay() {
+    var $graphDisplay = queryDisplay('tracker-graph', $root);
+    window.graphDisplay = graphDisplay = GraphDisplay($graphDisplay);
+  }
 
   var phone = new Phone();
 
@@ -145,6 +152,18 @@ ready(function(){
     render: function(projection){
       // console.debug('Display rendering:', projection);
       $uplinkStatusMessage.innerHTML = uplinkStatusMessageFromProjection(projection);
+
+      if (projection.uplinkStatus === 'STREAMING') {
+        $graphAndPhone.style.display = 'block';
+        $preloader.style.display = 'none';
+        if (!graphDisplay) {
+          setupGraphDisplay();
+        }
+      } else {
+        $graphAndPhone.style.display = 'none';
+        $preloader.style.display = 'block';
+      }
+
       if (projection.flightOutputStatus === 'HOLDING_SNAPSHOT') {
         $trackerHoldingSnapshot.style.display = '';
         $trackerFollowingLive.style.display = 'none';
@@ -170,9 +189,11 @@ ready(function(){
       // graphDisplay.setPoints(projection.flightSnapshot || projection.liveFlight);
       // console.log(projection.flightSnapshot || projection.liveFlight);
     },
+
     addReading(newReading){
       graphDisplay.addPoint(newReading);
     },
+
     setReadings(readings){
       graphDisplay.setPoints(readings);
     }

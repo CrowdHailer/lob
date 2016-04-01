@@ -8,6 +8,7 @@ export default function UplinkController(options, tracker){
   realtime.connection.on("connected", function(err) {
     // If we keep explicitly passing channel data to the controller we should pass it to the main app here
     tracker.uplinkAvailable(channelName);
+    uplinkPublisherPresenceUpdate();
   });
   realtime.connection.on("failed", function(err) {
     tracker.uplinkFailed(err);
@@ -25,4 +26,13 @@ export default function UplinkController(options, tracker){
   channel.subscribe("resetReadings", function(_event){
     tracker.resetReadings();
   });
+
+  function uplinkPublisherPresenceUpdate() {
+    channel.presence.get(function(err, members) {
+      console.log("Publishing members change:", members.length);
+      tracker.uplinkPresent(channelName, members.length);
+    });
+  }
+
+  channel.presence.subscribe(uplinkPublisherPresenceUpdate)
 }

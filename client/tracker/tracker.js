@@ -41,6 +41,19 @@ function Tracker(state, world){
     showcase(tracker.state);
   };
 
+  tracker.uplinkPresent = function(channelName, publisherCount){
+    if (publisherCount === 0) {
+      this.uplinkAvailable(channelName);
+    } else {
+      if (tracker.state.uplinkStatus !== 'STREAMING') {
+        tracker.state = tracker.state.set("uplinkStatus", "STREAMING");
+        tracker.state = tracker.state.set("uplinkChannelName", channelName);
+        logInfo("Uplink streaming", channelName);
+        showcase(tracker.state);
+      }
+    }
+  };
+
   tracker.uplinkFailed = function(err ){
     console.error(err);
     // Set state action can cause projection to exhibit new state

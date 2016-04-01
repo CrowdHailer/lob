@@ -11,12 +11,12 @@ export default function Flyer(state){
   var flyer = this;
   flyer.state = state;
 
-  flyer.uplinkAvailable = function(details){
+  flyer.uplinkAvailable = function(channelName){
     flyer.state = flyer.state.merge({
       "uplinkStatus": "AVAILABLE",
-      "uplinkDetails": details
+      "uplinkDetails": channelName
     });
-    logInfo("Uplink Available", details);
+    logInfo("Uplink Available", channelName);
     showcase(flyer.state);
   };
 

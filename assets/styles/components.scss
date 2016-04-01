@@ -63,3 +63,81 @@ a.button {
   text-decoration: none;
   color: black;
 }
+
+/* CSS loader courtesy of http://codepen.io/martinvd/pen/vEQeWR */
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  transform: perspective( 128px ) rotateX( 30deg );
+
+  .inner {
+    position: absolute;
+    box-sizing: border-box;
+    width: 16px;
+    height: 16px;
+    background-color: #860000;
+    border-radius: 50%;
+  }
+
+  .inner.one {
+    left: 0%;
+    top: 0%;
+    animation: loader-move-right 1s ease-out infinite;
+  }
+
+  .inner.two {
+    right: 0%;
+    top: 0%;
+    animation: loader-move-down 1s ease-in-out infinite;
+  }
+
+  .inner.three {
+    right: 0%;
+    bottom: 0%;
+    animation: loader-move-left 1s ease-in-out infinite;
+  }
+
+  .inner.four {
+    left: 0%;
+    bottom: 0%;
+    animation: loader-move-up 1s ease-out infinite;
+  }
+}
+
+@keyframes loader-move-right {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(32px);
+  }
+}
+
+@keyframes loader-move-down {
+  0% {
+    transform: translateY();
+  }
+  100% {
+    transform: translateY(32px);
+  }
+}
+
+@keyframes loader-move-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-32px);
+  }
+}
+
+@keyframes loader-move-up {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-32px);
+  }
+}
