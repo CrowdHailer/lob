@@ -12,28 +12,43 @@ function Presenter(projection){
 
   Object.defineProperty(this, "maxFlightTime", {
     get: function(){
-      return projection.maxFlightTime + " s";
+      return projection.maxFlightTime + "s";
+    }
+  });
+
+  Object.defineProperty(this, "lastFlightTime", {
+    get: function(){
+      return projection.lastFlightTime + "s";
     }
   });
 
   Object.defineProperty(this, "maxAltitude", {
     get: function(){
-      return projection.maxAltitude + " m";
+      return projection.maxAltitude + "m";
     }
   });
 
-  Object.defineProperty(this, "instruction", {
+  Object.defineProperty(this, "lastAltitude", {
     get: function(){
-      if (!this.hasThrow) {
-        return "Are you ready?<br>Lob your phone in the air now.<br>Good luck!";
-      }
-      return "Great! Can you lob it any higher?";
+      return projection.lastAltitude + "m";
     }
   });
 
   Object.defineProperty(this, "hasThrow", {
     get: function(){
       return projection.hasThrow;
+    }
+  });
+
+  Object.defineProperty(this, "hasOneThrow", {
+    get: function(){
+      return projection.hasOneThrow;
+    }
+  });
+
+  Object.defineProperty(this, "lastHigherThanBefore", {
+    get: function(){
+      return projection.lastAltitude > projection.maxAltitude;
     }
   });
 

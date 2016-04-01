@@ -32,7 +32,7 @@
         </div>
         <div class="needle"></div>
         <div class="caption">
-          Lob momentum
+          LobForce™
         </div>
       </div>
 
@@ -41,16 +41,9 @@
       </div>
     </div>
 
-    <p data-display="instruction"></p>
+    <p class="message" data-display="message"></p>
 
-    <p>
-      <span class="title">Flight time:</span><span class="value" data-hook="flight-time"></span>
-    </p>
-    <p>
-      <span class="title">Max height:</span><span class="value" data-hook="max-altitude"></span>
-    </p>
-
-    <form class="panel" action="/submit-flight" method="post">
+    <form class="leaderboard panel" action="/submit-flight" method="post">
       <input type="hidden" name="max-altitude" data-display="submitted-max-altitude" value="0">
       <button type="submit" data-display="submit-flight" disabled>Submit flight to leaderboard</button>
     </form>

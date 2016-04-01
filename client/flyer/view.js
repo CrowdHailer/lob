@@ -53,11 +53,7 @@ export default function FlyerView() {
     var display = getDisplay();
     var alertDisplay = getAlertDisplay();
 
-    for (var attribute in display) {
-      if (display.hasOwnProperty(attribute)) {
-        display[attribute] = presentation[attribute];
-      }
-    }
+    display.render(presentation);
 
     var alertMessage = projection.alert;
     if (alertMessage) {

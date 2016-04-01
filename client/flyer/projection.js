@@ -9,6 +9,7 @@ function readingsDuration(readings){
   var t1 = readings[last - 1].timestamp;
   return (t1 + readingPublishLimit - t0) / 1000;
 }
+
 function altitudeForFreefallDuration(duration){
   // Altitude Calculation
 
@@ -30,22 +31,41 @@ function round(number){
   return parseFloat(number.toFixed(2));
 }
 
-function Projection(rawState){
+function maxFlightDuration(flights) {
+  var flightDurations = flights.map(readingsDuration);
+  return Math.max.apply(null, flightDurations);
+}
 
+function maxAltitude(flights) {
+  var flightDurations = flights.map(readingsDuration);
+  var max = Math.max.apply(null, [0].concat(flightDurations));
+  return round(altitudeForFreefallDuration(max));
+}
+
+function Projection(rawState){
   Object.defineProperty(this, "maxFlightTime", {
     get: function(){
-      var flights = rawState.flightHistory.concat([rawState.currentFlight]);
-      var flightDurations = flights.map(readingsDuration);
-      var time =  Math.max.apply(null, flightDurations);
-      return time;
+      return maxFlightDuration(rawState.flightHistory.concat(rawState.currentFlight));
+    }
+  });
+
+  Object.defineProperty(this, "lastFlightTime", {
+    get: function(){
+      var lastFlight = rawState.flightHistory[rawState.flightHistory.length - 1];
+      return maxFlightDuration([lastFlight]);
     }
   });
 
   Object.defineProperty(this, "maxAltitude", {
     get: function(){
-      var flightDurations = rawState.flightHistory.map(readingsDuration);
-      var max = Math.max.apply(null, [0].concat(flightDurations));
-      return round(altitudeForFreefallDuration(max));
+      return maxAltitude(rawState.flightHistory.concat(rawState.currentFlight));
+    }
+  });
+
+  Object.defineProperty(this, "lastAltitude", {
+    get: function(){
+      var lastFlight = rawState.flightHistory[rawState.flightHistory.length - 1];
+      return maxAltitude([lastFlight]);
     }
   });
 
@@ -58,6 +78,12 @@ function Projection(rawState){
   Object.defineProperty(this, "hasThrow", {
     get: function(){
       return this.maxAltitude !== 0;
+    }
+  });
+
+  Object.defineProperty(this, "hasOneThrow", {
+    get: function(){
+      return this.hasThrow && (rawState.flightHistory.length === 1);
     }
   });
 
