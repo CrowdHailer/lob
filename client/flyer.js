@@ -13,10 +13,10 @@ export default function Flyer(state){
 
   flyer.uplinkAvailable = function(channelName){
     flyer.state = flyer.state.merge({
-      "uplinkStatus": "AVAILABLE",
+      "uplinkStatus": "TRANSMITTING",
       "uplinkDetails": channelName
     });
-    logInfo("Uplink Available", channelName);
+    logInfo("Uplink available, transmission will resume", channelName);
     showcase(flyer.state);
   };
 
@@ -33,11 +33,6 @@ export default function Flyer(state){
     logInfo("[Uplink Disconnected]");
   };
 
-  this.startTransmitting = function(){
-    // TODO test and handle case when uplink not available.
-    flyer.state = flyer.state.set("uplinkStatus", "TRANSMITTING");
-    showcase(flyer.state);
-  };
   flyer.newReading = function(raw){
     try {
       raw.timestamp = Date.now();

@@ -46,7 +46,7 @@ function Display($root){
     },
     channelName: {
       set: function(channel){
-        var content = "Watch on channel '" + channel + "'";
+        var content = "Streaming live Lob '" + channel + "'";
         $channel.innerHTML = content;
       },
       enumerable: true
