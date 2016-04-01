@@ -34,6 +34,7 @@ export default function Flyer(state){
   };
 
   flyer.newReading = function(raw){
+    var flightCompleted = false;
     try {
       raw.timestamp = Date.now();
       var reading = Reading(raw);
@@ -41,11 +42,12 @@ export default function Flyer(state){
       var currentFlight = state.currentFlight;
       var flightHistory = state.flightHistory;
       if (reading.magnitude < 4) {
-        currentFlight =  currentFlight.concat(reading);
+        currentFlight = currentFlight.concat(reading);
       } else if(currentFlight[0]) {
         // DEBT concat splits array so we double wrap the flight
         flightHistory = flightHistory.concat([currentFlight]);
         currentFlight = [];
+        flightCompleted = true;
       }
       state = state.set("currentFlight", currentFlight);
       state = state.set("flightHistory", flightHistory);
@@ -61,8 +63,12 @@ export default function Flyer(state){
         throw err;
       }
     }
-    // logInfo("[New reading]", reading); DONT log this
-    showcase(flyer.state);
+
+    if (flightCompleted) {
+      /* Don't update all UI elements for every cycle, hugely CPU intensive */
+      showcase(state);
+    }
+
     flyer.view.renderPhoneMovement(raw);
   };
   flyer.newOrientation = function(position) {
