@@ -20,6 +20,10 @@ class LobApp < Sinatra::Base
     erb :about
   end
 
+  get '/why-stream' do
+    erb :"why-stream"
+  end
+
   get '/leaderboard' do
     erb :leaderboard, locals: {leaderboard: Leaderboard.best_today, past: '24 hrs'}
   end
@@ -32,15 +36,14 @@ class LobApp < Sinatra::Base
     erb :leaderboard, locals: {leaderboard: Leaderboard.best_this_month, past: '30 days'}
   end
 
-  post '/new-flight' do
+  get '/new-flight' do
     channel_name = cookies[:channel_name] ||= create_channel_name
     redirect "/flyer?channel-name=#{channel_name}"
   end
 
   get '/flyer' do
     channel_name = request.GET["channel-name"]
-    twitter_link = "https://twitter.com/home?status=I'm%20lobbing%20my%20phone%20with%20http%3A//lob.workshop14.io/.%20Track%20my%20flight%20http%3A//lob.workshop14.io/track/#{channel_name}%20%23giveitalob"
-    erb :flyer, locals: { twitter_link: twitter_link }
+    erb :flyer
   end
 
   get '/flyer/:channel_name/token' do

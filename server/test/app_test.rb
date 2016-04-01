@@ -41,7 +41,7 @@ class AppTest < MiniTest::Test
 
   def test_posting_new_flight_redirects_with_token_and_channel
     # DEBT start flight
-    post '/new-flight'
+    get '/new-flight'
     assert_match(/flyer\?channel-name=[A-Z0-9]{4}&token=/, last_response.location)
   end
 
