@@ -1,6 +1,7 @@
 /* jshint esnext: true */
 
 import State from "./state";
+import Audio from "../lib/Audio";
 
 function isInFlight(reading){
   // DEBT magic number
@@ -31,6 +32,8 @@ function Tracker(state, world){
   // DEBT return to external assignment
   world = world || {};
   tracker.logger = world.logger // Or error causing of silent version;
+
+  tracker.audio = new Audio();
 
   tracker.uplinkAvailable = function(channelName){
     // Set state action can cause projection to exhibit new state
@@ -80,6 +83,7 @@ function Tracker(state, world){
     var wasInFlight = lastReading && isInFlight(lastReading);
     var isNowGrounded = !isInFlight(newReading);
     if (wasInFlight && isNowGrounded) {
+      this.audio.playDropSound();
       setTimeout(function () {
         tracker.holdSnapshot();
         // pause the newReading

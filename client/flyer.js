@@ -2,6 +2,7 @@
 
 import Projection from "./flyer/projection";
 import Reading from "./lib/reading";
+import Audio from "./lib/Audio";
 import FlyerState from './flyer/state'
 
 export default function Flyer(state){
@@ -10,6 +11,8 @@ export default function Flyer(state){
 
   var flyer = this;
   flyer.state = state;
+
+  flyer.audio = new Audio();
 
   flyer.uplinkAvailable = function(channelName) {
     if (flyer.state.uplinkStatus === 'INCOMPATIBLE') { return; }
@@ -39,6 +42,8 @@ export default function Flyer(state){
   };
 
   flyer.newReading = function(raw) {
+    raw.timestamp = Date.now();
+
     if (isNaN(parseInt(raw.x))) {
       flyer.state = flyer.state.merge({
         "alert": "Accelerometer not found for this device. Please try again on a different mobile",
@@ -49,11 +54,11 @@ export default function Flyer(state){
     }
 
     var flightCompleted = false;
-    raw.timestamp = Date.now();
     var reading = Reading(raw);
     var state = flyer.state.set("latestReading", reading);
     var currentFlight = state.currentFlight;
     var flightHistory = state.flightHistory;
+
     if (reading.magnitude < 4) {
       currentFlight = currentFlight.concat(reading);
     } else if(currentFlight[0]) {
@@ -70,6 +75,7 @@ export default function Flyer(state){
     if (flightCompleted) {
       /* Don't update all UI elements for every cycle, hugely CPU intensive */
       showcase(state);
+      this.audio.playDropSound();
     }
 
     flyer.view.renderPhoneMovement(raw);
