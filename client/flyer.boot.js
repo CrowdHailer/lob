@@ -7,18 +7,6 @@ import FlyerUplink from './flyer/uplink';
 
 import { readingPublishLimit } from './config';
 
-var lobIdentity = localStorage.getItem('lobIdentity');
-if (!lobIdentity) {
-  var parser = new UAParser();
-  var result = parser.getResult();
-  lobIdentity = result.device.model || result.browser.name;
-  try {
-    localStorage.setItem('lobIdentity', lobIdentity);
-  } catch (err) {
-    console.warn('set local storage failed');
-  }
-}
-
 var router = Router(window.location);
 
 var uplink = FlyerUplink({
@@ -26,9 +14,7 @@ var uplink = FlyerUplink({
   rateLimit: readingPublishLimit
 }, window.console);
 
-var flyer = Flyer({
-  identity: lobIdentity
-});
+var flyer = Flyer();
 
 
 flyer.logger = window.console;

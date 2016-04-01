@@ -75,8 +75,4 @@ export default function FlyerUplink(options, logger) {
       }
     });
   };
-
-  this.transmitIdentity = function() {
-    // TODO update identity
-  }
 }

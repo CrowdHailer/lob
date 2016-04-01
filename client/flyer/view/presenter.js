@@ -56,14 +56,10 @@ function Presenter(projection){
       return projection.uplinkStatus.toLowerCase();
     }
   });
+
   Object.defineProperty(this, "channelName", {
     get: function(){
       return projection.channelName;
-    }
-  });
-  Object.defineProperty(this, "identity", {
-    get: function(){
-      return projection.identity;
     }
   });
 }

@@ -8,8 +8,6 @@ function Display($root){
   var $instruction = $root.querySelector("[data-display~=instruction]");
   var $uplink = $root.querySelector("[data-display~=uplink]");
   var $channel = $root.querySelector("[data-display~=channel]");
-  var $identity = $root.querySelector("[data-display~=identity]");
-  var $submittedIdentity = $root.querySelector("[data-display~=submitted-identity]");
   var $submitFlight = $root.querySelector("[data-display~=submit-flight]");
 
   return Object.create({}, {
@@ -58,15 +56,6 @@ function Display($root){
         $uplink.classList.remove("transmitting");
         $uplink.classList.remove("failed");
         $uplink.classList.add(status);
-      },
-      enumerable: true
-    },
-    identity: {
-      set: function(identity){
-        if ($identity.value == '') {
-          $identity.value = identity;
-        }
-        $submittedIdentity.value = identity;
       },
       enumerable: true
     }

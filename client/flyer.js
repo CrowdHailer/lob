@@ -80,14 +80,6 @@ export default function Flyer(state){
     logInfo("Reset readings"); // Untested
   };
 
-  flyer.updateIdentity = function(newIdentity){
-    flyer.state = flyer.state.set('identity', newIdentity);
-    logInfo('Updated identity', newIdentity);
-    transmitIdentity(newIdentity);
-    localStorage.setItem('lobIdentity', newIdentity);
-    showcase(flyer.state);
-  }
-
   flyer.closeAlert = function(){
     // DEBT untested
     flyer.state = flyer.state.set("alert", "");
@@ -110,9 +102,6 @@ export default function Flyer(state){
     if (flyer.state.uplinkStatus === "TRANSMITTING") {
       flyer.uplink.transmitResetReadings();
     }
-  }
-  function transmitIdentity(identity){
-    flyer.uplink.transmitIdentity(identity);
   }
   function showcase(state){
     flyer.view.render(Projection(state));
