@@ -52,6 +52,11 @@ export default function FlyerUplink(options, logger) {
     }
   });
 
+  /* Register leave events quickly so that Ably knows the client is gone intentionally
+     as opposed to disconnected abruptly */
+  window.onunload = window.onbeforeunload = function () {
+    client.connection.close();
+  };
 
   this.channelName = channelName;
 
