@@ -7,9 +7,14 @@
 <% end %>
 
 <main class="flyer" data-interface="avionics" data-display="data-logger">
-  <p data-display="instruction"></p>
 
-  <div class="phone-reading-panels">
+  <div class="uplink-status" data-display="uplink-status">Hold on, just getting ready...</div>
+
+  <div class="connecting-loader" data-display="connecting-loader">
+    <%= erb :_loader %>
+  </div>
+
+  <div class="phone-reading-panels" data-display="phone-reading-panels">
     <div class="guage-widget">
       <ul class="labels">
         <li>0%</li>
@@ -32,6 +37,8 @@
     </div>
   </div>
 
+  <p data-display="instruction"></p>
+
   <p>
     <span class="title">Flight time:</span><span class="value" data-hook="flight-time"></span>
   </p>
@@ -39,17 +46,6 @@
     <span class="title">Max height:</span><span class="value" data-hook="max-altitude"></span>
   </p>
 
-  <div id="uplink" class="unknown" data-display="uplink">
-    <form id="starting-uplink" class="panel" action="#" method="post">
-      <button type="button" data-display="status">Looking for connection</button>
-    </form>
-    <form id="uplink-transmitting" class="panel" action="#" method="post">
-      <span data-display="channel"></span>
-    </form>
-    <form id="uplink-failed" class="panel">
-      <button type="button">Could not start uplink. Try again later.</button>
-    </form>
-  </div>
   <form class="panel" action="/submit-flight" method="post">
     <input type="hidden" name="max-altitude" data-display="submitted-max-altitude" value="0">
     <button type="submit" data-display="submit-flight" disabled>Submit flight to leaderboard</button>

@@ -20,7 +20,7 @@
   text-align: center;
 
   .phone-reading-panels {
-    display: block;
+    display: none;
     position: relative;
     min-height: 200px;
     overflow: hidden;
@@ -54,6 +54,7 @@
     }
   }
 
+  // TODO: Check if still needed
   span {
     &.title {
       width: 50%;
@@ -66,6 +67,19 @@
       display: inline-block;
       padding-left: 0.4em;
       text-align: left;
+    }
+  }
+
+  .uplink-status {
+    font-size: 80%;
+  }
+
+  .connecting-loader {
+    padding-top: 2em;
+
+    .loader {
+      left: calc(50% - 24px);
+      position: relative;
     }
   }
 }

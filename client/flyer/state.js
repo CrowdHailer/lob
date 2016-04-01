@@ -1,13 +1,14 @@
 import Struct from "../carbide/struct";
 
 var FLYER_STATE_DEFAULTS = {
-  uplinkStatus: "UNKNOWN",
+  uplinkStatus: "CONNECTING",
   uplinkDetails: {},
   latestReading: null, // DEBT best place a null object here
   currentFlight: [],
   flightHistory: [],
   alert: ""
 };
+
 // DEBT not quite sure why this can't just be named state;
 export default function FlyerState(raw){
   if ( !(this instanceof FlyerState) ) { return new FlyerState(raw); }
