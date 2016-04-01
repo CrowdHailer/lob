@@ -9,6 +9,7 @@ import ConsoleView from "./tracker/console-view";
 import Showcase from "./tracker/showcase";
 import Reading from "./lib/reading";
 import AlertDisplay from "./alert/display";
+import Phone from "./lib/phone";
 import { ready } from "./utils/dom";
 
 // GENERAL CONFIGURATION
@@ -31,7 +32,7 @@ function uplinkStatusMessageFromProjection(projection) {
   if (message === 'AVAILABLE') {
     return 'Connection made to live Lob "' + projection.uplinkChannelName +'". Waiting for device to stream its position in real time';
   } else if (message === 'STREAMING') {
-    return 'Streaming live Lob "' + projection.uplinkChannelName +'"';
+    return 'Streaming live Lob <b>' + projection.uplinkChannelName + "</b>";
   } else if (message === 'FAILED') {
     return 'Could not connect to live Lob realtime service';
   } else if (message === 'DISCONNECTED') {
@@ -105,27 +106,6 @@ function GraphDisplay($root) {
         self.addPoint(point);
       })
     })
-  }
-}
-
-function Phone() {
-  if ( !(this instanceof Phone) ) { return new Phone($root); }
-  var $phone = document.documentElement.querySelector('#tridiv .scene');
-  var prefixes = ["-webkit-", "-moz-", "-ms-", ""];
-
-  this.setOrientation = function(position) {
-    /* Don't rotate on Y axis so that phone rotates on X & Y axis in front of user */
-    var xRotation = (90 - position.beta) + 270,
-        zRotation = position.gamma;
-
-    var cssText = '';
-
-    for (var prefixIndex = 0; prefixIndex < prefixes.length; prefixIndex++) {
-      var prefix = prefixes[prefixIndex];
-      cssText += prefix + 'transform: rotateX(' + xRotation + 'deg) rotateY(0deg) rotateZ(' + zRotation + 'deg);';
-    }
-
-    $phone.style.cssText = cssText;
   }
 }
 

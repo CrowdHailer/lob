@@ -4,7 +4,6 @@ function Display($root){
   var $maxFlightTime = $root.querySelector("[data-hook~=flight-time]");
   var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
   var $SubmittedMaxAltitude = $root.querySelector("[data-display~=submitted-max-altitude]");
-  var $currentReadout = $root.querySelector("[data-hook~=current-reading]");
   var $instruction = $root.querySelector("[data-display~=instruction]");
   var $uplink = $root.querySelector("[data-display~=uplink]");
   var $channel = $root.querySelector("[data-display~=channel]");
@@ -27,12 +26,6 @@ function Display($root){
         } else {
           $submitFlight.disabled = false;
         }
-      },
-      enumerable: true
-    },
-    currentReadout: {
-      set: function(currentReadout){
-        $currentReadout.innerHTML = currentReadout;
       },
       enumerable: true
     },

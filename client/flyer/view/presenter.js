@@ -22,26 +22,12 @@ function Presenter(projection){
     }
   });
 
-  Object.defineProperty(this, "currentReadout", {
-    get: function(){
-      // DEBT replace with reading toString method
-      if (!projection.latestReading) {
-        return "Waiting.";
-      }
-      var acceleration = projection.latestReading;
-      var x = acceleration.x;
-      var y = acceleration.y;
-      var z = acceleration.z;
-      return "[" + [format(x), format(y), format(z)].join(", ") + "]";
-    }
-  });
-
   Object.defineProperty(this, "instruction", {
     get: function(){
       if (!this.hasThrow) {
-        return "Lob phone to get started";
+        return "Are you ready?<br>Lob your phone in the air now.<br>Good luck!";
       }
-      return "OK! can you lob any higher";
+      return "Great! Can you lob it any higher?";
     }
   });
 

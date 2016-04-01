@@ -1,16 +1,44 @@
-<main class="flyer width-limited" data-interface="avionics" data-display="data-logger">
-  <p data-display="instruction">
-    Lob phone to get started
-  </p>
+<% content_for :body_class do %>small-header<% end %>
+
+<% content_for :head do %>
+  <link rel="stylesheet" href="/phone-model.css" media="screen" charset="utf-8">
+  <script type="text/javascript" src="/vendor.js"></script>
+  <script type="text/javascript" src="/flyer.js"></script>
+<% end %>
+
+<main class="flyer" data-interface="avionics" data-display="data-logger">
+  <p data-display="instruction"></p>
+
+  <div class="phone-reading-panels">
+    <div class="guage-widget">
+      <ul class="labels">
+        <li>0%</li>
+        <li>25%</li>
+        <li>50%</li>
+        <li>75%</li>
+        <li>100%</li>
+      </ul>
+      <div class="guage">
+        <div class="inner"></div>
+      </div>
+      <div class="needle"></div>
+      <div class="caption">
+        Lob momentum
+      </div>
+    </div>
+
+    <div class="phone">
+      <%= erb :_phone %>
+    </div>
+  </div>
+
   <p>
     <span class="title">Flight time:</span><span class="value" data-hook="flight-time"></span>
   </p>
   <p>
     <span class="title">Max height:</span><span class="value" data-hook="max-altitude"></span>
   </p>
-  <p class="readout" data-hook="current-reading">
-    starting
-  </p>
+
   <div id="uplink" class="unknown" data-display="uplink">
     <form id="starting-uplink" class="panel" action="#" method="post">
       <button type="button" data-display="status">Looking for connection</button>
@@ -29,9 +57,6 @@
   <form class="panel">
     <button type="button" onclick="Lob.resetReadings()">Reset</button>
   </form>
-  <%= erb :_phone %>
+
 </main>
 
-<link rel="stylesheet" href="/phone-model.css" media="screen" title="Phone styling" charset="utf-8">
-<script type="text/javascript" src="/vendor.js"></script>
-<script type="text/javascript" src="/flyer.js"></script>

@@ -16,9 +16,42 @@
 /* Throw your phone flying page */
 
 .flyer {
-  .readout {
-    text-align: center;
-    font-family: monospace;
+  max-width: $max-width;
+  text-align: center;
+
+  .phone-reading-panels {
+    display: block;
+    position: relative;
+    min-height: 200px;
+    overflow: hidden;
+
+    .guage-widget {
+      transform: scale(0.66);
+      position: absolute;
+      left: calc(25% - 90px);
+      z-index: -1;
+
+      .caption {
+        padding: 15px;
+        font-weight: bold;
+      }
+    }
+
+    .phone {
+      transform: scale(0.66);
+      position: absolute;
+      position: absolute;
+      left: calc(75% - 115px);
+      top: -30px;
+
+      #tridiv {
+        width: 350px;
+        height: 350px;
+        font-size: 37.5%;
+        margin: 0;
+        position: absolute;
+      }
+    }
   }
 
   span {

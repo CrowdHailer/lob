@@ -63,10 +63,12 @@ export default function Flyer(state){
     }
     // logInfo("[New reading]", reading); DONT log this
     showcase(flyer.state);
+    flyer.view.renderPhoneMovement(raw);
   };
   flyer.newOrientation = function(position) {
     position.timestamp = Date.now();
     transmitOrientation(position);
+    flyer.view.renderPhoneOrientation(position);
   }
   flyer.resetReadings = function(){
     flyer.state = flyer.state.merge({
