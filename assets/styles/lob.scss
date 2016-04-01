@@ -3,13 +3,16 @@
 @import 'node_modules/scut/dist/scut';
 @import "./notices";
 @import "./uplink";
-@import "./header";
 
 // RESETS
 // Preferred behaviour
 @include scut-reset-border-box;
 @include scut-reset-button;
 @include scut-sticky-footer-fluid(body, footer);
+
+$max-width: 980px; /* Designed for up to tablet */
+$tablet-width: 979px; /* Designed for up to tablet */
+$mobile-width: 500px;
 
 // STRUCTURE
 // styling added to semantic elements
@@ -42,54 +45,136 @@ hr {
   border: 1px solid black;
 }
 
+a {
+  color: #B10000;
+  font-weight: bold;
+  text-decoration: none;
+  &:hover {
+    text-decoration: underline;
+    color: #7D0000;
+  }
+}
 
 // LAYOUT
 // elements used across pages
 
-nav {
-  padding-top: 1em;
+header {
+  margin: 0 auto 20px 0;
+  position: relative;
   text-align: center;
 
-  &.footer-nav {
-    clear: both;
-    max-width: 760px;
+  h1 { display: none; }
+  h2 { display: none; }
+
+  img.heading {
+    margin-top: 90px;
+    max-width: 702px;
   }
 
-  .nav-item {
-    border: 2px solid;
-    border-radius: 4px;
-    padding: 0.1em 0.5em;
-    background-image: linear-gradient(to top, #fc0, #FFE788);
-    color: black;
-    text-decoration: none;
-    display: inline-block;
-    margin: 0.5em;
-    &:focus, &:active {
-      background-image: linear-gradient(to bottom, #fc0, #FFE788);
-      text-decoration: underline;
+  img.phone-rocket {
+    position: absolute;
+    z-index: -1;
+    margin-left: -350px;
+    margin-top: 10px;
+    max-width: 282px;
+  }
+}
+
+@media screen and (max-width: $tablet-width) {
+  header {
+    img.heading {
+      max-width: 450px;
+      margin-top: 60px;
+    }
+
+    img.phone-rocket {
+      margin-left: -230px;
+      max-width: 182px;
+    }
+  }
+}
+
+@media screen and (max-width: $mobile-width) {
+  header {
+    img.heading {
+      max-width: 300px;
+      margin-top: 40px;
+    }
+
+    img.phone-rocket {
+      margin-left: -150px;
+      max-width: 122px;
     }
   }
 }
 
 form.button {
   display: block;
-  max-width: 560px;
-  background-image: linear-gradient(to top, #fc0, #FFE788);
   font-size: 120%;
+  width: 100%;
   text-align: center;
   margin: 1rem auto;
-  border: 2px solid;
-  border-radius: 4px;
-  button {
-    padding: 0.5em;
-    &:focus, &:active {
-      text-decoration: underline;
+  border: none;
+
+  input[type=text] {
+    padding: 9px;
+    border: none;
+    border-bottom: solid 2px #D08200;
+    transition: border 0.3s;
+    margin: 10px;
+
+    &:focus {
+      border-bottom: solid 2px #000000;
+      outline: none;
     }
   }
+
+  button {
+    border: 1px solid #D08200;
+    position: relative;
+    top: -2px;
+
+    background: #fff200;
+    background-image: -webkit-linear-gradient(top, #fff200, #f0d000);
+    background-image: -moz-linear-gradient(top, #fff200, #f0d000);
+    background-image: -ms-linear-gradient(top, #fff200, #f0d000);
+    background-image: -o-linear-gradient(top, #fff200, #f0d000);
+    background-image: linear-gradient(to bottom, #fff200, #f0d000);
+    -webkit-border-radius: 28;
+    -moz-border-radius: 28;
+    border-radius: 28px;
+    text-shadow: 1px 1px 0px #ffffff;
+    font-family: Arial;
+    color: #000000;
+    font-size: 20px;
+    padding: 11px 20px 11px 20px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #f5e90e;
+    background-image: -webkit-linear-gradient(top, #f5e90e, #d4bb15);
+    background-image: -moz-linear-gradient(top, #f5e90e, #d4bb15);
+    background-image: -ms-linear-gradient(top, #f5e90e, #d4bb15);
+    background-image: -o-linear-gradient(top, #f5e90e, #d4bb15);
+    background-image: linear-gradient(to bottom, #f5e90e, #d4bb15);
+    text-decoration: none;
+  }
+
   button[disabled] {
-    color: #AAA;
+    background: #bdbdbd;
+    background-image: -webkit-linear-gradient(top, #bdbdbd, #999999);
+    background-image: -moz-linear-gradient(top, #bdbdbd, #999999);
+    background-image: -ms-linear-gradient(top, #bdbdbd, #999999);
+    background-image: -o-linear-gradient(top, #bdbdbd, #999999);
+    background-image: linear-gradient(to bottom, #bdbdbd, #999999);
+    text-decoration: none;
+    text-shadow: none;
+    color: #333;
   }
 }
+
 .center {
   text-align: center;
 }
@@ -101,7 +186,6 @@ form.button {
 
 .width-limited {
   max-width: 760px;
-  margin: 0 auto;
   padding-left: 1em;
   padding-right: 1em;
 }
@@ -121,34 +205,26 @@ span {
   }
 }
 
-
-::-webkit-input-placeholder {
-  color: #777;
-}
-
-:-moz-placeholder { /* Firefox 18- */
-  color: #777;
-}
-
-::-moz-placeholder {  /* Firefox 19+ */
-  color: #777;
-}
-
-:-ms-input-placeholder {
-  color: #777;
-}
+$placeholder-color: #999;
+::-webkit-input-placeholder { color: $placeholder-color; }
+:-moz-placeholder { color: $placeholder-color; }
+::-moz-placeholder { color: $placeholder-color; }
+:-ms-input-placeholder { color: $placeholder-color; }
 
 input {
   font-size: 100%;
   width: 50%;
   margin-right: 0.4em;
-  background-color: rgba(0,0,0,0);
+  background-color: rgba(255,255,255,0.9);
   font-family: raleway;
+  &:focus {
+    background-color: rgba(255,255,255,1);
+  }
 }
 
 .tracker {
   text-align: center;
-  width: 960px;
+  width: $max-width;
   margin: 0 auto;
 
   .graph-and-phone {
@@ -183,7 +259,21 @@ input {
   }
 }
 
+.home {
+  .mobile-ready {
+    display: none;
+  }
+
+  h2 {
+    border-top: 1px dashed #CA920D;
+    margin-top: 1.5em;
+    padding-top: 1.5em;
+  }
+}
+
 main {
+  margin: 0 auto 30px auto;
+
   a.button {
     background-image: linear-gradient(to top, #fc0, #FFE788);
     font-size: 120%;
@@ -202,23 +292,30 @@ main {
 footer {
   background-color: black;
   color: white;
+  text-align: center;
+
   a {
-    // text-decoration: none;
-    font-weight: bold;
-    // color: #266CB3;
     color: #FC0;
+    &:hover {
+      color: #FC0;
+    }
+  }
+
+  ul {
+    margin: 0;
+    list-style: none;
+    overflow: hidden;
+    li {
+      display: inline-block;
+      padding: 10px 25px 10px 20px;
+      border-right: 1px solid #EEE;
+      &:last-child {
+        border: none;
+      }
+    }
   }
 }
 
-footer p {
-  padding-left: 1em;
-  padding-right: 1em;
-  text-align: right;
-}
-
-footer span {
-  width: 22%;
-}
 .icon {
   display: inline-block;
   width: 1em;
