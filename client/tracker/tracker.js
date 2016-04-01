@@ -140,10 +140,6 @@ function Tracker(state, world){
     showcase(state);
     logEvent("following live readings");
   };
-  tracker.resetReadings = function(){
-    // Fundamentally no reason to resetReadings;
-    console.log('resetReadings');
-  };
 
   tracker.closeAlert = function(){
     // DEBT untested

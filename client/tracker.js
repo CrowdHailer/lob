@@ -130,7 +130,6 @@ ready(function(){
 
   var mainView = {
     render: function(projection){
-      // console.debug('Display rendering:', projection);
       $uplinkStatusMessage.innerHTML = uplinkStatusMessageFromProjection(projection);
 
       if (projection.uplinkStatus === 'STREAMING') {

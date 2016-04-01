@@ -67,12 +67,4 @@ export default function FlyerUplink(options, logger) {
 
   this.transmitReading = throttle(transmitReading, newReadingRateLimit);
   this.transmitOrientation = throttle(transmitOrientation, newReadingRateLimit);
-
-  this.transmitResetReadings = function() {
-    channel.publish("resetReadings", {}, function(err) {
-      if(err) {
-        window.console.warn("Unable to send reset readings; err = " + err.message);
-      }
-    });
-  };
 }

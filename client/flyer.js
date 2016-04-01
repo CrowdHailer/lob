@@ -80,22 +80,12 @@ export default function Flyer(state){
 
     flyer.view.renderPhoneMovement(raw);
   };
+
   flyer.newOrientation = function(position) {
     position.timestamp = Date.now();
     transmitOrientation(position);
     flyer.view.renderPhoneOrientation(position);
   }
-  flyer.resetReadings = function(){
-    flyer.state = flyer.state.merge({
-      latestReading: null,
-      currentFlight: [],
-      flightHistory: []
-    });
-    // transmit
-    transmitResetReadings();
-    showcase(flyer.state); // Untested
-    logInfo("Reset readings"); // Untested
-  };
 
   flyer.closeAlert = function(){
     // DEBT untested
@@ -113,11 +103,6 @@ export default function Flyer(state){
   function transmitOrientation(position){
     if (flyer.state.uplinkStatus === "TRANSMITTING") {
       flyer.uplink.transmitOrientation(position);
-    }
-  }
-  function transmitResetReadings(){
-    if (flyer.state.uplinkStatus === "TRANSMITTING") {
-      flyer.uplink.transmitResetReadings();
     }
   }
   function showcase(state){
