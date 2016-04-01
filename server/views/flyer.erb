@@ -1,12 +1,12 @@
-<main class="width-limited" data-interface="avionics" data-display="data-logger">
-  <p class="center" data-display="instruction">
+<main class="flyer width-limited" data-interface="avionics" data-display="data-logger">
+  <p data-display="instruction">
     Lob phone to get started
   </p>
   <p>
-    <span class="right">Flight time:</span><span class="left" data-hook="flight-time"></span>
+    <span class="title">Flight time:</span><span class="value" data-hook="flight-time"></span>
   </p>
   <p>
-    <span class="right">Max height:</span><span class="left" data-hook="max-altitude"></span>
+    <span class="title">Max height:</span><span class="value" data-hook="max-altitude"></span>
   </p>
   <p class="readout" data-hook="current-reading">
     starting
@@ -26,31 +26,30 @@
     <input type="text" name="username" autofocus value="" onkeyup="Lob.updateIdentity(this.value)" data-display="identity" required placeholder="Enter name">
   </label>
   <div id="uplink" class="unknown" data-display="uplink">
-    <form id="starting-uplink" class="button" action="#" method="post">
+    <form id="starting-uplink" class="panel" action="#" method="post">
       <button type="button" data-display="status">Looking for connection</button>
     </form>
-    <form id="uplink-available" class="button" onclick="Lob.startTransmitting()">
+    <form id="uplink-available" class="panel" onclick="Lob.startTransmitting()">
       <button type="button">Click to share flight</button>
     </form>
-    <form id="uplink-transmitting" class="button" action="#" method="post">
-      <button type="button" >
-        <a href="<%= twitter_link %>" target="_blank"><svg class="icon icon-twitter"><use xlink:href="#icon-twitter"></use></svg></a><span data-display="channel"> Watch on channel '????'</span></button>
+    <form id="uplink-transmitting" class="panel" action="#" method="post">
+      <span data-display="channel">Watch on channel '????'</span>
     </form>
-    <form id="uplink-failed" class="button">
+    <form id="uplink-failed" class="panel">
       <button type="button">Could not start uplink. Try again later.</button>
     </form>
   </div>
-  <form class="button" action="/submit-flight" method="post">
+  <form class="panel" action="/submit-flight" method="post">
     <input type="hidden" name="max-altitude" data-display="submitted-max-altitude" value="0">
     <input type="hidden" name="username" data-display="submitted-identity">
     <button type="submit" data-display="submit-flight" disabled>Submit flight to leaderboard</button>
   </form>
-  <form onclick="Lob.resetReadings()" class="button">
-    <button type="button">Reset</button>
+  <form class="panel">
+    <button type="button" onclick="Lob.resetReadings()">Reset</button>
   </form>
   <%= erb :_phone %>
 </main>
 
-<link rel="stylesheet" href="/phone.css" media="screen" title="Phone styling" charset="utf-8">
+<link rel="stylesheet" href="/phone-model.css" media="screen" title="Phone styling" charset="utf-8">
 <script type="text/javascript" src="/vendor.js"></script>
 <script type="text/javascript" src="/flyer.js"></script>

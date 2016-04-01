@@ -1,0 +1,65 @@
+/* Shared CSS components */
+
+/* Panel that typically includes 0+ form elements and one button */
+
+form.panel {
+  display: block;
+  font-size: 120%;
+  width: 100%;
+  text-align: center;
+  margin: 1rem auto;
+  border: none;
+
+  input[type=text] {
+    padding: 9px;
+    border: none;
+    border-bottom: solid 2px #D08200;
+    transition: border 0.3s;
+    margin: 10px;
+
+    &:focus {
+      border-bottom: solid 2px #000000;
+      outline: none;
+    }
+  }
+
+  button {
+    border: 1px solid #D08200;
+    position: relative;
+    top: -2px;
+    @include background(linear-gradient(to bottom, #fff200, #f0d000));
+    border-radius: 28px;
+    font-family: Arial;
+    color: #000000;
+    font-size: 20px;
+    padding: 11px 20px 11px 20px;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  button:hover {
+    @include background(linear-gradient(to bottom, #f5e90e, #d4bb15));
+    text-decoration: none;
+  }
+
+  button[disabled] {
+    @include background(linear-gradient(to bottom, #bdbdbd, #999999));
+    text-decoration: none;
+    text-shadow: none;
+    color: #333;
+  }
+}
+
+a.button {
+  @include background(linear-gradient(to top, #fc0, #FFE788));
+  font-size: 120%;
+  text-align: center;
+  border: 2px solid;
+  display: block;
+  padding: 0.5em;
+  border-radius: 4px;
+  margin: 1rem auto;
+  max-width: 560px;
+  text-decoration: none;
+  color: black;
+}

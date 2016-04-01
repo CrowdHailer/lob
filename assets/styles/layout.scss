@@ -1,0 +1,96 @@
+/* Shared layout styling such as headers, footers */
+
+/* Generic content area */
+main {
+  margin: 0 auto 30px auto;
+  padding: 0 1em;
+  box-sizing: border-box;
+
+  /* Generic style to ensure content does not get too wide */
+  &.width-limited {
+    max-width: $tablet-width;
+  }
+}
+
+/*
+  Page header: logo + strapline
+*/
+
+header {
+  margin: 0 auto 20px 0;
+  position: relative;
+  text-align: center;
+
+  h1 { display: none; }
+  h2 { display: none; }
+
+  img.heading {
+    margin-top: 90px;
+    max-width: 702px;
+  }
+
+  img.phone-rocket {
+    position: absolute;
+    z-index: -1;
+    margin-left: -350px;
+    margin-top: 10px;
+    max-width: 282px;
+  }
+}
+
+@media screen and (max-width: $tablet-width) {
+  header {
+    img.heading {
+      max-width: 450px;
+      margin-top: 60px;
+    }
+
+    img.phone-rocket {
+      margin-left: -230px;
+      max-width: 182px;
+    }
+  }
+}
+
+@media screen and (max-width: $mobile-width) {
+  header {
+    img.heading {
+      max-width: 300px;
+      margin-top: 40px;
+    }
+
+    img.phone-rocket {
+      margin-left: -150px;
+      max-width: 122px;
+    }
+  }
+}
+
+/* Footer */
+
+footer {
+  background-color: black;
+  color: white;
+  text-align: center;
+
+  a {
+    color: #FC0;
+    &:hover {
+      color: #FC0;
+    }
+  }
+
+  ul {
+    margin: 0;
+    list-style: none;
+    overflow: hidden;
+    li {
+      display: inline-block;
+      padding: 10px 25px 10px 20px;
+      border-right: 1px solid #EEE;
+      &:last-child {
+        border: none;
+      }
+    }
+  }
+}

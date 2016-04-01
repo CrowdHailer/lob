@@ -1,0 +1,77 @@
+/* Home page */
+
+.home {
+  /* Assume visitor does not have an accelerometer unless we detect one */
+  .mobile-ready {
+    display: none;
+  }
+
+  h2 {
+    border-top: 1px dashed #CA920D;
+    margin-top: 1.5em;
+    padding-top: 1.5em;
+  }
+}
+
+/* Throw your phone flying page */
+
+.flyer {
+  .readout {
+    text-align: center;
+    font-family: monospace;
+  }
+
+  span {
+    &.title {
+      width: 50%;
+      display: inline-block;
+      padding-right: 0.4em;
+      text-align: right;
+    }
+    &.value {
+      width: 50%;
+      display: inline-block;
+      padding-left: 0.4em;
+      text-align: left;
+    }
+  }
+}
+
+/* Track another phone page */
+
+.tracker {
+  text-align: center;
+  width: $max-width;
+  margin: 0 auto;
+
+  .graph-and-phone {
+    overflow: hidden;
+
+    #tracker-graph {
+      background-color: #EEE;
+      border: 1px solid #AAA;
+      float: left;
+      margin: 25px 0;
+      border-radius: 8px;
+      padding: 5px;
+
+      canvas {
+        background-color: #EEE;
+        width: 590px;
+        height: 290px;
+      }
+    }
+
+    #tridiv {
+      float: right;
+      position: relative;
+      width: 350px;
+      height: 350px;
+      font-size: 37.5%;
+    }
+  }
+
+  .lock-unlock {
+    clear: both;
+  }
+}
