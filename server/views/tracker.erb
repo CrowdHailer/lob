@@ -1,3 +1,12 @@
+<% content_for :body_class do %>small-header<% end %>
+
+<% content_for :head do %>
+  <link rel="stylesheet" href="/phone-model.css" media="screen" title="Phone styling" charset="utf-8">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+  <script type="text/javascript" src="/vendor.js"></script>
+  <script type="text/javascript" src="/tracker.js"></script>
+<% end %>
+
 <main class="tracker">
   <form>
     <button type="button" data-display="uplink-status-message">Connecting to Ably</button>
@@ -22,8 +31,3 @@
     </form>
   </div>
 </main>
-
-<link rel="stylesheet" href="/phone-model.css" media="screen" title="Phone styling" charset="utf-8">
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
-<script type="text/javascript" src="/vendor.js"></script>
-<script type="text/javascript" src="/tracker.js"></script>

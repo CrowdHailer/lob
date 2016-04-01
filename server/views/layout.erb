@@ -47,12 +47,13 @@
   <meta name="msapplication-config" content="/images/favicon/browserconfig.xml">
   <!-- ****** faviconit.com favicons ****** -->
 
-  <link rel="stylesheet" href="/lob.css" media="screen" title="no title" charset="utf-8">
-
+  <link rel="stylesheet" href="/lob.css" media="screen" charset="utf-8">
   <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" ></script>
+
+  <%= yield_content :head %>
 </head>
 
-<body>
+<body class="<%= yield_content :body_class %>">
   <aside class="notices" onclick="Lob.closeAlert()" data-display="alert">
     <section>
       <h1>Ooops!</h1>

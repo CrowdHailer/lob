@@ -36,24 +36,20 @@ header {
     margin-top: 10px;
     max-width: 282px;
   }
-}
 
-@media screen and (max-width: $tablet-width) {
-  header {
+  @mixin header-tablet {
     img.heading {
-      max-width: 450px;
+      max-width: 480px;
       margin-top: 60px;
     }
 
     img.phone-rocket {
-      margin-left: -230px;
+      margin-left: -245px;
       max-width: 182px;
     }
   }
-}
 
-@media screen and (max-width: $mobile-width) {
-  header {
+  @mixin header-mobile {
     img.heading {
       max-width: 300px;
       margin-top: 40px;
@@ -63,6 +59,38 @@ header {
       margin-left: -150px;
       max-width: 122px;
     }
+  }
+
+  @mixin header-mobile-tiny {
+    img.heading {
+      max-width: 210px;
+      margin-top: 35px;
+    }
+
+    img.phone-rocket {
+      margin-left: -115px;
+      max-width: 90px;
+    }
+  }
+
+  body.small-header & {
+    @include header-tablet;
+
+    @media screen and (max-width: $tablet-width) {
+      @include header-mobile;
+    }
+
+    @media screen and (max-width: $mobile-width) {
+      @include header-mobile-tiny;
+    }
+  }
+
+  @media screen and (max-width: $tablet-width) {
+    @include header-tablet;
+  }
+
+  @media screen and (max-width: $mobile-width) {
+    @include header-mobile;
   }
 }
 
@@ -90,6 +118,31 @@ footer {
       border-right: 1px solid #EEE;
       &:last-child {
         border: none;
+      }
+    }
+  }
+
+  @media screen and (max-width: $tablet-width) {
+    ul {
+      li {
+        padding: 10px 15px 10px 10px;
+        font-size: 80%;
+      }
+    }
+  }
+
+  @media screen and (max-width: $tablet-width) {
+    ul {
+      padding: 5px 0;
+      li {
+        padding: 5px 10px 5px 10px;
+        border: none;
+        clear: left;
+        display: block;
+        border-bottom: 1px solid #333;
+        &:last-child {
+          border-bottom: none
+        }
       }
     }
   }

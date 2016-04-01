@@ -1,5 +1,6 @@
 require "sinatra/base"
 require "sinatra/cookies"
+require "sinatra/content_for"
 
 require "ably"
 
@@ -7,6 +8,7 @@ require_relative './lib/leaderboard'
 
 class LobApp < Sinatra::Base
   helpers Sinatra::Cookies
+  helpers Sinatra::ContentFor
 
   set :public_folder, 'public'
 
