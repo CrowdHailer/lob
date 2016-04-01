@@ -1,12 +1,13 @@
 /* jshint esnext: true */
 
+import { readingPublishLimit } from '../config';
+
 function readingsDuration(readings){
   if (!readings[0]) { return 0; }
   var last = readings.length;
   var t0 = readings[0].timestamp;
   var t1 = readings[last - 1].timestamp;
-  // DEBT Magic number that make sense when sample rate is every 250ms
-  return (t1 + 250 - t0) / 1000;
+  return (t1 + readingPublishLimit - t0) / 1000;
 }
 function altitudeForFreefallDuration(duration){
   // Altitude Calculation

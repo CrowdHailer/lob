@@ -1,1 +1,1 @@
-export var readingPublishLimit = 250; // ms
+export var readingPublishLimit = 200; // ms
