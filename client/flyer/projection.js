@@ -1,13 +1,12 @@
 /* jshint esnext: true */
 
-import { readingPublishLimit } from '../config';
-
 function readingsDuration(readings){
   if (!readings[0]) { return 0; }
-  var last = readings.length;
+
   var t0 = readings[0].timestamp;
-  var t1 = readings[last - 1].timestamp;
-  return (t1 + readingPublishLimit - t0) / 1000;
+  var t1 = readings[readings.length - 1].timestamp;
+
+  return (t1 - t0) / 1000;
 }
 
 function altitudeForFreefallDuration(duration){

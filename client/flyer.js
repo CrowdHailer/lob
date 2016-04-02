@@ -5,17 +5,56 @@ import Reading from "./lib/reading";
 import Audio from "./lib/Audio";
 import FlyerState from './flyer/state'
 
+/* Class that wraps a reading but has logic
+   that allows it to be queried with a nice DSL */
+
+function PeakOrTrough(reading) {
+  this.updateReading(reading);
+}
+
+PeakOrTrough.prototype.Threshold = { peak: 18, trough: 4, timeWithoutPeakOrTrough: 0.75 };
+
+PeakOrTrough.prototype.exceedThreshold = function() {
+  return (this.magnitude < this.Threshold.trough) ||
+    (this.magnitude > this.Threshold.peak);
+};
+
+PeakOrTrough.prototype.isPeak = function() {
+  return this.magnitude > 10;
+}
+
+/* A peak for throw will never be around for more than 0.75 seconds i.e.
+   it has to swing back to another peak/trough or to stationery (magnitude 10) */
+PeakOrTrough.prototype.isTooOld = function() {
+  return this.timestamp < Date.now() - 750;
+}
+
+/* A trough of 3 is less than a trough  of 2
+   and a peak of 19 is less than a peak of 22 */
+PeakOrTrough.prototype.isLessThan = function(newPeakOrTrough) {
+  if (this.magnitude < 10) {
+    return newPeakOrTrough.magnitude < this.magnitude;
+  } else {
+    return newPeakOrTrough.magnitude > this.magnitude;
+  }
+};
+
+PeakOrTrough.prototype.updateReading = function(reading) {
+  this.reading = reading;
+  this.magnitude = reading.magnitude;
+  this.timestamp = reading.timestamp;
+}
+
 export default function Flyer(state){
   if ( !(this instanceof Flyer) ) { return new Flyer(state); }
-  state = FlyerState(state || {});
 
   var flyer = this;
-  flyer.state = state;
-  flyer.audio = new Audio();
+  var audio = new Audio();
+  var peakOrTroughHistory = [];
+  var currentFlightReadings = [];
 
-  /* Keep track of when it appears a flight is starting
-     and ending so that we can record the flights */
-  var lastFlightCompleted = false;
+  state = FlyerState(state || {});
+  flyer.state = state;
 
   flyer.uplinkAvailable = function(channelName) {
     if (flyer.state.uplinkStatus === 'INCOMPATIBLE') { return; }
@@ -60,35 +99,75 @@ export default function Flyer(state){
     transmitReading(reading);
     flyer.view.renderPhoneMovement(raw);
 
-    /* If flight has just completed, don't start a new one for 1.5s */
-    if (lastFlightCompleted && (lastFlightCompleted.getTime() > new Date().getTime() - 1500)) {
-      return;
-    }
+    this.trackThrows(reading, function(currentFlight) {
+      var state = flyer.state.set("latestReading", reading);
+      var flightHistory = state.flightHistory;
 
-    var state = flyer.state.set("latestReading", reading);
-    var currentFlight = state.currentFlight;
-    var flightHistory = state.flightHistory;
-    var flightCompleted = false;
-
-    if (reading.magnitude < 4) {
-      currentFlight.push(reading);
-    } else if(currentFlight[0]) {
       flightHistory.push(currentFlight);
-      currentFlight = [];
-      flightCompleted = true;
-      lastFlightCompleted = new Date();
-    }
-
-    state = state.set("currentFlight", currentFlight);
-    state = state.set("flightHistory", flightHistory);
-    flyer.state = state;
-
-    if (flightCompleted) {
-      /* Don't always update state UI for every movement cycle, hugely CPU intensive */
-      showcase(state);
-      this.audio.playDropSound();
-    }
+      flyer.state = state.set({
+        "currentFlight": currentFlight,
+        "flightHistory": flightHistory
+      });
+      showcase(flyer.state);
+      audio.playDropSound();
+    });
   };
+
+  /****
+
+    Calls the callback with an Array of readings when
+    a throw is detected
+
+    A throw is typically a curve in the form
+        ---      ---
+    ----/   \    /   \-----
+            \__/
+
+    What we need to identify is two large peaks or
+    troughs with an opposing peak/rought to work
+    out how long the throw was and how significant
+    it was
+
+  ****/
+  flyer.trackThrows = function(reading, callback) {
+    var currentPeakOrTrough = new PeakOrTrough(reading);
+    var lastPeakOrTrough = peakOrTroughHistory[peakOrTroughHistory.length - 1];
+
+    /* Start recording peaks or troughs, update the extremes of the peaks or
+       troughs, and when peak switches to trough or vice versa, add a new
+       recorded peak or trough in history */
+    if (currentPeakOrTrough.exceedThreshold()) {
+      if (!lastPeakOrTrough) {
+        peakOrTroughHistory.push(currentPeakOrTrough);
+      } else {
+        if (currentPeakOrTrough.isPeak() === lastPeakOrTrough.isPeak()) {
+          if (lastPeakOrTrough.isLessThan(currentPeakOrTrough)) {
+            lastPeakOrTrough.updateReading(currentPeakOrTrough);
+          }
+        } else {
+          peakOrTroughHistory.push(currentPeakOrTrough);
+        }
+      }
+    } else {
+      /* We are no longer exceeding a peak or trough
+         and we have satisfied the requirements of three peaks */
+      if (peakOrTroughHistory.length === 3) {
+        callback(currentFlightReadings);
+        peakOrTroughHistory = [];
+        currentFlightReadings = [];
+      }
+    }
+
+    if (lastPeakOrTrough) {
+      if (lastPeakOrTrough.isTooOld()) {
+        /* This is not a valid throw, clear all history */
+        peakOrTroughHistory = [];
+        currentFlightReadings = [];
+      } else {
+        currentFlightReadings.push(reading);
+      }
+    }
+  }
 
   flyer.newOrientation = function(position) {
     position.timestamp = Date.now();
