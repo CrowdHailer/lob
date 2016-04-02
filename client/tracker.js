@@ -1,5 +1,7 @@
 /* jshint esnext: true */
 
+import { pointsInTrackingGraph } from './config';
+
 // IMPORTS
 import "./utils/polyfill";
 import Tracker from "./tracker/tracker";
@@ -85,7 +87,7 @@ function GraphDisplay($root) {
         myLineChart.addData([point.magnitude], '');
       }
       // DEBT make length part of config
-      if (myLineChart.datasets[0].points.length > 20) {
+      if (myLineChart.datasets[0].points.length > pointsInTrackingGraph) {
         myLineChart.removeData();
       }
       i = i + 0.25;
