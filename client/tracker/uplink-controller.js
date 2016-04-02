@@ -1,6 +1,6 @@
-// Could also be called UplinkDriver - might be more suitable
 // RESPONSIBILITY - Drive the tracker application in response to messages from the Ably uplink
 import Reading from "../lib/reading";
+
 /* jshint esnext: true */
 export default function UplinkController(options, tracker){
   var realtime = new Ably.Realtime({ authUrl: '/token' });
@@ -42,8 +42,8 @@ export default function UplinkController(options, tracker){
 
   channel.presence.subscribe(uplinkPublisherPresenceUpdate);
 
-  flightRecorderChannel.subscribe(function(flightData) {
-    console.log("Flight data:", flightData.data, flightData.data.data);
+  flightRecorderChannel.subscribe(function(flightMessage) {
+    tracker.newFlight(flightMessage.data);
   }, function(err) {
     if (err) {
       console.error("Could not attach to flight recorder channel", flightRecorderChannelName);

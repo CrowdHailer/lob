@@ -107,7 +107,7 @@ function GraphDisplay($root) {
       self.clear();
       points.forEach(function(point){
         self.addPoint(point);
-      })
+      });
     })
   }
 }
@@ -115,9 +115,6 @@ function GraphDisplay($root) {
 ready(function(){
   var $root = document.documentElement;
   var $uplinkStatusMessage = queryDisplay('uplink-status-message', $root);
-  var $trackerHoldingSnapshot = queryDisplay('tracker-holding-snapshot', $root);
-  var $trackerFollowingLive = queryDisplay('tracker-following-live', $root);
-  var $trackerFollowingFlight = queryDisplay('tracker-following-flight', $root);
   var $graphAndPhone = queryDisplay('graph-and-phone', $root);
   var $preloader = queryDisplay('connecting-loader', $root);
   var $alert = queryDisplay('alert', $root);
@@ -146,21 +143,6 @@ ready(function(){
         $preloader.style.display = 'block';
       }
 
-      if (projection.flightOutputStatus === 'HOLDING_SNAPSHOT') {
-        $trackerHoldingSnapshot.style.display = '';
-        $trackerFollowingLive.style.display = 'none';
-        $trackerFollowingFlight.style.display = 'none';
-
-      } else if (projection.flightOutputStatus === 'FOLLOWING_LIVE') {
-        $trackerHoldingSnapshot.style.display = 'none';
-        $trackerFollowingLive.style.display = '';
-        $trackerFollowingFlight.style.display = 'none';
-
-      } else if (projection.flightOutputStatus === 'FOLLOWING_FLIGHT') {
-        $trackerHoldingSnapshot.style.display = 'none';
-        $trackerFollowingLive.style.display = 'none';
-        $trackerFollowingFlight.style.display = '';
-      }
       var alertMessage = projection.alert;
       if (alertMessage) {
         alertDisplay.message = alertMessage;
@@ -168,8 +150,6 @@ ready(function(){
       } else {
         alertDisplay.active = false;
       }
-      // graphDisplay.setPoints(projection.flightSnapshot || projection.liveFlight);
-      // console.log(projection.flightSnapshot || projection.liveFlight);
     },
 
     addReading(newReading){
