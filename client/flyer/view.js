@@ -4,7 +4,7 @@ import AlertDisplay from "../alert/display";
 import Phone from "../lib/phone";
 import Guage from "../lib/guage";
 
-import { readingPublishLimit } from '../config';
+import { config } from '../config';
 import { throttle } from "../utils/fn";
 
 export default function FlyerView() {
@@ -64,6 +64,6 @@ export default function FlyerView() {
     }
   }
 
-  this.renderPhoneMovement = throttle(renderPhoneMovement.bind(this), readingPublishLimit);
-  this.renderPhoneOrientation = throttle(renderPhoneOrientation.bind(this), readingPublishLimit);
+  this.renderPhoneMovement = throttle(renderPhoneMovement.bind(this), config.readingPublishLimit);
+  this.renderPhoneOrientation = throttle(renderPhoneOrientation.bind(this), config.readingPublishLimit);
 }

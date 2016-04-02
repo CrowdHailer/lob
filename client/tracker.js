@@ -1,6 +1,6 @@
 /* jshint esnext: true */
 
-import { pointsInTrackingGraph } from './config';
+import { config } from './config';
 
 // IMPORTS
 import "./utils/polyfill";
@@ -32,7 +32,9 @@ var uplinkController = new UplinkController(router.state, tracker);
 function uplinkStatusMessageFromProjection(projection) {
   var message = projection.uplinkStatus;
   if (message === 'AVAILABLE') {
-    return 'Connection made to live Lob "' + projection.uplinkChannelName +'".<br> Waiting for device to stream its position in real time';
+    return '<p>Connection made to live Lob <b>' + projection.uplinkChannelName + '</b>.</p>' +
+      '<p>Waiting for device to stream its position in real time.</p>' +
+      '<p>Are you sure the device is publishing with ID <b>' + projection.uplinkChannelName + '?</b>';
   } else if (message === 'STREAMING') {
     return 'Streaming live Lob <b>' + projection.uplinkChannelName + "</b>";
   } else if (message === 'FAILED') {
@@ -87,7 +89,7 @@ function GraphDisplay($root) {
         myLineChart.addData([point.magnitude], '');
       }
       // DEBT make length part of config
-      if (myLineChart.datasets[0].points.length > pointsInTrackingGraph) {
+      if (myLineChart.datasets[0].points.length > config.pointsInTrackingGraph) {
         myLineChart.removeData();
       }
       i = i + 0.25;

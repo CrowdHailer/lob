@@ -7,6 +7,10 @@ export default function UplinkController(options, tracker){
   var channelName = options.channelName;
   var channel = realtime.channels.get(channelName);
 
+  /* Flights namespace is configured to persist messages */
+  var flightRecorderChannelName = "flights:" + channelName;
+  var flightRecorderChannel = realtime.channels.get(flightRecorderChannelName);
+
   function uplinkPublisherPresenceUpdate() {
     channel.presence.get(function(err, members) {
       console.log("Publishing members change:", members.length);
@@ -36,5 +40,15 @@ export default function UplinkController(options, tracker){
     tracker.newOrientation(event.data);
   });
 
-  channel.presence.subscribe(uplinkPublisherPresenceUpdate)
+  channel.presence.subscribe(uplinkPublisherPresenceUpdate);
+
+  flightRecorderChannel.subscribe(function(flightData) {
+    console.log("Flight data:", flightData.data, flightData.data.data);
+  }, function(err) {
+    if (err) {
+      console.error("Could not attach to flight recorder channel", flightRecorderChannelName);
+    } else {
+      console.info("Attached to flight recorder channel", flightRecorderChannelName);
+    }
+  });
 }

@@ -23,10 +23,10 @@ PeakOrTrough.prototype.isPeak = function() {
   return this.magnitude > 10;
 }
 
-/* A peak for throw will never be around for more than 0.75 seconds i.e.
+/* A peak for throw will never be around for more than 2 seconds i.e.
    it has to swing back to another peak/trough or to stationery (magnitude 10) */
 PeakOrTrough.prototype.isTooOld = function() {
-  return this.timestamp < Date.now() - 750;
+  return this.timestamp < Date.now() - 2000;
 }
 
 /* A trough of 3 is less than a trough  of 2
@@ -45,7 +45,7 @@ PeakOrTrough.prototype.updateReading = function(reading) {
   this.timestamp = reading.timestamp;
 }
 
-export default function Flyer(state){
+export default function Flyer(state) {
   if ( !(this instanceof Flyer) ) { return new Flyer(state); }
 
   var flyer = this;
@@ -63,16 +63,16 @@ export default function Flyer(state){
       "uplinkStatus": "TRANSMITTING",
       "uplinkDetails": channelName
     });
-    logInfo("Uplink available, transmission will resume", channelName);
+    flyer.logger.info("Uplink available, transmission commencing", channelName);
     showcase(flyer.state);
   };
 
-  flyer.uplinkFailed = function() {
+  flyer.uplinkFailed = function(err) {
     if (flyer.state.uplinkStatus === 'INCOMPATIBLE') { return; }
 
     flyer.state = flyer.state.set("uplinkStatus", "FAILED");
     showcase(flyer.state);
-    logInfo("[Uplink Failed]");
+    flyer.logger.error("Uplink failed", err);
   };
 
   flyer.uplinkDisconnected = function() {
@@ -80,7 +80,7 @@ export default function Flyer(state){
 
     flyer.state = flyer.state.set("uplinkStatus", "DISCONNECTED");
     showcase(flyer.state);
-    logInfo("[Uplink Disconnected]");
+    flyer.logger.warn("Uplink disconnected, will attempt reconnect");
   };
 
   flyer.newReading = function(raw) {
@@ -108,8 +108,11 @@ export default function Flyer(state){
         "currentFlight": currentFlight,
         "flightHistory": flightHistory
       });
+
       showcase(flyer.state);
+
       audio.playDropSound();
+      transmitFlightData(flyer.state, currentFlight);
     });
   };
 
@@ -155,6 +158,7 @@ export default function Flyer(state){
         callback(currentFlightReadings);
         peakOrTroughHistory = [];
         currentFlightReadings = [];
+        return;
       }
     }
 
@@ -179,26 +183,38 @@ export default function Flyer(state){
     // DEBT untested
     flyer.state = flyer.state.set("alert", "");
     showcase(flyer.state);
-    logInfo("Alert closed");
   };
 
-  // DEBT what to do before other values are set
   function transmitReading(reading){
     if (flyer.state.uplinkStatus === "TRANSMITTING") {
       flyer.uplink.transmitReading(reading);
     }
   }
+
   function transmitOrientation(position){
     if (flyer.state.uplinkStatus === "TRANSMITTING") {
       flyer.uplink.transmitOrientation(position);
     }
   }
+
+  function transmitFlightData(state, flightData) {
+    if (flyer.state.uplinkStatus === "TRANSMITTING") {
+      var projection = Projection(state);
+      var data = {
+        timestamp: projection.lastFlightTimestamp,
+        flightTime: projection.lastFlightTime,
+        altitude: projection.lastAltitude,
+        flightSerialThisSession: projection.flightCount,
+        data: flightData
+      }
+      flyer.uplink.transmitFlightData(data);
+    }
+  }
+
   function showcase(state){
     flyer.view.render(Projection(state));
   }
-  function logInfo() {
-    flyer.logger.info.apply(flyer.logger, arguments);
-  }
+
   // DEBT should be set separatly for Testing
   flyer.clock = window.Date;
 }

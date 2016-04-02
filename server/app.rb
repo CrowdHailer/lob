@@ -53,7 +53,11 @@ class LobApp < Sinatra::Base
       'Invalid channel name'
     else
       content_type :json
-      capability = { '*' => ['subscribe', 'history'], channel_name => ['subscribe', 'publish', 'history', 'presence'] }
+      capability = {
+        '*' => ['subscribe', 'history'],
+        channel_name => ['subscribe', 'publish', 'history', 'presence'],
+        "flights:#{channel_name}" => ['subscribe', 'publish', 'history']
+      }
       client.auth.create_token_request(client_id: channel_name, capability: capability).to_json
     end
   end

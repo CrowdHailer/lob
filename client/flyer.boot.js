@@ -5,13 +5,10 @@ import Router from "./router";
 import FlyerView from "./flyer/view";
 import FlyerUplink from './flyer/uplink';
 
-import { readingPublishLimit } from './config';
-
 var router = Router(window.location);
 
 var uplink = FlyerUplink({
-  channelName: router.state.channelName,
-  rateLimit: readingPublishLimit
+  channelName: router.state.channelName
 }, window.console);
 
 var flyer = Flyer();

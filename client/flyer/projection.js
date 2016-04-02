@@ -55,6 +55,19 @@ function Projection(rawState){
     }
   });
 
+  Object.defineProperty(this, "lastFlightTimestamp", {
+    get: function(){
+      var lastFlight = rawState.flightHistory[rawState.flightHistory.length - 1];
+      return lastFlight[lastFlight.length-1].timestamp;
+    }
+  });
+
+  Object.defineProperty(this, "flightCount", {
+    get: function(){
+      return rawState.flightHistory.length;
+    }
+  });
+
   Object.defineProperty(this, "maxAltitude", {
     get: function(){
       return maxAltitude(rawState.flightHistory.concat(rawState.currentFlight));
