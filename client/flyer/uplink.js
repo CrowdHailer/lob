@@ -1,6 +1,6 @@
 import { throttle } from "../utils/fn";
 
-import { config } from '../config';
+import { Config } from '../config';
 
 export default function FlyerUplink(options, logger) {
   if ( !(this instanceof FlyerUplink) ) { return new FlyerUplink(options, logger); }
@@ -88,7 +88,7 @@ export default function FlyerUplink(options, logger) {
   this.onconnectionFailed = noop;
   this.onconnectionDisconnected = noop;
 
-  this.transmitReading = throttle(transmitReading, config.readingPublishLimit);
-  this.transmitOrientation = throttle(transmitOrientation, config.readingPublishLimit);
-  this.transmitFlightData = throttle(transmitFlightData, config.flightPublishLimit); /* never send more than one lob per second, it shouldn't happen, but just in case */
+  this.transmitReading = throttle(transmitReading, Config.readingPublishLimit);
+  this.transmitOrientation = throttle(transmitOrientation, Config.readingPublishLimit);
+  this.transmitFlightData = throttle(transmitFlightData, Config.flightPublishLimit); /* never send more than one lob per second, it shouldn't happen, but just in case */
 }

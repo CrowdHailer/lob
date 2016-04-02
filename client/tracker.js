@@ -1,6 +1,6 @@
 /* jshint esnext: true */
 
-import { config } from './config';
+import { Config } from './config';
 
 // IMPORTS
 import "./utils/polyfill";
@@ -88,8 +88,7 @@ function GraphDisplay($root) {
       } else {
         myLineChart.addData([point.magnitude], '');
       }
-      // DEBT make length part of config
-      if (myLineChart.datasets[0].points.length > config.pointsInTrackingGraph) {
+      if (myLineChart.datasets[0].points.length > Config.pointsInTrackingGraph) {
         myLineChart.removeData();
       }
       i = i + 0.25;
