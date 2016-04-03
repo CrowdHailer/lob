@@ -18,11 +18,17 @@ flyer.view = new FlyerView
 flyer.uplink = uplink;
 
 function AccelerometerController(global, flyer){
-  global.addEventListener('devicemotion', function(deviceMotionEvent){
-    flyer.newReading(deviceMotionEvent.accelerationIncludingGravity);
-  });
-  global.addEventListener('deviceorientation', function(deviceOrientationEvent){
-    flyer.newOrientation({ alpha: deviceOrientationEvent.alpha, beta: deviceOrientationEvent.beta, gamma: deviceOrientationEvent.gamma });
+  var gn = new GyroNorm();
+  var logger = function(data) {
+    console.warn("Gyro log:", data);
+  }
+  gn.init({ frequency: 10, decimalCounts: 3, logger: logger }).then(function() {
+    gn.start(function(data) {
+      flyer.newReading(data);
+    });
+  }).catch(function(e) {
+    /* DeviceOrientation or DeviceMotion is not supported by the browser or device */
+    flyer.accelerometerNotSupported();
   });
 }
 

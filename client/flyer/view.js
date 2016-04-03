@@ -39,8 +39,8 @@ export default function FlyerView() {
     return memoized.guage;
   }
 
-  var renderPhoneMovement = function(projection) {
-    getGuage().setMomentum(projection)
+  var renderPhoneMovement = function(reading) {
+    getGuage().setMomentum(reading);
   }
 
   var renderPhoneOrientation = function(position) {

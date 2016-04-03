@@ -20,24 +20,16 @@ export default function FlyerUplink(options, logger) {
 
   var noop = function() {};
 
-  function transmitReading(reading){
-    channel.publish('newReading', reading, function(err){
+  function transmitReadingAndOrientation(reading, orientation){
+    channel.publish("reading", { reading: reading, orientation: orientation }, function(err) {
       if (err) {
         logger.warn("Unable to send new reading; err = " + err.message);
       }
     })
   }
 
-  function transmitOrientation(position){
-    channel.publish('newOrientation', position, function(err) {
-      if (err) {
-        logger.warn("Unable to send new orientation; err = " + err.message);
-      }
-    })
-  }
-
   function transmitFlightData(flightData){
-    flightRecorderChannel.publish('flight', flightData, function(err) {
+    flightRecorderChannel.publish("flight", flightData, function(err) {
       if (err) {
         logger.warn("Unable to send new fligth data; err = " + err.message);
       }
@@ -88,7 +80,6 @@ export default function FlyerUplink(options, logger) {
   this.onconnectionFailed = noop;
   this.onconnectionDisconnected = noop;
 
-  this.transmitReading = throttle(transmitReading, Config.readingPublishLimit);
-  this.transmitOrientation = throttle(transmitOrientation, Config.readingPublishLimit);
+  this.transmitReadingAndOrientation = throttle(transmitReadingAndOrientation, Config.readingPublishLimit);
   this.transmitFlightData = throttle(transmitFlightData, Config.flightPublishLimit); /* never send more than one lob per second, it shouldn't happen, but just in case */
 }

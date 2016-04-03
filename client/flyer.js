@@ -140,20 +140,19 @@ export default function Flyer(state) {
   };
 
   flyer.newReading = function(raw) {
-    raw.timestamp = Date.now();
-    var reading = Reading(raw);
+    var reading = Reading({
+      x: raw.dm.gx, /* raw.dm is devicemotion */
+      y: raw.dm.gy,
+      z: raw.dm.gz,
+      timestamp: Date.now()
+    });
 
-    if (isNaN(parseInt(raw.x))) {
-      flyer.state = flyer.state.merge({
-        "alert": "Accelerometer not found for this device. Please try again on a different mobile",
-        "uplinkStatus": "INCOMPATIBLE"
-      });
-      showcase(flyer.state);
-      return;
-    }
+    var orientation = raw.do;
 
-    transmitReading(reading);
-    flyer.view.renderPhoneMovement(raw);
+    transmitReadingAndOrientation(reading, orientation);
+
+    flyer.view.renderPhoneMovement(reading);
+    flyer.view.renderPhoneOrientation(orientation);
 
     this.trackThrows(reading, function(currentFlight, peakOrTroughHistory) {
       var state = flyer.state.set("latestReading", reading);
@@ -269,17 +268,19 @@ export default function Flyer(state) {
     }
   }
 
-  flyer.newOrientation = function(position) {
-    position.timestamp = Date.now();
-    transmitOrientation(position);
-    flyer.view.renderPhoneOrientation(position);
-  }
-
   flyer.closeAlert = function(){
     // DEBT untested
     flyer.state = flyer.state.set("alert", "");
     showcase(flyer.state);
   };
+
+  flyer.accelerometerNotSupported = function() {
+    flyer.state = flyer.state.merge({
+      "alert": "Accelerometer not found for this device. Please try again on a different mobile",
+      "uplinkStatus": "INCOMPATIBLE"
+    });
+    showcase(flyer.state);
+  }
 
   function dropFirstPeakAndTrough() {
     peakOrTroughHistory.splice(0,2);
@@ -309,15 +310,9 @@ export default function Flyer(state) {
     return freefallData;
   }
 
-  function transmitReading(reading){
+  function transmitReadingAndOrientation(reading, orientation) {
     if (flyer.state.uplinkStatus === "TRANSMITTING") {
-      flyer.uplink.transmitReading(reading);
-    }
-  }
-
-  function transmitOrientation(position){
-    if (flyer.state.uplinkStatus === "TRANSMITTING") {
-      flyer.uplink.transmitOrientation(position);
+      flyer.uplink.transmitReadingAndOrientation(reading, orientation);
     }
   }
 

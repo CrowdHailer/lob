@@ -36,12 +36,9 @@ export default function UplinkController(options, tracker){
     tracker.uplinkDisconnected(err);
   });
 
-  channel.subscribe("newReading", function(event){
-    tracker.newReading(Reading(event.data));
-  });
-
-  channel.subscribe("newOrientation", function(event){
-    tracker.newOrientation(event.data);
+  channel.subscribe("reading", function(event){
+    tracker.newReading(Reading(event.data.reading));
+    tracker.newOrientation(event.data.orientation);
   });
 
   channel.presence.subscribe(uplinkPublisherPresenceUpdate);

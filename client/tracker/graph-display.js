@@ -133,7 +133,7 @@ export default function GraphDisplay(trackDivId) {
   this.addPoint = function(point) {
     chart.dataProvider.push({
       date: point.timestamp,
-      value: Math.round((point.magnitude - 10) * 100) / 100 /* LobForce is stationery at 0 */
+      value: Math.round((point.magnitude - Config.gravityMagnitudeConstant) * 100) / 100 /* LobForce is stationery at 0 */
     });
     this.prepareAndTruncateData();
   }
