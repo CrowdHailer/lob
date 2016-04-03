@@ -47,12 +47,22 @@ export default function UplinkController(options, tracker){
   channel.presence.subscribe(uplinkPublisherPresenceUpdate);
 
   flightRecorderChannel.subscribe(function(flightMessage) {
-    tracker.newFlight(flightMessage.data);
+    tracker.newFlight(flightMessage.data, true);
   }, function(err) {
     if (err) {
-      console.error("Could not attach to flight recorder channel", flightRecorderChannelName);
+      console.error("Could not attach to flight recorder channel", flightRecorderChannelName, err);
     } else {
       console.info("Attached to flight recorder channel", flightRecorderChannelName);
+      flightRecorderChannel.history({ limit: 20 }, function(err, historicalFlightPage) {
+        if (err) {
+          console.error("Could not retrieve history for ", flightRecorderChannelName, err);
+        } else {
+          var historicalFlights = historicalFlightPage.items;
+          for (var i = historicalFlights.length - 1; i >= 0; i--) {
+            tracker.newFlight(historicalFlights[i].data, false);
+          }
+        }
+      })
     }
   });
 }
