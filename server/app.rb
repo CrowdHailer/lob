@@ -84,14 +84,16 @@ class LobApp < Sinatra::Base
 
   post '/submit-flight' do
     begin
-      username = request.POST['username'];
+      username = request.POST['nickname'];
       max_altitude = request.POST['max-altitude']; # m
       flight = Flight.new(username: username, max_altitude: max_altitude)
       Leaderboard.submit_flight(flight)
-      erb :submission
+      content_type :json
+      { message: "Submitted successfully" }.to_json
     rescue ArgumentError => err
       status 400
-      erb :failed_submission, :locals => {message: err.message}
+      content_type :json
+      { error: true, message: err.message }.to_json
     end
   end
 

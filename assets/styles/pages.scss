@@ -82,6 +82,22 @@
 
   .leaderboard {
     display: none;
+    font-size: 85%;
+    border-top: 1px solid #ca920d;
+
+    h3 {
+      font-size: 100%;
+    }
+
+    form {
+      input[type=text] {
+        min-width: 280px;
+      }
+    }
+
+    .submitted-panel {
+      display: none;
+    }
   }
 
   .message {

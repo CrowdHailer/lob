@@ -12,16 +12,15 @@ export default function FlyerView() {
 
   var getDisplay = function() {
     if (!memoized.display) {
-      var $avionics = document.querySelector("[data-interface~=avionics]");
-      memoized.display = new Display($avionics);
+      var $flyer = $('.flyer');
+      memoized.display = new Display($flyer);
     }
     return memoized.display;
   }
 
   var getAlertDisplay = function() {
     if (!memoized.alertDisplay) {
-      var $alertDisplay = document.querySelector("[data-display~=alert]");
-      memoized.alertDisplay = AlertDisplay($alertDisplay);
+      memoized.alertDisplay = AlertDisplay();
     }
     return memoized.alertDisplay;
   }

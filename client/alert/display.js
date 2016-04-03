@@ -1,6 +1,6 @@
 /* jshint esnext: true */
 
-export default function Display($root){
+export default function Display() {
   var $root = $('.notices'),
       $message = $root.find('.message');
 

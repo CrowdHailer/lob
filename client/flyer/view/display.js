@@ -1,44 +1,98 @@
 /* jshint esnext: true */
 
+import AlertDisplay from "../../alert/display";
+
 /* This function class contains the logic for the presentation
    messaging in the view based on the state, but is weirdly not a
    view itself as their is a view, a projection, and a presenter? */
 
 function Display($root){
-  var $maxFlightTime = $root.querySelector("[data-hook~=flight-time]");
-  var $maxAltitude = $root.querySelector("[data-hook~=max-altitude]");
-  var $submittedMaxAltitude = $root.querySelector("[data-display~=submitted-max-altitude]");
-  var $message = $root.querySelector("[data-display~=message]");
-  var $uplinkStatus = $root.querySelector("[data-display~=uplink-status]");
-  var $submitFlight = $root.querySelector("[data-display~=submit-flight]");
-  var $loader = $root.querySelector("[data-display~=connecting-loader]");
-  var $connectionActive = $root.querySelector("[data-display~=connection-active]");
+  var $leaderboardPanel = $root.find(".leaderboard"),
+      $leaderboardSubmitPanel = $leaderboardPanel.find(".submit-panel"),
+      $leaderboardSubmittedPanel = $leaderboardPanel.find(".submitted-panel"),
+      $leaderboardForm = $leaderboardPanel.find("form"),
+      $leaderBoardFormNickname = $leaderboardPanel.find("form input[name=nickname]"),
+      $leaderBoardFormAltitude = $leaderboardPanel.find("form input[name=max-altitude]"),
+      $leaderBoardAltitudeMessage = $leaderboardPanel.find(".max-altitude-message"),
+      $leaderBoardSubmittedAltitude = $leaderboardPanel.find(".max-altitude-message-submitted");
+
+  var $message = $root.find(".message"),
+      $uplinkStatus = $root.find(".uplink-status"),
+      $loader = $root.find(".connecting-loader"),
+      $connectionActive = $root.find(".connection-active");
+
+  var alertDisplay = AlertDisplay();
+
+  function init() {
+    $leaderboardForm.on('submit', function(event) {
+      event.preventDefault();
+
+      var altitude = $leaderBoardFormAltitude.val(),
+          nickname = $leaderBoardFormNickname.val(),
+          data = { "max-altitude": altitude, "nickname": nickname };
+
+      if (window.localStorage) {
+        localStorage.setItem('nickname', nickname);
+      }
+
+      $leaderboardForm.find('submit').attr('disabled', 'disabled');
+
+      $.post('/submit-flight', data).done(function() {
+          alertDisplay.active = false;
+          $leaderBoardSubmittedAltitude.text(altitude + "m");
+          $leaderboardSubmitPanel.hide();
+          $leaderboardSubmittedPanel.show();
+        }).fail(function() {
+          alertDisplay.message = "Oops, something went wrong submitting your lob to the leaderboard. Please try again";
+          alertDisplay.active = true;
+        }).always(function() {
+          $leaderboardForm.find('submit').removeAttr('disabled');
+        })
+    });
+  }
 
   function setLoading(isLoading) {
-    $loader.style.display = isLoading ? 'block' : 'none';
-    $connectionActive.style.display = isLoading ? 'none' : 'block';
+    if (isLoading) {
+      $loader.show();
+      $connectionActive.hide();
+    } else {
+      $loader.hide();
+      $connectionActive.show();
+    }
+  }
+
+  function showLeaderboard(altitude) {
+    $leaderboardPanel.show();
+    $leaderboardSubmitPanel.show();
+    $leaderboardSubmittedPanel.hide();
+    $leaderBoardFormAltitude.val(altitude);
+    $leaderBoardAltitudeMessage.text(Math.round(altitude * 100)/100 + "m");
+
+    if (window.localStorage && window.localStorage.getItem('nickname')) {
+      $leaderBoardFormNickname.val(window.localStorage.getItem('nickname'));
+    }
   }
 
   function updateUplinkStatus(presentation) {
     switch(presentation.uplinkStatus.toLowerCase()) {
       case "connecting":
-        $uplinkStatus.innerHTML = "Hold on, we're establishing a realtime connection to stream your lob.";
+        $uplinkStatus.html("Hold on, we're establishing a realtime connection to stream your lob.");
         setLoading(true);
         break;
       case "disconnected":
-        $uplinkStatus.innerHTML = "Hold on, we've lost the realtime connection. Trying to reconnect now.";
+        $uplinkStatus.html("Hold on, we've lost the realtime connection. Trying to reconnect now.");
         setLoading(true);
         break;
       case "failed":
-        $uplinkStatus.innerHTML = "Oops, we've failed to establish a realtime connection. Try reloading this app.";
+        $uplinkStatus.html("Oops, we've failed to establish a realtime connection. Try reloading this app.");
         setLoading(true);
         break;
       case "incompatible":
-        $uplinkStatus.innerHTML = "Unfortunately no accelerometer was found on this device. Please try again on a different mobile";
+        $uplinkStatus.html("Unfortunately no accelerometer was found on this device. Please try again on a different mobile");
         setLoading(true);
         break;
       case "transmitting":
-        $uplinkStatus.innerHTML = "Live streaming this with id <b>" + presentation.channelName + "</b>. <a href='/why-stream'>Why?</a>";
+        $uplinkStatus.html("Live streaming this with id <b>" + presentation.channelName + "</b>. <a href='/why-stream'>Why?</a>");
         setLoading(false);
         break;
       default:
@@ -47,28 +101,29 @@ function Display($root){
   }
 
   function renderNoThrows(presentation) {
-    $message.innerHTML = "<p>Are you ready?</p><p><b>Lob your phone in the air now.</b></p><p>Good luck!</p>";
+    $message.html("<p>Are you ready?</p><p><b>Lob your phone in the air now.</b></p><p>Good luck!</p>");
     updateUplinkStatus(presentation);
   }
 
   function renderFirstThrow(presentation) {
-    $message.innerHTML = "<p>Great throw!</p>" +
+    $message.html("<p>Great throw!</p>" +
       "<p>You lobbed it <b>" + presentation.lastAltitude + "</b> for <b>" + presentation.lastFlightTime + "</b></p>" +
-      "<p>Go on, try again!</p>"
+      "<p>Go on, try again!</p>");
     updateUplinkStatus(presentation);
   }
 
   function renderMultipleThrows(presentation) {
     if (presentation.lastHigherThanBefore) {
-      $message.innerHTML = "<p>Superb, that's your best so far!</p>" +
-      "<p>You lobbed it <b>" + presentation.lastAltitude + "</b> for <b>" + presentation.lastFlightTime + "</b></p>" +
-      "<p>Your previous best was <b>" + presentation.maxAltitude + "</b> high</p>" +
-      "<p>You can do better!</p>"
+      $message.html("<p>Superb, that's your best so far!</p>" +
+        "<p>You lobbed it <b>" + presentation.lastAltitude + "</b> for <b>" + presentation.lastFlightTime + "</b></p>" +
+        "<p>Your previous best was <b>" + presentation.maxAltitude + "</b> high</p>" +
+        "<p>Go for glory, see if you can go higher!</p>");
+      showLeaderboard(presentation.rawMaxAltitude);
     } else {
-      $message.innerHTML = "<p>Not bad, but that's not your best so far.</p>" +
-      "<p>You lobbed it <b>" + presentation.lastAltitude + "</b> for <b>" + presentation.lastFlightTime + "</b></p>" +
-      "<p>Your previous best was <b>" + presentation.maxAltitude + "</b> high</p>" +
-      "<p>Give it another go!</p>"
+      $message.html("<p>Not bad, but that's not your best so far.</p>" +
+        "<p>You lobbed it <b>" + presentation.lastAltitude + "</b> for <b>" + presentation.lastFlightTime + "</b></p>" +
+        "<p>Your previous best was <b>" + presentation.maxAltitude + "</b> high</p>" +
+        "<p>Give it another go!</p>");
     }
     updateUplinkStatus(presentation);
   }
@@ -78,10 +133,13 @@ function Display($root){
       renderNoThrows(presentation);
     } else if (presentation.hasOneThrow) {
       renderFirstThrow(presentation);
+      showLeaderboard(presentation.rawMaxAltitude);
     } else {
       renderMultipleThrows(presentation);
     }
   }
+
+  init();
 }
 
 export function create($root){ Display($root); }

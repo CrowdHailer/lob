@@ -6,18 +6,17 @@
   <script type="text/javascript" src="/flyer.js"></script>
 <% end %>
 
-<main class="flyer" data-interface="avionics" data-display="data-logger">
+<main class="flyer">
+  <div class="uplink-status">Hold on, just getting ready...</div>
 
-  <div class="uplink-status" data-display="uplink-status">Hold on, just getting ready...</div>
-
-  <div class="connecting-loader" data-display="connecting-loader">
+  <div class="connecting-loader">
     <%= erb :_loader %>
     <div class="back">
       <a href="/">&laquo; cancel</a>
     </div>
   </div>
 
-  <div class="connection-active" data-display="connection-active">
+  <div class="connection-active">
     <div class="phone-reading-panels">
       <div class="guage-widget">
         <ul class="labels">
@@ -41,12 +40,21 @@
       </div>
     </div>
 
-    <p class="message" data-display="message"></p>
+    <p class="message"></p>
 
-    <form class="leaderboard panel" action="/submit-flight" method="post">
-      <input type="hidden" name="max-altitude" data-display="submitted-max-altitude" value="0">
-      <button type="submit" data-display="submit-flight" disabled>Submit flight to leaderboard</button>
-    </form>
+    <div class="leaderboard panel">
+      <div class="submit-panel">
+        <form class="panel" action="/submit-flight" method="post">
+          <h3>Submit your <span class="max-altitude-message"></span> Lob to our leaderboard</h3>
+          <input type="text" name="nickname" placeholder="Enter a nickname" required><button type="submit">Submit</button>
+          <input type="hidden" name="max-altitude" id="max-altitide" value="0">
+        </form>
+      </div>
+      <div class="submitted-panel">
+        <h3>You're in our leaderboard</h3>
+        <p>Your height of <span class="max-altitude-message-submitted"></span> was submitted to the leaderboard.</p>
+      </div>
+      <a href="/leaderboard">View the leaderboard &raquo;</a>
   </div>
 </main>
 

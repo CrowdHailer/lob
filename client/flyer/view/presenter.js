@@ -28,6 +28,12 @@ function Presenter(projection){
     }
   });
 
+  Object.defineProperty(this, "rawMaxAltitude", {
+    get: function(){
+      return projection.maxAltitude;
+    }
+  });
+
   Object.defineProperty(this, "lastAltitude", {
     get: function(){
       return projection.lastAltitude + "m";
