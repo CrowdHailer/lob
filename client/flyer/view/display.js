@@ -114,7 +114,7 @@ function Display($root){
 
   function renderMultipleThrows(presentation) {
     if (presentation.lastHigherThanBefore) {
-      $message.html("<p>Superb, that's your best so far!</p>" +
+      $message.html("<p>Superb, <b>that's your new record!</b></p>" +
         "<p>You lobbed it <b>" + presentation.lastAltitude + "</b> for <b>" + presentation.lastFlightTime + "</b></p>" +
         "<p>Your previous best was <b>" + presentation.maxAltitude + "</b> high</p>" +
         "<p>Go for glory, see if you can go higher!</p>");

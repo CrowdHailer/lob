@@ -54,7 +54,7 @@ function Presenter(projection){
 
   Object.defineProperty(this, "lastHigherThanBefore", {
     get: function(){
-      return projection.lastAltitude > projection.maxAltitude;
+      return projection.lastAltitude == projection.maxAltitude;
     }
   });
 
