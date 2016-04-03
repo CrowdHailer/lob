@@ -142,19 +142,32 @@ export default function GraphDisplay(trackDivId) {
     var start = flightData.data[0].timestamp;
     var end = flightData.data[flightData.data.length - 1].timestamp;
     var altitude = flightData.altitude;
+    var midpointDate = (start + end) / 2;
+    var guide = new AmCharts.Guide();
 
     chart.dataProvider.push({
       date: start,
       altitude: 0
     });
     chart.dataProvider.push({
-      date: (start + end) / 2,
+      date: midpointDate,
       altitude: altitude
     });
     chart.dataProvider.push({
       date: end,
       altitude: 0
     });
+
+    guide.label = Math.round(altitude * 100)/100 + "m, airborne " + Math.round((end - start) / 1000)/100 + "s";
+    guide.labelRotation = 90;
+    guide.position = "top";
+    guide.inside = true;
+    guide.color = "black";
+    guide.lineThickness = 2;
+    guide.lineAlpha = 1;
+    guide.category = midpointDate;
+    chart.categoryAxis.addGuide(guide);
+
     this.prepareAndTruncateData();
   }
 
@@ -168,6 +181,10 @@ export default function GraphDisplay(trackDivId) {
       return point.date > minDateOnGraph;
     }).sort(function(a,b) {
       return a.date - b.date;
+    });
+
+    chart.guides = chart.guides.filter(function(guide) {
+      return guide.category > minDateOnGraph;
     });
 
     chart.validateData();
