@@ -97,13 +97,17 @@ ready(function(){
     addReading: function(newReading) {
       if (paused) { return; }
 
-      graphDisplay.addPoint(newReading);
+      if (graphDisplay) {
+        graphDisplay.addPoint(newReading);
+      }
     },
 
     addFlight: function(newFlightData, live) {
       if (paused) { return; }
 
-      graphDisplay.addFlight(newFlightData);
+      if (graphDisplay) {
+        graphDisplay.addFlight(newFlightData);
+      }
 
       var altitude = Math.round(newFlightData.altitude * 100)/100 + "m",
           flightTime = Math.round(newFlightData.flightTime * 100)/100 + "s",

@@ -9,21 +9,24 @@ function readingsDuration(readings){
   return (t1 - t0) / 1000;
 }
 
-function altitudeForFreefallDuration(duration){
-  // Altitude Calculation
+function altitudeForFreefallDuration(durationInSeconds){
+  /*
+    Altitude Calculation
 
-  // SUVAT
-  // s = vt - 0.5 * a * t^2
-  // input
-  // s = s <- desired result
-  // u = ? <- not needed
-  // v = 0 <- stationary at top
-  // a = - 9.81 <- local g
-  // t = flightTime/2 time to top of arc
+    Makes an assumption that magnitude is 10 (stationery) at
+    the top of the throw and bottom of the throw starts when magnitude
+    starts increasing again indicatin deceleration. Our flight data
+    is trimmed before it arrives here so that it only contains freefall
+    information.
 
-  // s = 9.81 * 1/8 t^2
-  var t = duration;
-  return 9.81/8 * t * t;
+    As we have two peaks and one trough, the freefall data is the mid point
+    (as in level of 10) of peak 1 & bottom of trough 1.
+
+    Vertical drop formula:
+      height = gravity 9.8m/s * time^2 / 2
+  */
+
+  return 9.8 * Math.pow(durationInSeconds, 2) / 2;
 }
 
 function round(number){

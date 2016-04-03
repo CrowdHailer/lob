@@ -186,12 +186,13 @@ export default function Flyer(state) {
     opposing peak/trough to work out how long the throw was
 
     Assumption is that throw is end of the first up curve i.e. it's stopped accelerating upwards,
-    until the bottom of the following down curve.
+    until the bottom of the following down curve when it starts decellerating.
 
   ****/
   flyer.trackThrows = function(reading, callback) {
     var currentPeakOrTrough = new PeakOrTrough(reading);
     var lastPeakOrTrough = peakOrTroughHistory[peakOrTroughHistory.length - 1];
+    var freefallData;
 
     /* Prevent detection sometimes on bounce / catch */
     if (lastThrowCompleted && (lastThrowCompleted > Date.now() - Thresholds.flightPause)) {
@@ -206,22 +207,22 @@ export default function Flyer(state) {
       if (!lastPeakOrTrough) {
         /* We only start recording from a peak, never from a trough */
         if (currentPeakOrTrough.isPeak()) {
-          console.debug('Detected first peak', reading.asJson());
+          debug('Detected first peak', reading.asJson());
           peakOrTroughHistory.push(currentPeakOrTrough);
         } else {
-          console.debug('Trough so ignoring data', reading.asJson());
+          debug('Trough so ignoring data', reading.asJson());
         }
       } else {
         if (currentPeakOrTrough.isPeak() === lastPeakOrTrough.isPeak()) {
           if (lastPeakOrTrough.isLessThan(currentPeakOrTrough)) {
-            console.debug('In play peak is greater than old peak', reading.asJson());
+            debug('In play peak is greater than old peak', reading.asJson());
             lastPeakOrTrough.updateReading(reading);
           }
         } else {
           peakOrTroughHistory.push(currentPeakOrTrough);
-          console.debug('New peak detected. Now', peakOrTroughHistory.length, 'peaks or troughs.', reading.asJson());
+          debug('New peak detected. Now', peakOrTroughHistory.length, 'peaks or troughs.', reading.asJson());
           while (peakOrTroughHistory.length > 3) {
-            console.debug('Truncating first peak and trough as new peaks and troughs detected');
+            debug('Truncating first peak and trough as new peaks and troughs detected');
             dropFirstPeakAndTrough();
           }
         }
@@ -230,11 +231,11 @@ export default function Flyer(state) {
       /* We are no longer exceeding a peak or trough
          and we have satisfied the requirements of three peaks */
       if (peakOrTroughHistory.length === 3) {
-        console.debug('Total 3 peaks or troughs detected and now in middle ground.', reading.asJson());
+        debug('Total 3 peaks or troughs detected and now in middle ground.', reading.asJson());
 
         var peakToTroughDuration = peakOrTroughHistory[2].timestampEnd - peakOrTroughHistory[0].timestampStart;
         if (peakToTroughDuration < Thresholds.peakTroughMinTime) {
-          console.debug('Peak to peak duration too low so skipping that peak & trough', peakToTroughDuration, peakOrTroughHistory);
+          debug('Peak to peak duration too low so skipping that peak & trough', peakToTroughDuration, peakOrTroughHistory);
           /*
             The peak and trough are too close togeher, person is probably just waving phone up and down.
             Lets keep this current peak and drop previous peak & trough
@@ -242,7 +243,13 @@ export default function Flyer(state) {
           dropFirstPeakAndTrough();
         } else {
           lastThrowCompleted = Date.now();
-          callback(currentFlightReadings, peakOrTroughHistory);
+
+          /* Only keep the flight data for the freefall, see Projection
+             for a better explanation of why we only use freefall data */
+          freefallData = filterFreefallData(currentFlightReadings);
+          debug("Free fall data", freefallData);
+
+          callback(freefallData, peakOrTroughHistory);
           peakOrTroughHistory = [];
           currentFlightReadings = [];
           return;
@@ -252,7 +259,7 @@ export default function Flyer(state) {
 
     if (lastPeakOrTrough) {
       if (lastPeakOrTrough.isStagnant()) {
-        console.debug('Last peak or trough stagnant, discarding everything', lastPeakOrTrough, peakOrTroughHistory);
+        debug('Last peak or trough stagnant, discarding everything', lastPeakOrTrough, peakOrTroughHistory);
         /* This is not a valid throw, clear all history */
         peakOrTroughHistory = [];
         currentFlightReadings = [];
@@ -279,6 +286,27 @@ export default function Flyer(state) {
     currentFlightReadings = currentFlightReadings.filter(function(reading) {
       return reading.timestamp >= peakOrTroughHistory[0].timestamp;
     });
+  }
+
+  function filterFreefallData(flightData) {
+    var freefallData = [],
+        reading,
+        lowestMagnitude;
+
+    /* First get all data that is below stationery i.e. in freefall
+       but only keep the points that are increasingly lower in magnitude.
+       See Projection for more details on assumptions */
+    for (var i = 0; i < flightData.length; i++) {
+      reading = flightData[i];
+      if (reading.magnitude >= 10) { continue; }
+
+      if (!lowestMagnitude || (reading.magnitude < lowestMagnitude)) {
+        lowestMagnitude = reading.magnitude;
+        freefallData.push(reading);
+      }
+    }
+
+    return freefallData;
   }
 
   function transmitReading(reading){
