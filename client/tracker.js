@@ -56,6 +56,8 @@ ready(function(){
       phone = new Phone(),
       graphDisplay;
 
+  var paused = false;
+
   var mainView = {
     render: function(projection) {
       $uplinkStatusMessage.html(uplinkStatusMessageFromProjection(projection));
@@ -78,13 +80,29 @@ ready(function(){
       } else {
         alertDisplay.active = false;
       }
+
+      $('.pause-button').on('click', function() {
+        paused = true;
+        $('.pause-button').hide();
+        $('.play-button').show();
+      });
+
+      $('.play-button').on('click', function() {
+        paused = false;
+        $('.play-button').hide();
+        $('.pause-button').show();
+      });
     },
 
     addReading: function(newReading) {
+      if (paused) { return; }
+
       graphDisplay.addPoint(newReading);
     },
 
     addFlight: function(newFlightData) {
+      if (paused) { return; }
+
       graphDisplay.addFlight(newFlightData);
 
       var altitude = Math.round(newFlightData.altitude * 100)/100 + "m",

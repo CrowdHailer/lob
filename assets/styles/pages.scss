@@ -128,6 +128,7 @@
       border-radius: 8px;
       padding: 5px;
       width: 570px;
+      position: relative;
     }
 
     #tracker-graph {
@@ -141,6 +142,16 @@
       width: 350px;
       height: 350px;
       font-size: 37.5%;
+    }
+
+    .pause-button, .play-button {
+      position: absolute;
+      top: 5px;
+      right: 7px;
+      margin: 0;
+    }
+    .play-button {
+      display: none
     }
   }
 
