@@ -74,8 +74,7 @@ function Tracker(state, world){
 
   tracker.uplinkDisconnected = function(err) {
     if (tracker.state.uplinkStatus === 'DISCONNECTED') { return; }
-    var state = tracker.state.set("uplinkStatus", "DISCONNECTED");
-    tracker.state = state.set("alert", "Hold on, we've been disconnected from Ably, attempting to reconnect");
+    tracker.state = tracker.state.set("uplinkStatus", "DISCONNECTED");
     tracker.logger.warn("Uplink has been disconnected", err);
     showcase(tracker.state);
   };
