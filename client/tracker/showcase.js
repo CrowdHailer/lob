@@ -35,12 +35,15 @@ export default function TrackerShowcase(window){
     phones.push(phone);
   }
 
-  // DEBT
   this.addReading = function(newReading){
     views.forEach(function(view){
-      if (view.addReading) {
-        view.addReading(newReading);
-      }
+      view.addReading(newReading);
+    });
+  }
+
+  this.addFlight = function(newFlightData) {
+    views.forEach(function(view){
+      view.addFlight(newFlightData);
     });
   }
 
@@ -48,14 +51,6 @@ export default function TrackerShowcase(window){
     phones.forEach(function(phone){
       if (phone.setOrientation) {
         phone.setOrientation(position);
-      }
-    });
-  }
-
-  this.setReadings = function(readings){
-    views.forEach(function(view){
-      if (view.setReadings) {
-        view.setReadings(readings);
       }
     });
   }

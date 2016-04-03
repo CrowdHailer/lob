@@ -13,8 +13,12 @@ export default function UplinkController(options, tracker){
 
   function uplinkPublisherPresenceUpdate() {
     channel.presence.get(function(err, members) {
-      console.log("Publishing members change:", members.length);
-      tracker.uplinkPresent(channelName, members.length);
+      if (err) {
+        tracker.uplinkFailed(err);
+      } else {
+        console.log("Publishers on this channel:", members.length);
+        tracker.uplinkPresent(channelName, members.length);
+      }
     });
   }
 

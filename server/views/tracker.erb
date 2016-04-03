@@ -2,7 +2,7 @@
 
 <% content_for :head do %>
   <link rel="stylesheet" href="/phone-model.css" media="screen" title="Phone styling" charset="utf-8">
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js"></script>
+  <script type="text/javascript" src="/vendor-chart.js"></script>
   <script type="text/javascript" src="/vendor.js"></script>
   <script type="text/javascript" src="/tracker.js"></script>
 <% end %>
@@ -11,8 +11,8 @@
   <div data-display="uplink-status-message">Connecting to Ably</div>
 
   <div class="graph-and-phone" data-display="graph-and-phone">
-    <div id="tracker-graph" data-display="tracker-graph">
-      <canvas></canvas>
+    <div id="tracker-wrapper">
+      <div id="tracker-graph"></div>
     </div>
     <%= erb :_phone %>
   </div>

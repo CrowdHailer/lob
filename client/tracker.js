@@ -1,7 +1,5 @@
 /* jshint esnext: true */
 
-import { Config } from './config';
-
 // IMPORTS
 import "./utils/polyfill";
 import Tracker from "./tracker/tracker";
@@ -12,6 +10,7 @@ import Showcase from "./tracker/showcase";
 import Reading from "./lib/reading";
 import AlertDisplay from "./alert/display";
 import Phone from "./lib/phone";
+import GraphDisplay from "./tracker/graph-display";
 import { ready } from "./utils/dom";
 
 // GENERAL CONFIGURATION
@@ -46,72 +45,6 @@ function uplinkStatusMessageFromProjection(projection) {
   }
 }
 
-function GraphDisplay($root) {
-  if ( !(this instanceof GraphDisplay) ) { return new GraphDisplay($root); }
-
-  var canvas = $root.querySelector('canvas');
-  var canvasContext = canvas.getContext("2d");
-
-  // DEBT data can come from $root dataset
-  var data = {
-    labels: [],
-    datasets: [{
-      label: "Magnitude",
-      strokeColor: "#FFCC00",
-      data: []
-    }]
-  };
-
-  var i = 0.0;
-  // add point
-  // clear
-  var chartOptions = {
-    animation: false,
-    pointDot : false,
-    datasetFill: false,
-    showToolTips: false,
-    scaleOverride: true,
-    scaleStartValue: 0,
-    scaleSteps: 9,
-    scaleStepWidth: 10,
-    scaleLabel: "    <%=value%>"
-  };
-
-  var myLineChart = new Chart(canvasContext).Line(data, chartOptions);
-  window.myLineChart = myLineChart
-  this.addPoint = function(point){
-    window.requestAnimationFrame(function(){
-      var date = new Date(point.timestamp)
-      // TODO plot only some legends
-      if (i % 1 === 0) {
-        myLineChart.addData([point.magnitude], date.getSeconds() + 's');
-      } else {
-        myLineChart.addData([point.magnitude], '');
-      }
-      if (myLineChart.datasets[0].points.length > Config.pointsInTrackingGraph) {
-        myLineChart.removeData();
-      }
-      i = i + 0.25;
-    })
-  }
-  this.clear = function(){
-    myLineChart.destroy();
-    // i = 0.0;
-    data.labels = [];
-    myLineChart = new Chart(canvasContext).Line(data, chartOptions);
-  }
-  this.setPoints = function(points){
-    // DEBT remove use of this
-    var self = this;
-    window.requestAnimationFrame(function(){
-      self.clear();
-      points.forEach(function(point){
-        self.addPoint(point);
-      });
-    })
-  }
-}
-
 ready(function(){
   var $root = document.documentElement;
   var $uplinkStatusMessage = queryDisplay('uplink-status-message', $root);
@@ -121,22 +54,17 @@ ready(function(){
   var alertDisplay = AlertDisplay($alert);
   var graphDisplay;
 
-  function setupGraphDisplay() {
-    var $graphDisplay = queryDisplay('tracker-graph', $root);
-    window.graphDisplay = graphDisplay = GraphDisplay($graphDisplay);
-  }
-
   var phone = new Phone();
 
   var mainView = {
-    render: function(projection){
+    render: function(projection) {
       $uplinkStatusMessage.innerHTML = uplinkStatusMessageFromProjection(projection);
 
       if (projection.uplinkStatus === 'STREAMING') {
         $graphAndPhone.style.display = 'block';
         $preloader.style.display = 'none';
         if (!graphDisplay) {
-          setupGraphDisplay();
+          graphDisplay = new GraphDisplay('tracker-graph');
         }
       } else {
         $graphAndPhone.style.display = 'none';
@@ -152,12 +80,12 @@ ready(function(){
       }
     },
 
-    addReading(newReading){
+    addReading: function(newReading) {
       graphDisplay.addPoint(newReading);
     },
 
-    setReadings(readings){
-      graphDisplay.setPoints(readings);
+    addFlight: function(newFlightData) {
+      graphDisplay.addFlight(newFlightData);
     }
   };
   tracker.showcase.addView(mainView);
