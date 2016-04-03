@@ -171,4 +171,37 @@
   .connecting-loader {
     @include preloader;
   }
+
+  .flight-history {
+    display: none;
+    margin-bottom: 2em;
+
+    table {
+      margin: 0 auto;
+      th {
+        background-color: #B80201;
+        color: white;
+        padding: 10px 20px;
+        border-right: 1px solid #FC0;
+        font-weight: bold;
+        font-size: 80%;
+      }
+      tr:nth-child(odd) {
+        td {
+          background: #FFF1BA;
+        }
+      }
+      tr:nth-child(even) {
+        td {
+          background: #FFFFFF;
+        }
+      }
+      td {
+        padding: 10px 20px;
+        border-right: 1px solid #FC0;
+        font-weight: normal;
+        font-size: 80%;
+      }
+    }
+  }
 }

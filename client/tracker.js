@@ -46,29 +46,29 @@ function uplinkStatusMessageFromProjection(projection) {
 }
 
 ready(function(){
-  var $root = document.documentElement;
-  var $uplinkStatusMessage = queryDisplay('uplink-status-message', $root);
-  var $graphAndPhone = queryDisplay('graph-and-phone', $root);
-  var $preloader = queryDisplay('connecting-loader', $root);
-  var $alert = queryDisplay('alert', $root);
-  var alertDisplay = AlertDisplay($alert);
-  var graphDisplay;
+  var $uplinkStatusMessage = $('.uplink-status-message'),
+      $graphAndPhone = $('.graph-and-phone'),
+      $preloader = $('.connecting-loader'),
+      $flightHistory = $('.flight-history'),
+      $flightHistoryTable = $flightHistory.find('table');
 
-  var phone = new Phone();
+  var alertDisplay = AlertDisplay(),
+      phone = new Phone(),
+      graphDisplay;
 
   var mainView = {
     render: function(projection) {
-      $uplinkStatusMessage.innerHTML = uplinkStatusMessageFromProjection(projection);
+      $uplinkStatusMessage.html(uplinkStatusMessageFromProjection(projection));
 
       if (projection.uplinkStatus === 'STREAMING') {
-        $graphAndPhone.style.display = 'block';
-        $preloader.style.display = 'none';
+        $graphAndPhone.show();
+        $preloader.hide();
         if (!graphDisplay) {
           graphDisplay = new GraphDisplay('tracker-graph');
         }
       } else {
-        $graphAndPhone.style.display = 'none';
-        $preloader.style.display = 'block';
+        $graphAndPhone.hide();
+        $preloader.show();
       }
 
       var alertMessage = projection.alert;
@@ -86,16 +86,21 @@ ready(function(){
 
     addFlight: function(newFlightData) {
       graphDisplay.addFlight(newFlightData);
+
+      var altitude = Math.round(newFlightData.altitude * 100)/100 + "m",
+          flightTime = Math.round(newFlightData.flightTime * 100)/100 + "s",
+          flightDate = new Date(newFlightData.timestamp),
+          flewAt = flightDate.toLocaleTimeString() + " " + flightDate.toLocaleDateString();
+
+      var row = $("<tr><td>" + altitude + "</td><td>" + flightTime + "</td><td>" + flewAt + "</td></tr>");
+      $flightHistoryTable.find('tr:first').after(row);
+      $flightHistory.show();
     }
   };
+
   tracker.showcase.addView(mainView);
   tracker.showcase.addPhone(phone);
 });
 
-
-// Dom views should be initialized with the ready on certain selectors library
-function queryDisplay(display, element){
-  return element.querySelector('[data-display~=' + display + ']');
-}
 export default tracker;
 

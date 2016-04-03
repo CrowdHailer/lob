@@ -8,19 +8,30 @@
 <% end %>
 
 <main class="tracker">
-  <div data-display="uplink-status-message">Connecting to Ably</div>
+  <div class="uplink-status-message">Connecting to Ably</div>
 
-  <div class="graph-and-phone" data-display="graph-and-phone">
+  <div class="graph-and-phone">
     <div id="tracker-wrapper">
       <div id="tracker-graph"></div>
     </div>
     <%= erb :_phone %>
   </div>
 
-  <div class="connecting-loader" data-display="connecting-loader">
+  <div class="connecting-loader">
     <%= erb :_loader %>
     <div class="back">
       <a href="/">&laquo; cancel</a>
     </div>
+  </div>
+
+  <div class="flight-history">
+    <h3>Lob history</h3>
+    <table>
+      <tr>
+        <th>Height</th>
+        <th>Time airborne</th>
+        <th>Lobbed at</th>
+      </tr>
+    </table>
   </div>
 </main>
