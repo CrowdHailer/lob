@@ -1,3 +1,8 @@
+<% content_for :head do %>
+  <script type="text/javascript" src="/vendor.js"></script>
+  <script type="text/javascript" src="/home.js"></script>
+<% end %>
+
 <main class="home width-limited">
   <div class="mobile-ready">
     <p><b>Ready?</b> Press 'start flight' and throw your phone into the air. Remember to catch it!</p>
@@ -12,9 +17,9 @@
 
   <h2 name="watch">Watch a phone get lobbed in real time</h2>
   <p>All phones lobbed stream their movement in realtime to our servers. Enter the unique live Lob code shown on yours or a friend's phone to view their live stream.</p>
-  <form class="panel" action="/track-flight" method="post">
+  <form class="track-flight panel" action="/track-flight" method="post">
     <label>
-      <input type="text" name="channel-name" required placeholder="Enter a live Lob code">
+      <input type="text" name="channel-name" placeholder="Enter a live Lob code" required>
       <button type="submit">Watch live lob</button>
     </label>
   </form>
@@ -23,19 +28,3 @@
   <p>Throw your phone to the sky and have your name etched in our leaderboard forever</p>
   <a href="/leaderboard">View the leaderboard</a>
 </main>
-
-<script type="text/javascript">
-(function() {
-  var mobileSupported = document.documentElement.querySelector('.mobile-ready'),
-      mobileNotSupported = document.documentElement.querySelector('.mobile-not-ready');
-
-  if (window.DeviceOrientationEvent && window.DeviceMotionEvent) {
-    window.addEventListener('devicemotion', function(event) {
-      if (!isNaN(parseInt(event.acceleration.x))) {
-        mobileNotSupported.style.display = 'none';
-        mobileSupported.style.display = 'block';
-      }
-    }, false);
-  }
-}());
-</script>

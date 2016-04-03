@@ -28,8 +28,14 @@ function Display($root){
       event.preventDefault();
 
       var altitude = $leaderBoardFormAltitude.val(),
-          nickname = $leaderBoardFormNickname.val(),
+          nickname = $leaderBoardFormNickname.val().replace(/^\s+|\s+$/g,""),
           data = { "max-altitude": altitude, "nickname": nickname };
+
+      if (nickname.length === 0) {
+        alert("Sorry, you need to have a nickname to enter the leaderboard");
+        $leaderBoardFormNickname.focus();
+        return;
+      }
 
       if (window.localStorage) {
         localStorage.setItem('nickname', nickname);

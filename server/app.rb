@@ -37,21 +37,21 @@ class LobApp < Sinatra::Base
   end
 
   get '/new-flight' do
-    channel_name = cookies[:channel_name] ||= create_channel_name
+    channel_name ||= cookies[:channel_name] || create_channel_name
     redirect "/flyer/#{channel_name}"
   end
 
   get '/flyer/:channel_name' do
-    channel_name = params[:channel_name]
+    channel_name = params[:channel_name].strip
     response.set_cookie 'channel_name', value: channel_name, expires: Time.now + 365 * 24 * 60 * 60
     erb :flyer, locals: { channel_name: channel_name }
   end
 
   get '/flyer/:channel_name/token' do
-    channel_name = params[:channel_name].upcase
+    channel_name = params[:channel_name].upcase.strip
     if !channel_name
       status 400
-      'Invalid channel name'
+      'Oops, that is not a valid channel name'
     else
       content_type :json
       capability = {
@@ -64,12 +64,17 @@ class LobApp < Sinatra::Base
   end
 
   post '/track-flight' do
-    channel_name = request.POST["channel-name"].upcase
-    redirect "/track/#{channel_name}"
+    channel_name = (request.POST["channel-name"] || '').upcase
+    if (channel_name.strip == '')
+      status 400
+      'Oops, that is not a valid channel name'
+    else
+      redirect "/track/#{channel_name}"
+    end
   end
 
   get '/track/:channel_name' do
-    channel_name = params[:channel_name].upcase
+    channel_name = params[:channel_name].upcase.strip
     erb :tracker, locals: { channel_name: channel_name }
   end
 

@@ -112,7 +112,7 @@ ready(function(){
       var altitude = Math.round(newFlightData.altitude * 100)/100 + "m",
           flightTime = Math.round(newFlightData.flightTime * 100)/100 + "s",
           flightDate = new Date(newFlightData.timestamp),
-          flewAt = flightDate.toLocaleTimeString() + " " + flightDate.toLocaleDateString();
+          flewAt = flightDate.toLocaleTimeString() + " on " + flightDate.toLocaleDateString();
 
       var row = $("<tr><td>" + altitude + "</td><td>" + flightTime + "</td><td>" + flewAt + "</td></tr>");
       $flightHistoryTable.find('tr:first').after(row);
