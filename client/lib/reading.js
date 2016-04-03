@@ -35,3 +35,10 @@ Object.defineProperty(Reading.prototype, "magnitude", {
     return roundtoFour(Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z));
   }
 });
+
+Reading.prototype.asJson = function() {
+  return {
+    timestamp: this.timestamp,
+    magnitude: this.magnitude
+  }
+};

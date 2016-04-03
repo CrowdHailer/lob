@@ -139,8 +139,8 @@ export default function GraphDisplay(trackDivId) {
   }
 
   this.addFlight = function(flightData) {
-    var start = flightData.data[0].timestamp;
-    var end = flightData.data[flightData.data.length - 1].timestamp;
+    var start = flightData.peakInfo[0].timestampStart;
+    var end = flightData.peakInfo[flightData.peakInfo.length-1].timestampEnd;
     var altitude = flightData.altitude;
     var midpointDate = (start + end) / 2;
     var guide = new AmCharts.Guide();
@@ -158,7 +158,7 @@ export default function GraphDisplay(trackDivId) {
       altitude: 0
     });
 
-    guide.label = Math.round(altitude * 100)/100 + "m, airborne " + Math.round((end - start) / 1000)/100 + "s";
+    guide.label = "Lob " + Math.round(altitude * 100)/100 + "m, airborne " + Math.round(flightData.flightTime * 100)/100 + "s";
     guide.labelRotation = 90;
     guide.position = "top";
     guide.inside = true;

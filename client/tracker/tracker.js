@@ -84,7 +84,7 @@ function Tracker(state, world){
   };
 
   tracker.newFlight = function(flightData, live) {
-    this.showcase.addFlight(flightData);
+    this.showcase.addFlight(flightData, live);
     if (live) { this.audio.playDropSound(); };
   }
 

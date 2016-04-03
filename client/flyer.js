@@ -5,28 +5,72 @@ import Reading from "./lib/reading";
 import Audio from "./lib/Audio";
 import FlyerState from './flyer/state'
 
+var Thresholds = {
+  peak: 18,
+  trough: 4,
+  stagnantMovementTime: 1000,
+  stagnantMovementAmount: 7, /* expect at least this much movement in magnitude over stagnantMovementTime */
+  flightPause: 2000, /* period we stop detecting throws after a throw has been made */
+  peakTroughMinTime: 400 /* Min time we expect from the throw peak to the drop trough to consider this a valid throw */
+}
+
+var DebugThrows = false; /* Will output debugging info when false */
+var lastDebugArgs;
+
+function debug() {
+  if (DebugThrows) {
+    var argsString = Array.prototype.join.call(arguments, ",");
+    if (lastDebugArgs === argsString) {
+      return;
+    }
+    lastDebugArgs = argsString;
+
+    console.debug.apply(console, arguments);
+  }
+}
+
 /* Class that wraps a reading but has logic
    that allows it to be queried with a nice DSL */
 
 function PeakOrTrough(reading) {
+  this.historicalReadings = [];
   this.updateReading(reading);
 }
 
-PeakOrTrough.prototype.Threshold = { peak: 18, trough: 4, timeWithoutPeakOrTrough: 0.75 };
-
 PeakOrTrough.prototype.exceedThreshold = function() {
-  return (this.magnitude < this.Threshold.trough) ||
-    (this.magnitude > this.Threshold.peak);
+  return (this.magnitude < Thresholds.trough) ||
+    (this.magnitude > Thresholds.peak);
 };
 
 PeakOrTrough.prototype.isPeak = function() {
   return this.magnitude > 10;
 }
 
-/* A peak for throw will never be around for more than 2 seconds i.e.
-   it has to swing back to another peak/trough or to stationery (magnitude 10) */
-PeakOrTrough.prototype.isTooOld = function() {
-  return this.timestamp < Date.now() - 2000;
+/* If we sample the last X seconds of the readings,
+   we expect to see reasonable movement in magnitude in one direction
+   else it's probably no longer in flight */
+PeakOrTrough.prototype.isStagnant = function() {
+  if (this.timestampEnd - this.timestampStart < Thresholds.stagnantMovementTime) {
+    /* This peak or trough cannot be stagnant unless some time has passed first */
+    return false;
+  }
+
+  var magnitudes = this.historicalReadings.filter(function(reading) {
+    reading.timestamp >= Date.now() - Thresholds.stagnantMovementTime;
+  }).map(function(reading) {
+    return reading.magnitude;
+  });
+
+  if (magnitudes.length === 0) {
+    return true;
+  }
+
+  var max = Math.max.apply(null, magnitudes),
+      min = Math.min.apply(null, magnitudes);
+
+  debug("isStagnant:", Math.abs(max - min) < Thresholds.stagnantMovementAmount, min, max);
+
+  return Math.abs(max - min) < Thresholds.stagnantMovementAmount;
 }
 
 /* A trough of 3 is less than a trough  of 2
@@ -42,7 +86,18 @@ PeakOrTrough.prototype.isLessThan = function(newPeakOrTrough) {
 PeakOrTrough.prototype.updateReading = function(reading) {
   this.reading = reading;
   this.magnitude = reading.magnitude;
-  this.timestamp = reading.timestamp;
+  if (!this.timestampStart) { this.timestampStart = reading.timestamp; }
+  this.timestampEnd = reading.timestamp;
+  this.historicalReadings.push(reading)
+}
+
+PeakOrTrough.prototype.asJson = function() {
+  return {
+    magnitude: this.magnitude,
+    readings: this.historicalReadings.map(function(reading) { return [reading.timestamp, reading.magnitude]; }),
+    timestampStart: this.timestampStart,
+    timestampEnd: this.timestampEnd
+  }
 }
 
 export default function Flyer(state) {
@@ -52,6 +107,7 @@ export default function Flyer(state) {
   var audio = new Audio();
   var peakOrTroughHistory = [];
   var currentFlightReadings = [];
+  var lastThrowCompleted;
 
   state = FlyerState(state || {});
   flyer.state = state;
@@ -99,7 +155,7 @@ export default function Flyer(state) {
     transmitReading(reading);
     flyer.view.renderPhoneMovement(raw);
 
-    this.trackThrows(reading, function(currentFlight) {
+    this.trackThrows(reading, function(currentFlight, peakOrTroughHistory) {
       var state = flyer.state.set("latestReading", reading);
       var flightHistory = state.flightHistory;
 
@@ -112,7 +168,7 @@ export default function Flyer(state) {
       showcase(flyer.state);
 
       audio.playDropSound();
-      transmitFlightData(flyer.state, currentFlight);
+      transmitFlightData(flyer.state, currentFlight, peakOrTroughHistory);
     });
   };
 
@@ -126,44 +182,77 @@ export default function Flyer(state) {
     ----/   \    /   \-----
             \__/
 
-    What we need to identify is two large peaks or
-    troughs with an opposing peak/rought to work
-    out how long the throw was and how significant
-    it was
+    What we need to identify is two large peaks with an
+    opposing peak/trough to work out how long the throw was
+
+    Assumption is that throw is end of the first up curve i.e. it's stopped accelerating upwards,
+    until the bottom of the following down curve.
 
   ****/
   flyer.trackThrows = function(reading, callback) {
     var currentPeakOrTrough = new PeakOrTrough(reading);
     var lastPeakOrTrough = peakOrTroughHistory[peakOrTroughHistory.length - 1];
 
+    /* Prevent detection sometimes on bounce / catch */
+    if (lastThrowCompleted && (lastThrowCompleted > Date.now() - Thresholds.flightPause)) {
+      debug('Ignoring throw data due to previous throw', lastThrowCompleted);
+      return;
+    }
+
     /* Start recording peaks or troughs, update the extremes of the peaks or
        troughs, and when peak switches to trough or vice versa, add a new
        recorded peak or trough in history */
     if (currentPeakOrTrough.exceedThreshold()) {
       if (!lastPeakOrTrough) {
-        peakOrTroughHistory.push(currentPeakOrTrough);
+        /* We only start recording from a peak, never from a trough */
+        if (currentPeakOrTrough.isPeak()) {
+          console.debug('Detected first peak', reading.asJson());
+          peakOrTroughHistory.push(currentPeakOrTrough);
+        } else {
+          console.debug('Trough so ignoring data', reading.asJson());
+        }
       } else {
         if (currentPeakOrTrough.isPeak() === lastPeakOrTrough.isPeak()) {
           if (lastPeakOrTrough.isLessThan(currentPeakOrTrough)) {
-            lastPeakOrTrough.updateReading(currentPeakOrTrough);
+            console.debug('In play peak is greater than old peak', reading.asJson());
+            lastPeakOrTrough.updateReading(reading);
           }
         } else {
           peakOrTroughHistory.push(currentPeakOrTrough);
+          console.debug('New peak detected. Now', peakOrTroughHistory.length, 'peaks or troughs.', reading.asJson());
+          while (peakOrTroughHistory.length > 3) {
+            console.debug('Truncating first peak and trough as new peaks and troughs detected');
+            dropFirstPeakAndTrough();
+          }
         }
       }
     } else {
       /* We are no longer exceeding a peak or trough
          and we have satisfied the requirements of three peaks */
       if (peakOrTroughHistory.length === 3) {
-        callback(currentFlightReadings);
-        peakOrTroughHistory = [];
-        currentFlightReadings = [];
-        return;
+        console.debug('Total 3 peaks or troughs detected and now in middle ground.', reading.asJson());
+
+        var peakToTroughDuration = peakOrTroughHistory[2].timestampEnd - peakOrTroughHistory[0].timestampStart;
+        if (peakToTroughDuration < Thresholds.peakTroughMinTime) {
+          console.debug('Peak to peak duration too low so skipping that peak & trough', peakToTroughDuration, peakOrTroughHistory);
+          /*
+            The peak and trough are too close togeher, person is probably just waving phone up and down.
+            Lets keep this current peak and drop previous peak & trough
+          */
+          dropFirstPeakAndTrough();
+        } else {
+          lastThrowCompleted = Date.now();
+          callback(currentFlightReadings, peakOrTroughHistory);
+          peakOrTroughHistory = [];
+          currentFlightReadings = [];
+          return;
+        }
       }
     }
 
     if (lastPeakOrTrough) {
-      if (lastPeakOrTrough.isTooOld()) {
+      if (lastPeakOrTrough.isStagnant()) {
+        console.debug('Last peak or trough stagnant, discarding everything', lastPeakOrTrough, peakOrTroughHistory);
         /* This is not a valid throw, clear all history */
         peakOrTroughHistory = [];
         currentFlightReadings = [];
@@ -185,6 +274,13 @@ export default function Flyer(state) {
     showcase(flyer.state);
   };
 
+  function dropFirstPeakAndTrough() {
+    peakOrTroughHistory.splice(0,2);
+    currentFlightReadings = currentFlightReadings.filter(function(reading) {
+      return reading.timestamp >= peakOrTroughHistory[0].timestamp;
+    });
+  }
+
   function transmitReading(reading){
     if (flyer.state.uplinkStatus === "TRANSMITTING") {
       flyer.uplink.transmitReading(reading);
@@ -197,7 +293,7 @@ export default function Flyer(state) {
     }
   }
 
-  function transmitFlightData(state, flightData) {
+  function transmitFlightData(state, flightData, peakOrTroughHistory) {
     if (flyer.state.uplinkStatus === "TRANSMITTING") {
       var projection = Projection(state);
       var data = {
@@ -205,8 +301,8 @@ export default function Flyer(state) {
         flightTime: projection.lastFlightTime,
         altitude: projection.lastAltitude,
         flightSerialThisSession: projection.flightCount,
-        data: flightData
-      }
+        peakInfo: peakOrTroughHistory.map(function(peak) { return peak.asJson(); })
+      };
       flyer.uplink.transmitFlightData(data);
     }
   }

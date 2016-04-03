@@ -100,7 +100,7 @@ ready(function(){
       graphDisplay.addPoint(newReading);
     },
 
-    addFlight: function(newFlightData) {
+    addFlight: function(newFlightData, live) {
       if (paused) { return; }
 
       graphDisplay.addFlight(newFlightData);

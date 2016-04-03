@@ -41,9 +41,9 @@ export default function TrackerShowcase(window){
     });
   }
 
-  this.addFlight = function(newFlightData) {
+  this.addFlight = function(newFlightData, live) {
     views.forEach(function(view){
-      view.addFlight(newFlightData);
+      view.addFlight(newFlightData, live);
     });
   }
 
