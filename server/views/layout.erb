@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head <%= %{data-channel-name="#{channel_name}"} if defined?(channel_name)%>>
   <meta charset="UTF-8">
 
   <title>Give it a Lob</title>

@@ -13,7 +13,6 @@ var uplink = FlyerUplink({
 
 var flyer = Flyer();
 
-
 flyer.logger = window.console;
 flyer.view = new FlyerView
 flyer.uplink = uplink;

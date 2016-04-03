@@ -38,12 +38,13 @@ class LobApp < Sinatra::Base
 
   get '/new-flight' do
     channel_name = cookies[:channel_name] ||= create_channel_name
-    redirect "/flyer?channel-name=#{channel_name}"
+    redirect "/flyer/#{channel_name}"
   end
 
-  get '/flyer' do
-    channel_name = request.GET["channel-name"]
-    erb :flyer
+  get '/flyer/:channel_name' do
+    channel_name = params[:channel_name]
+    response.set_cookie 'channel_name', value: channel_name, expires: Time.now + 365 * 24 * 60 * 60
+    erb :flyer, locals: { channel_name: channel_name }
   end
 
   get '/flyer/:channel_name/token' do
@@ -64,22 +65,18 @@ class LobApp < Sinatra::Base
 
   post '/track-flight' do
     channel_name = request.POST["channel-name"].upcase
-    redirect "/tracker?channel-name=#{channel_name}"
+    redirect "/track/#{channel_name}"
   end
 
   get '/track/:channel_name' do
     channel_name = params[:channel_name].upcase
-    redirect "/tracker?channel-name=#{channel_name}"
+    erb :tracker, locals: { channel_name: channel_name }
   end
 
   get '/token' do
     content_type :json
     capability = { '*' => ['subscribe', 'history'] }
     client.auth.create_token_request(capability: capability).to_json
-  end
-
-  get '/tracker' do
-    erb :tracker
   end
 
   post '/submit-flight' do
