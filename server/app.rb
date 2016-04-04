@@ -11,6 +11,9 @@ class LobApp < Sinatra::Base
   helpers Sinatra::ContentFor
 
   set :public_folder, 'public'
+  set(:cookie_options) do
+    { :expires => Time.now + 3600*24 }
+  end
 
   get '/' do
     erb :index
@@ -43,7 +46,7 @@ class LobApp < Sinatra::Base
 
   get '/flyer/:channel_name' do
     channel_name = params[:channel_name].strip
-    response.set_cookie 'channel_name', value: channel_name, expires: Time.now + 365 * 24 * 60 * 60
+    cookies['channel_name'] = channel_name
     erb :flyer, locals: { channel_name: channel_name }
   end
 
