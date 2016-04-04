@@ -131,6 +131,11 @@ class LobApp < Sinatra::Base
     end
   end
 
+  not_found do
+    status 404
+    erb :oops, locals: { error_message: 'Sorry, this page does not exist' }
+  end
+
   def client
     @client ||= Ably::Rest.new(key: ENV.fetch("ABLY_API_KEY"))
   end
