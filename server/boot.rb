@@ -18,3 +18,10 @@ DATABASE_URL = ENV.fetch('DATABASE_URL') { "postgres://localhost/lob_#{RACK_ENV}
 
 Sequel::Model.plugin(:schema)
 DB = Sequel.connect(DATABASE_URL)
+
+require 'rollbar'
+Rollbar.configure do |config|
+  config.access_token = ENV['ROLLBAR_ACCESS_TOKEN']
+end
+
+require 'newrelic_rpm'

@@ -12,6 +12,8 @@ gem 'sequel'
 gem 'puma'
 
 gem 'dotenv', :groups => [:development, :test]
+gem 'rollbar', '~> 2.8.3'
+gem 'newrelic_rpm'
 
 gem 'rack-test', :require => 'rack/test'
 

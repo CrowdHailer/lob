@@ -3,6 +3,7 @@ require "sinatra/cookies"
 require "sinatra/content_for"
 require "digest/sha1"
 require "erubis"
+require "rollbar/middleware/sinatra"
 
 require "ably"
 
@@ -11,6 +12,8 @@ require_relative './lib/leaderboard'
 class LobApp < Sinatra::Base
   helpers Sinatra::Cookies
   helpers Sinatra::ContentFor
+
+  use Rollbar::Middleware::Sinatra
 
   # Avoid ambiguous characters and letters
   # 31 characters ** 5 = 28m options, never goint to have a clash in reality

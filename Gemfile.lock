@@ -38,6 +38,7 @@ GEM
     msgpack (0.7.1)
     multi_json (1.11.2)
     multipart-post (2.0.0)
+    newrelic_rpm (3.14.1.311)
     pg (0.18.4)
     puma (2.15.3)
     rack (1.6.4)
@@ -45,6 +46,8 @@ GEM
       rack
     rack-test (0.6.3)
       rack (>= 1.0)
+    rollbar (2.8.3)
+      multi_json
     ruby-progressbar (1.7.5)
     sequel (4.30.0)
     sinatra (1.4.6)
@@ -73,9 +76,11 @@ DEPENDENCIES
   erubis
   minitest
   minitest-reporters
+  newrelic_rpm
   pg
   puma
   rack-test
+  rollbar (~> 2.8.3)
   sequel
   sinatra
   sinatra-contrib

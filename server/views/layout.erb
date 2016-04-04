@@ -98,9 +98,7 @@
 
   ga('create', 'UA-62043294-4', 'auto');
   ga('send', 'pageview');
-
   </script>
-
-  <script src="//d2wy8f7a9ursnm.cloudfront.net/bugsnag-2.min.js" async="async" data-apikey="1eb28d92155dd279338048e1429716b7" data-releasestage="<%= RACK_ENV %>"></script>
+  <%= erb :_rollbar %>
 </body>
 </html>
