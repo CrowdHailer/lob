@@ -1,6 +1,10 @@
-if require 'dotenv'
-  puts "Loading .env key=value pairs if present"
-  Dotenv.load
+begin
+  if require 'dotenv'
+    puts "Loading .env key=value pairs if present"
+    Dotenv.load
+  end
+rescue LoadError
+  # Just don't load it if it's not included in this gemset
 end
 
 # setup as development enviroment unless otherwise specified
