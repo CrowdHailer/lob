@@ -1,6 +1,8 @@
 require "sinatra/base"
 require "sinatra/cookies"
 require "sinatra/content_for"
+require "digest/sha1"
+require "erubis"
 
 require "ably"
 
@@ -18,6 +20,8 @@ class LobApp < Sinatra::Base
   set(:cookie_options) do
     { :expires => Time.now + 3600*24 }
   end
+
+  set :erb, escape_html: true
 
   get '/' do
     erb :index
