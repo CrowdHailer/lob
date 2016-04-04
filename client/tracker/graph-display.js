@@ -44,8 +44,7 @@ export default function GraphDisplay(trackDivId) {
         scaleSteps: 8,
         scaleStepWidth: 10,
         scaleLabel: "<%=value%>",
-        responsive: true,
-        maintainAspectRatio: true,
+        responsive: false,
         yAxisLabel: "LobForce™",
         showXLabels: 5,
         scaleXGridLinesStep: 5,
@@ -60,10 +59,31 @@ export default function GraphDisplay(trackDivId) {
         inGraphDataFontColor: "rgba(220,0,0,1)"
       };
 
+  var $trackerWrapper = $('#tracker-wrapper'),
+      $canvas = $trackerWrapper.find('canvas'),
+      listenerAdded = false;
+
   function initialize(lineData) {
-    var canvas = $('#tracker-graph canvas');
-    context = canvas[0].getContext("2d");
+    setDimensions();
+    context = $canvas[0].getContext("2d");
     chart = new Chart(context).Line(lineData, chartOptions);
+
+    if (!listenerAdded) {
+      listenerAdded = true;
+      $(window).on('resize', function() { /* catches orientation changes and window resizing */
+        var oldCanvas = $trackerWrapper.find('canvas');
+        oldCanvas.after('<canvas>');
+        oldCanvas.remove();
+        $canvas = $trackerWrapper.find('canvas');
+        chart = undefined;
+        prepareAndTruncateData(); /* this will create a new graph */
+      });
+    }
+  }
+
+  function setDimensions() {
+    $canvas.attr('width', $trackerWrapper.width() - 10);
+    $canvas.attr('height', $trackerWrapper.height() - 10);
   }
 
   function maxTimestampFromData() {
