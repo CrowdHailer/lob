@@ -131,7 +131,7 @@
       position: relative;
     }
 
-    #tracker-graph {
+    #tracker-graph canvas {
       width: 555px;
       height: 270px;
     }
@@ -158,7 +158,11 @@
   @media screen and (max-width: $tablet-width) {
     width: initial;
     .graph-and-phone {
-      #tracker-graph {
+      #tracker-wrapper {
+        width: 100%;
+      }
+
+      #tracker-graph canvas {
         float: none;
         width: 100%;
         height: 250px;
@@ -175,7 +179,12 @@
     .graph-and-phone {
       padding-bottom: 200px;
       position: relative;
-      #tracker-graph {
+
+      #tracker-wrapper {
+        width: 100%;
+      }
+
+      #tracker-graph canvas {
         float: none;
         width: 100%;
         height: 160px;
