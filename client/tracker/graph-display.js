@@ -56,11 +56,13 @@ export default function GraphDisplay(trackDivId) {
         inGraphDataVAlign: "bottom",
         inGraphDataPaddingX: 20,
         inGraphDataPaddingY: -15,
-        inGraphDataFontColor: "rgba(220,0,0,1)"
+        inGraphDataFontColor: "rgba(220,0,0,1)",
+        graphSpaceAfter: 0,
+        spaceBottom: 0
       };
 
-  var $trackerWrapper = $('#tracker-wrapper'),
-      $canvas = $trackerWrapper.find('canvas'),
+  var $trackerGraph = $('#tracker-graph'),
+      $canvas = $trackerGraph.find('canvas'),
       listenerAdded = false;
 
   function initialize(lineData) {
@@ -71,10 +73,10 @@ export default function GraphDisplay(trackDivId) {
     if (!listenerAdded) {
       listenerAdded = true;
       $(window).on('resize', function() { /* catches orientation changes and window resizing */
-        var oldCanvas = $trackerWrapper.find('canvas');
+        var oldCanvas = $trackerGraph.find('canvas');
         oldCanvas.after('<canvas>');
         oldCanvas.remove();
-        $canvas = $trackerWrapper.find('canvas');
+        $canvas = $trackerGraph.find('canvas');
         chart = undefined;
         prepareAndTruncateData(); /* this will create a new graph */
       });
@@ -82,8 +84,8 @@ export default function GraphDisplay(trackDivId) {
   }
 
   function setDimensions() {
-    $canvas.attr('width', $trackerWrapper.width() - 10);
-    $canvas.attr('height', $trackerWrapper.height() - 10);
+    $canvas.attr('width', $trackerGraph.width());
+    $canvas.attr('height', $trackerGraph.height());
   }
 
   function maxTimestampFromData() {
