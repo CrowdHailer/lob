@@ -16,6 +16,12 @@ function Presenter(projection){
     }
   });
 
+  Object.defineProperty(this, "rawMaxFlightTime", {
+    get: function(){
+      return projection.maxFlightTime;
+    }
+  });
+
   Object.defineProperty(this, "lastFlightTime", {
     get: function(){
       return projection.lastFlightTime + "s";

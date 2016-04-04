@@ -91,7 +91,16 @@ class LobApp < Sinatra::Base
     begin
       username = request.POST['nickname'];
       max_altitude = request.POST['max-altitude']; # m
-      flight = Flight.new(username: username, max_altitude: max_altitude)
+      max_flight_time = request.POST['max-flight-time']; # seconds
+      device = request.POST['device'];
+
+      flight = Flight.new(
+        username: username,
+        max_altitude: max_altitude,
+        max_flight_time: max_flight_time,
+        device: device
+      )
+
       Leaderboard.submit_flight(flight)
       content_type :json
       { message: "Submitted successfully" }.to_json

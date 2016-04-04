@@ -10,12 +10,12 @@ export default function Device() {
     } else if (mobileDetect.tablet() && (mobileDetect.tablet() !== 'UnknownTablet')) {
       return mobileDetect.tablet();
     } else {
-      return platform.name + " on " + platform.os.family;
+      return platform.os.family;
     }
   }
 
   function desktopDescription() {
-    return browser.name + " on " + browser.os.family.replace(/Windows.*/,"Windows");
+    return browser.os.family.replace(/Windows.*/,"Windows") + " desktop";
   }
 
   this.deviceDescription = function() {

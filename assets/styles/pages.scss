@@ -241,3 +241,50 @@
     }
   }
 }
+
+/* Leaderboard page */
+.leaderboard {
+  table {
+    margin: 0 auto;
+    th {
+      background-color: #B80201;
+      color: white;
+      padding: 10px 20px;
+      border-right: 1px solid #FC0;
+      font-weight: bold;
+      font-size: 80%;
+    }
+    tr:nth-child(odd) {
+      td {
+        background: #FFF1BA;
+      }
+    }
+    tr:nth-child(even) {
+      td {
+        background: #FFFFFF;
+      }
+    }
+    td {
+      padding: 10px 20px;
+      border-right: 1px solid #FC0;
+      font-weight: normal;
+      font-size: 80%;
+    }
+  }
+
+  @media screen and (max-width: $mobile-width) {
+    table {
+      margin: 0 -5%;
+      width: 110%;
+      font-size: 80%;
+
+      th {
+        padding: 5px 5px;
+      }
+
+      td {
+        padding: 5px 5px;
+      }
+    }
+  }
+}

@@ -1,6 +1,7 @@
 /* jshint esnext: true */
 
 import AlertDisplay from "../../alert/display";
+import Device from "../../lib/device";
 
 /* This function class contains the logic for the presentation
    messaging in the view based on the state, but is weirdly not a
@@ -13,6 +14,7 @@ function Display($root){
       $leaderboardForm = $leaderboardPanel.find("form"),
       $leaderBoardFormNickname = $leaderboardPanel.find("form input[name=nickname]"),
       $leaderBoardFormAltitude = $leaderboardPanel.find("form input[name=max-altitude]"),
+      $leaderBoardFormFlightTime = $leaderboardPanel.find("form input[name=max-flight-time]"),
       $leaderBoardAltitudeMessage = $leaderboardPanel.find(".max-altitude-message"),
       $leaderBoardSubmittedAltitude = $leaderboardPanel.find(".max-altitude-message-submitted");
 
@@ -23,13 +25,21 @@ function Display($root){
 
   var alertDisplay = AlertDisplay();
 
+  var deviceType = new Device().deviceDescription();
+
   function init() {
     $leaderboardForm.on('submit', function(event) {
       event.preventDefault();
 
       var altitude = $leaderBoardFormAltitude.val(),
+          flightTime = $leaderBoardFormFlightTime.val(),
           nickname = $leaderBoardFormNickname.val().replace(/^\s+|\s+$/g,""),
-          data = { "max-altitude": altitude, "nickname": nickname };
+          data = {
+            "max-altitude": altitude,
+            "max-flight-time": flightTime,
+            "nickname": nickname,
+            "device": deviceType
+          };
 
       if (nickname.length === 0) {
         alert("Sorry, you need to have a nickname to enter the leaderboard");
@@ -67,11 +77,12 @@ function Display($root){
     }
   }
 
-  function showLeaderboard(altitude) {
+  function showLeaderboard(altitude, flightTime) {
     $leaderboardPanel.show();
     $leaderboardSubmitPanel.show();
     $leaderboardSubmittedPanel.hide();
     $leaderBoardFormAltitude.val(altitude);
+    $leaderBoardFormFlightTime.val(flightTime);
     $leaderBoardAltitudeMessage.text(Math.round(altitude * 100)/100 + "m");
 
     if (window.localStorage && window.localStorage.getItem('nickname')) {
@@ -124,7 +135,7 @@ function Display($root){
         "<p>You lobbed it <b>" + presentation.lastAltitude + "</b> for <b>" + presentation.lastFlightTime + "</b></p>" +
         "<p>Your previous best was <b>" + presentation.maxAltitude + "</b> high</p>" +
         "<p>Go for glory, see if you can go higher!</p>");
-      showLeaderboard(presentation.rawMaxAltitude);
+      showLeaderboard(presentation.rawMaxAltitude, presentation.rawMaxFlightTime);
     } else {
       $message.html("<p>Not bad, but that's not your best so far.</p>" +
         "<p>You lobbed it <b>" + presentation.lastAltitude + "</b> for <b>" + presentation.lastFlightTime + "</b></p>" +
@@ -139,7 +150,7 @@ function Display($root){
       renderNoThrows(presentation);
     } else if (presentation.hasOneThrow) {
       renderFirstThrow(presentation);
-      showLeaderboard(presentation.rawMaxAltitude);
+      showLeaderboard(presentation.rawMaxAltitude, presentation.rawMaxFlightTime);
     } else {
       renderMultipleThrows(presentation);
     }
