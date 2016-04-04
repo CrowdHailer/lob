@@ -48,6 +48,7 @@ export default function FlyerUplink(options, logger) {
   });
 
   client.connection.on("failed", function(err) {
+    console.error("Connection failed", err);
     uplink.onconnectionFailed(err);
   });
 
