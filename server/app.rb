@@ -32,33 +32,48 @@ class LobApp < Sinatra::Base
   end
 
   get '/leaderboard' do
-    erb :leaderboard, locals: {leaderboard: Leaderboard.best_today, past: '24 hrs'}
+    erb :leaderboard, locals: { leaderboard: Leaderboard.best_today, past: '24 hrs' }
   end
 
   get '/leaderboard/week' do
-    erb :leaderboard, locals: {leaderboard: Leaderboard.best_this_week, past: '7 days'}
+    erb :leaderboard, locals: { leaderboard: Leaderboard.best_this_week, past: '7 days' }
   end
 
   get '/leaderboard/month' do
-    erb :leaderboard, locals: {leaderboard: Leaderboard.best_this_month, past: '30 days'}
+    erb :leaderboard, locals: { leaderboard: Leaderboard.best_this_month, past: '30 days' }
   end
 
   get '/new-flight' do
-    channel_name ||= cookies[:channel_name] || create_channel_name
-    redirect "/flyer/#{channel_name}"
+    query_params = ''
+    channel_name = if cookies['channel_name'] && (channel_sha(cookies['channel_name']) == cookies['channel_sha'])
+      cookies['channel_name']
+    else
+      create_channel_name.tap do |channel_name|
+        query_params = "?cs=#{channel_sha(channel_name)}"
+      end
+    end
+    redirect "/flyer/#{channel_name}#{query_params}"
   end
 
   get '/flyer/:channel_name' do
-    channel_name = params[:channel_name].strip
-    cookies['channel_name'] = channel_name
-    erb :flyer, locals: { channel_name: channel_name }
+    channel_name = params[:channel_name].strip.upcase
+    channel_sha = (request.GET['cs'] || cookies['channel_sha']).to_s.strip
+    puts channel_name, channel_sha, channel_sha(channel_name)
+    if channel_sha(channel_name) != channel_sha
+      status 403
+      erb :oops, locals: { error_message: 'This channel name you are using is not permitted as our security checks have failed.' }
+    else
+      cookies['channel_name'] = channel_name
+      cookies['channel_sha'] = channel_sha(cookies['channel_name'])
+      erb :flyer, locals: { channel_name: channel_name }
+    end
   end
 
   get '/flyer/:channel_name/token' do
-    channel_name = params[:channel_name].upcase.strip
+    channel_name = params[:channel_name].strip.upcase
     if !channel_name
       status 400
-      'Oops, that is not a valid channel name'
+      erb :oops, locals: { error_message: 'That is not a valid channel name' }
     else
       content_type :json
       capability = {
@@ -72,17 +87,17 @@ class LobApp < Sinatra::Base
   end
 
   get '/track-flight' do
-    channel_name = (request.POST["channel-name"] || '').upcase
-    if (channel_name.strip == '')
+    channel_name = request.GET['channel-name'].to_s.strip.upcase
+    if channel_name == ''
       status 400
-      'Oops, that is not a valid channel name'
+      erb :oops, locals: { error_message: 'You are missing a valid channel name' }
     else
       redirect "/track/#{channel_name}"
     end
   end
 
   get '/track/:channel_name' do
-    channel_name = params[:channel_name].upcase.strip
+    channel_name = params[:channel_name].strip.upcase
     erb :tracker, locals: { channel_name: channel_name }
   end
 
@@ -124,5 +139,9 @@ class LobApp < Sinatra::Base
     5.times.map do
       LOB_CODE_PERMITTED_CHARS.sample
     end.join()
+  end
+
+  def channel_sha(channel_name)
+    Digest::SHA1.hexdigest("#{channel_name}#{ENV.fetch("CHANNEL_SALT")}")[0...20]
   end
 end
