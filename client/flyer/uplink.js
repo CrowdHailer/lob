@@ -1,6 +1,6 @@
 import { throttle } from "../utils/fn";
-
 import { Config } from '../config';
+import Device from "../lib/device";
 
 export default function FlyerUplink(options, logger) {
   if ( !(this instanceof FlyerUplink) ) { return new FlyerUplink(options, logger); }
@@ -17,6 +17,8 @@ export default function FlyerUplink(options, logger) {
   /* Flights namespace is configured to persist messages */
   var flightRecorderChannelName = "flights:" + options.channelName;
   var flightRecorderChannel = client.channels.get(flightRecorderChannelName);
+
+  var deviceType = new Device().deviceDescription();
 
   var noop = function() {};
 
@@ -50,12 +52,12 @@ export default function FlyerUplink(options, logger) {
   });
 
   /* Be present on the channel so that subscribers know a publisher is here */
-  channel.presence.enter(function(err) {
+  channel.presence.enter({ device: deviceType }, function(err) {
     if (err) {
       logger.error("Could not enter presence", err);
       uplink.onconnectionFailed(err);
     } else {
-      logger.info("Present on channel", channelName);
+      logger.info("Present on channel", channelName, ", device:", deviceType);
     }
   });
 

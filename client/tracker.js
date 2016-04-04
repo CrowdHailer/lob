@@ -17,10 +17,8 @@ import { ready } from "./utils/dom";
 window.Tracker = Tracker;
 window.Tracker.Reading = Reading;
 
-
 var router = Router(window.location);
 console.log('Router:', 'Started with initial state:', router.state);
-
 
 var tracker = new Tracker();
 tracker.logger = window.console;
@@ -32,10 +30,10 @@ function uplinkStatusMessageFromProjection(projection) {
   var message = projection.uplinkStatus;
   if (message === 'AVAILABLE') {
     return '<p>Connection made to live Lob <b>' + projection.uplinkChannelName + '</b>.</p>' +
-      '<p>Waiting for device to stream its position in real time.</p>' +
-      '<p>Are you sure the device is publishing with ID <b>' + projection.uplinkChannelName + '?</b>';
+      "<p>As soon as the device is connected, you'll see the results in realtime below</p>";
   } else if (message === 'STREAMING') {
-    return 'Streaming live Lob <b>' + projection.uplinkChannelName + "</b>";
+    return 'Streaming Lob <b>' + projection.uplinkChannelName + "</b>" +
+      (projection.uplinkDevice ? "  from " + projection.uplinkDevice : "");
   } else if (message === 'FAILED') {
     return 'Could not connect to live Lob realtime service';
   } else if (message === 'DISCONNECTED') {

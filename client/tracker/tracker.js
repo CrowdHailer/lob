@@ -51,13 +51,21 @@ function Tracker(state, world){
     showcase(tracker.state);
   };
 
-  tracker.uplinkPresent = function(channelName, publisherCount){
-    if (publisherCount === 0) {
+  tracker.uplinkPresent = function(channelName, publishingMembers){
+    if (publishingMembers.length === 0) {
       this.uplinkAvailable(channelName);
     } else {
+
+      var deviceDescriptions = publishingMembers.filter(function(member) {
+        return member.data.device;
+      }).map(function(member) {
+        return member.data.device;
+      });
+
       if (tracker.state.uplinkStatus !== 'STREAMING') {
         tracker.state = tracker.state.set("uplinkStatus", "STREAMING");
         tracker.state = tracker.state.set("uplinkChannelName", channelName);
+        tracker.state = tracker.state.set("uplinkDevice", deviceDescriptions[0]);
         tracker.logger.info("Uplink streaming", channelName);
         showcase(tracker.state);
       }

@@ -16,8 +16,7 @@ export default function UplinkController(options, tracker){
       if (err) {
         tracker.uplinkFailed(err);
       } else {
-        console.log("Publishers on this channel:", members.length);
-        tracker.uplinkPresent(channelName, members.length);
+        tracker.uplinkPresent(channelName, members);
       }
     });
   }

@@ -5,6 +5,7 @@ import Struct from "../carbide/struct";
 var STATE_DEFAULTS = {
   uplinkStatus: "UNKNOWN",
   uplinkChannelName: "UNKNOWN",
+  uplinkDevice: null,
   flightSnapshot: null,
   alert: ""
 };
