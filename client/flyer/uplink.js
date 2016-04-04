@@ -18,6 +18,9 @@ export default function FlyerUplink(options, logger) {
   var flightRecorderChannelName = "flights:" + options.channelName;
   var flightRecorderChannel = client.channels.get(flightRecorderChannelName);
 
+  var broadcastChannelName = Config.broadcastNewChannelName;
+  var broadcastChannel = client.channels.get(broadcastChannelName);
+
   var deviceType = new Device().deviceDescription();
 
   var noop = function() {};
@@ -36,6 +39,10 @@ export default function FlyerUplink(options, logger) {
         logger.warn("Unable to send new fligth data; err = " + err.message);
       }
     })
+  }
+
+  function broadcastNewChannel() {
+    broadcastChannel.publish("new", { channel: channelName, device: deviceType });
   }
 
   client.connection.on("connected", function(err) {
@@ -59,6 +66,7 @@ export default function FlyerUplink(options, logger) {
       uplink.onconnectionFailed(err);
     } else {
       logger.info("Present on channel", channelName, ", device:", deviceType);
+      broadcastNewChannel();
     }
   });
 

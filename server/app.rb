@@ -64,13 +64,14 @@ class LobApp < Sinatra::Base
       capability = {
         '*' => ['subscribe', 'history'],
         channel_name => ['subscribe', 'publish', 'history', 'presence'],
-        "flights:#{channel_name}" => ['subscribe', 'publish', 'history']
+        "flights:#{channel_name}" => ['subscribe', 'publish', 'history'],
+        "broadcast:channel" => ['subscribe', 'publish', 'history'] # channel name replicated in config.js
       }
       client.auth.create_token_request(client_id: channel_name, capability: capability).to_json
     end
   end
 
-  post '/track-flight' do
+  get '/track-flight' do
     channel_name = (request.POST["channel-name"] || '').upcase
     if (channel_name.strip == '')
       status 400
