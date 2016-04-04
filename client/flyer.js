@@ -148,6 +148,7 @@ export default function Flyer(state) {
     });
 
     var orientation = raw.do;
+    orientation.orientation = window.orientation;
 
     transmitReadingAndOrientation(reading, orientation);
 
