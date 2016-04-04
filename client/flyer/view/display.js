@@ -109,7 +109,8 @@ function Display($root){
         setLoading(true);
         break;
       case "transmitting":
-        $uplinkStatus.html("Live streaming this with id <b>" + presentation.channelName + "</b>. <a href='/why-stream'>Why?</a>");
+        $uplinkStatus.html("<p class='title-with-hint'>Your unique Lob code is: <b>" + presentation.channelName + "</b></p>" +
+          "<p class='hint'>Give this to others and they can watch your Lob live.<br><a href='/why-stream'>How does this work?</a>");
         setLoading(false);
         break;
       default:

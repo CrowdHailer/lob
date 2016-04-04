@@ -74,6 +74,15 @@
   .uplink-status {
     font-size: 80%;
     margin-bottom: 1em;
+
+    p.title-with-hint {
+      margin-bottom: 0;
+    }
+    p.hint {
+      margin: 0;
+      font-size: 80%;
+      color: #4A3B00;
+    }
   }
 
   .connecting-loader {
