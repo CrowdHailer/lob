@@ -59,9 +59,11 @@
         }
       }
 
-      $lobHistory.find('li').remove();
-      $lobHistory.append($channelList.find('li'));
-      $recentLobs.show();
+      if ($channelList.find('li').length) {
+        $lobHistory.find('li').remove();
+        $lobHistory.append($channelList.find('li'));
+        $recentLobs.show();
+      }
     }
 
     broadcastChannel.attach(function(err) {
