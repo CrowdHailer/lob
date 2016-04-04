@@ -555,6 +555,19 @@ footer {
     border-top: 1px dashed #CA920D;
     margin-top: 1.5em;
     padding-top: 1.5em; }
+  .home div.recent-lobs {
+    display: none; }
+  .home ul.lob-history {
+    display: inline;
+    list-style: none;
+    margin: 0;
+    padding: 0; }
+    .home ul.lob-history li {
+      display: inline; }
+      .home ul.lob-history li::after {
+        content: ", "; }
+    .home ul.lob-history li:last-child::after {
+      content: "..."; }
 
 /* Throw your phone flying page */
 .flyer {
@@ -590,6 +603,12 @@ footer {
   .flyer .uplink-status {
     font-size: 80%;
     margin-bottom: 1em; }
+    .flyer .uplink-status p.title-with-hint {
+      margin-bottom: 0; }
+    .flyer .uplink-status p.hint {
+      margin: 0;
+      font-size: 80%;
+      color: #4A3B00; }
   .flyer .connecting-loader {
     padding-top: 2em; }
     .flyer .connecting-loader .loader {
@@ -630,7 +649,7 @@ footer {
       padding: 5px;
       width: 570px;
       position: relative; }
-    .tracker .graph-and-phone #tracker-graph canvas {
+    .tracker .graph-and-phone #tracker-graph {
       width: 555px;
       height: 270px; }
     .tracker .graph-and-phone #tridiv {
@@ -651,7 +670,7 @@ footer {
       width: initial; }
       .tracker .graph-and-phone #tracker-wrapper {
         width: 100%; }
-      .tracker .graph-and-phone #tracker-graph canvas {
+      .tracker .graph-and-phone #tracker-graph {
         float: none;
         width: 100%;
         height: 250px; }
@@ -665,7 +684,7 @@ footer {
       position: relative; }
       .tracker .graph-and-phone #tracker-wrapper {
         width: 100%; }
-      .tracker .graph-and-phone #tracker-graph canvas {
+      .tracker .graph-and-phone #tracker-graph {
         float: none;
         width: 100%;
         height: 160px; }
@@ -674,8 +693,8 @@ footer {
         height: 350px;
         font-size: 37.5%;
         transform: scale(0.6, 0.6);
-        margin: -86px auto 0 auto;
-        position: absolute; } }
+        position: absolute;
+        top: 160px; } }
   .tracker .lock-unlock {
     clear: both; }
   .tracker .connecting-loader {
@@ -706,6 +725,36 @@ footer {
         border-right: 1px solid #FC0;
         font-weight: normal;
         font-size: 80%; }
+
+/* Leaderboard page */
+.leaderboard table {
+  margin: 0 auto; }
+  .leaderboard table th {
+    background-color: #B80201;
+    color: white;
+    padding: 10px 20px;
+    border-right: 1px solid #FC0;
+    font-weight: bold;
+    font-size: 80%; }
+  .leaderboard table tr:nth-child(odd) td {
+    background: #FFF1BA; }
+  .leaderboard table tr:nth-child(even) td {
+    background: #FFFFFF; }
+  .leaderboard table td {
+    padding: 10px 20px;
+    border-right: 1px solid #FC0;
+    font-weight: normal;
+    font-size: 80%; }
+
+@media screen and (max-width: 500px) {
+  .leaderboard table {
+    margin: 0 -5%;
+    width: 110%;
+    font-size: 80%; }
+    .leaderboard table th {
+      padding: 5px 5px; }
+    .leaderboard table td {
+      padding: 5px 5px; } }
 
 .notices {
   position: fixed;

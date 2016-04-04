@@ -50,8 +50,38 @@ var Lob = (function () { 'use strict';
     readingPublishLimit: 200, // ms
     flightPublishLimit: 1000, // ms
     trackingGraphTimePeriod: 8000, // ms - time to keep points in visible graph
-    gravityMagnitudeConstant: 10 // default gravity magnitude value from accelerometer
+    gravityMagnitudeConstant: 10, // default gravity magnitude value from accelerometer
+    broadcastNewChannelName: 'broadcast:channel' /* replicated in app.rb */
   };
+
+  function Device() {
+    if ( !(this instanceof Device) ) { return new Device(); }
+
+    var mobileDetect = new MobileDetect(window.navigator.userAgent);
+    var browser = platform;
+
+    function mobileDescription() {
+      if (mobileDetect.phone() && (mobileDetect.phone() !== 'UnknownPhone')) {
+        return mobileDetect.phone()
+      } else if (mobileDetect.tablet() && (mobileDetect.tablet() !== 'UnknownTablet')) {
+        return mobileDetect.tablet();
+      } else {
+        return platform.os.family;
+      }
+    }
+
+    function desktopDescription() {
+      return browser.os.family.replace(/Windows.*/,"Windows") + " desktop";
+    }
+
+    this.deviceDescription = function() {
+      if (mobileDetect.mobile()) {
+        return mobileDescription();
+      } else {
+        return desktopDescription();
+      }
+    }
+  }
 
   function FlyerUplink(options, logger) {
     if ( !(this instanceof FlyerUplink) ) { return new FlyerUplink(options, logger); }
@@ -59,15 +89,20 @@ var Lob = (function () { 'use strict';
     logger.info('Starting uplink', options);
 
     var uplink = this;
-    var channelName = options.channelName;
+    var channelName = options.channelName.toString();
 
     // TODO: Remove clientId when https://github.com/ably/ably-js/issues/252 resolved
-    var client = new Ably.Realtime({ authUrl: '/flyer/' + channelName + '/token', clientId: channelName });
+    var client = new Ably.Realtime({ authUrl: '/flyer/' + channelName + '/token', clientId: channelName.toString() });
     var channel = client.channels.get(channelName);
 
     /* Flights namespace is configured to persist messages */
     var flightRecorderChannelName = "flights:" + options.channelName;
     var flightRecorderChannel = client.channels.get(flightRecorderChannelName);
+
+    var broadcastChannelName = Config.broadcastNewChannelName;
+    var broadcastChannel = client.channels.get(broadcastChannelName);
+
+    var deviceType = new Device().deviceDescription();
 
     var noop = function() {};
 
@@ -87,6 +122,10 @@ var Lob = (function () { 'use strict';
       })
     }
 
+    function broadcastNewChannel() {
+      broadcastChannel.publish("new", { channel: channelName, device: deviceType });
+    }
+
     client.connection.on("connected", function(err) {
       uplink.onconnected();
     });
@@ -97,16 +136,18 @@ var Lob = (function () { 'use strict';
     });
 
     client.connection.on("failed", function(err) {
+      console.error("Connection failed", err);
       uplink.onconnectionFailed(err);
     });
 
     /* Be present on the channel so that subscribers know a publisher is here */
-    channel.presence.enter(function(err) {
+    channel.presence.enter({ device: deviceType }, function(err) {
       if (err) {
         logger.error("Could not enter presence", err);
         uplink.onconnectionFailed(err);
       } else {
-        logger.info("Present on channel", channelName);
+        logger.info("Present on channel", channelName, ", device:", deviceType);
+        broadcastNewChannel();
       }
     });
 
@@ -739,6 +780,12 @@ var Lob = (function () { 'use strict';
       }
     });
 
+    Object.defineProperty(this, "rawMaxFlightTime", {
+      get: function(){
+        return projection.maxFlightTime;
+      }
+    });
+
     Object.defineProperty(this, "lastFlightTime", {
       get: function(){
         return projection.lastFlightTime + "s";
@@ -835,6 +882,7 @@ var Lob = (function () { 'use strict';
         $leaderboardForm = $leaderboardPanel.find("form"),
         $leaderBoardFormNickname = $leaderboardPanel.find("form input[name=nickname]"),
         $leaderBoardFormAltitude = $leaderboardPanel.find("form input[name=max-altitude]"),
+        $leaderBoardFormFlightTime = $leaderboardPanel.find("form input[name=max-flight-time]"),
         $leaderBoardAltitudeMessage = $leaderboardPanel.find(".max-altitude-message"),
         $leaderBoardSubmittedAltitude = $leaderboardPanel.find(".max-altitude-message-submitted");
 
@@ -845,13 +893,21 @@ var Lob = (function () { 'use strict';
 
     var alertDisplay = Display();
 
+    var deviceType = new Device().deviceDescription();
+
     function init() {
       $leaderboardForm.on('submit', function(event) {
         event.preventDefault();
 
         var altitude = $leaderBoardFormAltitude.val(),
+            flightTime = $leaderBoardFormFlightTime.val(),
             nickname = $leaderBoardFormNickname.val().replace(/^\s+|\s+$/g,""),
-            data = { "max-altitude": altitude, "nickname": nickname };
+            data = {
+              "max-altitude": altitude,
+              "max-flight-time": flightTime,
+              "nickname": nickname,
+              "device": deviceType
+            };
 
         if (nickname.length === 0) {
           alert("Sorry, you need to have a nickname to enter the leaderboard");
@@ -889,11 +945,12 @@ var Lob = (function () { 'use strict';
       }
     }
 
-    function showLeaderboard(altitude) {
+    function showLeaderboard(altitude, flightTime) {
       $leaderboardPanel.show();
       $leaderboardSubmitPanel.show();
       $leaderboardSubmittedPanel.hide();
       $leaderBoardFormAltitude.val(altitude);
+      $leaderBoardFormFlightTime.val(flightTime);
       $leaderBoardAltitudeMessage.text(Math.round(altitude * 100)/100 + "m");
 
       if (window.localStorage && window.localStorage.getItem('nickname')) {
@@ -920,7 +977,8 @@ var Lob = (function () { 'use strict';
           setLoading(true);
           break;
         case "transmitting":
-          $uplinkStatus.html("Live streaming this with id <b>" + presentation.channelName + "</b>. <a href='/why-stream'>Why?</a>");
+          $uplinkStatus.html("<p class='title-with-hint'>Your unique Lob code is: <b>" + presentation.channelName + "</b></p>" +
+            "<p class='hint'>Give this to others and they can watch your Lob live.<br><a href='/why-stream'>How does this work?</a>");
           setLoading(false);
           break;
         default:
@@ -946,7 +1004,7 @@ var Lob = (function () { 'use strict';
           "<p>You lobbed it <b>" + presentation.lastAltitude + "</b> for <b>" + presentation.lastFlightTime + "</b></p>" +
           "<p>Your previous best was <b>" + presentation.maxAltitude + "</b> high</p>" +
           "<p>Go for glory, see if you can go higher!</p>");
-        showLeaderboard(presentation.rawMaxAltitude);
+        showLeaderboard(presentation.rawMaxAltitude, presentation.rawMaxFlightTime);
       } else {
         $message.html("<p>Not bad, but that's not your best so far.</p>" +
           "<p>You lobbed it <b>" + presentation.lastAltitude + "</b> for <b>" + presentation.lastFlightTime + "</b></p>" +
@@ -961,7 +1019,7 @@ var Lob = (function () { 'use strict';
         renderNoThrows(presentation);
       } else if (presentation.hasOneThrow) {
         renderFirstThrow(presentation);
-        showLeaderboard(presentation.rawMaxAltitude);
+        showLeaderboard(presentation.rawMaxAltitude, presentation.rawMaxFlightTime);
       } else {
         renderMultipleThrows(presentation);
       }

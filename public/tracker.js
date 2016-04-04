@@ -4,7 +4,8 @@ var Lob = (function () { 'use strict';
     readingPublishLimit: 200, // ms
     flightPublishLimit: 1000, // ms
     trackingGraphTimePeriod: 8000, // ms - time to keep points in visible graph
-    gravityMagnitudeConstant: 10 // default gravity magnitude value from accelerometer
+    gravityMagnitudeConstant: 10, // default gravity magnitude value from accelerometer
+    broadcastNewChannelName: 'broadcast:channel' /* replicated in app.rb */
   };
 
   /* jshint esnext: true */
@@ -65,6 +66,7 @@ var Lob = (function () { 'use strict';
   var STATE_DEFAULTS = {
     uplinkStatus: "UNKNOWN",
     uplinkChannelName: "UNKNOWN",
+    uplinkDevice: null,
     flightSnapshot: null,
     alert: ""
   };
@@ -131,13 +133,21 @@ var Lob = (function () { 'use strict';
       showcase(tracker.state);
     };
 
-    tracker.uplinkPresent = function(channelName, publisherCount){
-      if (publisherCount === 0) {
+    tracker.uplinkPresent = function(channelName, publishingMembers){
+      if (publishingMembers.length === 0) {
         this.uplinkAvailable(channelName);
       } else {
+
+        var deviceDescriptions = publishingMembers.filter(function(member) {
+          return member.data.device;
+        }).map(function(member) {
+          return member.data.device;
+        });
+
         if (tracker.state.uplinkStatus !== 'STREAMING') {
           tracker.state = tracker.state.set("uplinkStatus", "STREAMING");
           tracker.state = tracker.state.set("uplinkChannelName", channelName);
+          tracker.state = tracker.state.set("uplinkDevice", deviceDescriptions[0]);
           tracker.logger.info("Uplink streaming", channelName);
           showcase(tracker.state);
         }
@@ -318,8 +328,7 @@ var Lob = (function () { 'use strict';
         if (err) {
           tracker.uplinkFailed(err);
         } else {
-          console.log("Publishers on this channel:", members.length);
-          tracker.uplinkPresent(channelName, members.length);
+          tracker.uplinkPresent(channelName, members);
         }
       });
     }
@@ -507,8 +516,7 @@ var Lob = (function () { 'use strict';
           scaleSteps: 8,
           scaleStepWidth: 10,
           scaleLabel: "<%=value%>",
-          responsive: true,
-          maintainAspectRatio: true,
+          responsive: false,
           yAxisLabel: "LobForce™",
           showXLabels: 5,
           scaleXGridLinesStep: 5,
@@ -520,13 +528,36 @@ var Lob = (function () { 'use strict';
           inGraphDataVAlign: "bottom",
           inGraphDataPaddingX: 20,
           inGraphDataPaddingY: -15,
-          inGraphDataFontColor: "rgba(220,0,0,1)"
+          inGraphDataFontColor: "rgba(220,0,0,1)",
+          graphSpaceAfter: 0,
+          spaceBottom: 0
         };
 
+    var $trackerGraph = $('#tracker-graph'),
+        $canvas = $trackerGraph.find('canvas'),
+        listenerAdded = false;
+
     function initialize(lineData) {
-      var canvas = $('#tracker-graph canvas');
-      context = canvas[0].getContext("2d");
+      setDimensions();
+      context = $canvas[0].getContext("2d");
       chart = new Chart(context).Line(lineData, chartOptions);
+
+      if (!listenerAdded) {
+        listenerAdded = true;
+        $(window).on('resize', function() { /* catches orientation changes and window resizing */
+          var oldCanvas = $trackerGraph.find('canvas');
+          oldCanvas.after('<canvas>');
+          oldCanvas.remove();
+          $canvas = $trackerGraph.find('canvas');
+          chart = undefined;
+          prepareAndTruncateData(); /* this will create a new graph */
+        });
+      }
+    }
+
+    function setDimensions() {
+      $canvas.attr('width', $trackerGraph.width());
+      $canvas.attr('height', $trackerGraph.height());
     }
 
     function maxTimestampFromData() {
@@ -620,10 +651,8 @@ var Lob = (function () { 'use strict';
   window.Tracker = Tracker;
   window.Tracker.Reading = Reading;
 
-
   var router = Router(window.location);
   console.log('Router:', 'Started with initial state:', router.state);
-
 
   var tracker = new Tracker();
   tracker.logger = window.console;
@@ -635,10 +664,10 @@ var Lob = (function () { 'use strict';
     var message = projection.uplinkStatus;
     if (message === 'AVAILABLE') {
       return '<p>Connection made to live Lob <b>' + projection.uplinkChannelName + '</b>.</p>' +
-        '<p>Waiting for device to stream its position in real time.</p>' +
-        '<p>Are you sure the device is publishing with ID <b>' + projection.uplinkChannelName + '?</b>';
+        "<p>As soon as the device is connected, you'll see the results in realtime below</p>";
     } else if (message === 'STREAMING') {
-      return 'Streaming live Lob <b>' + projection.uplinkChannelName + "</b>";
+      return 'Streaming Lob <b>' + projection.uplinkChannelName + "</b>" +
+        (projection.uplinkDevice ? "  from " + projection.uplinkDevice : "");
     } else if (message === 'FAILED') {
       return 'Could not connect to live Lob realtime service';
     } else if (message === 'DISCONNECTED') {
