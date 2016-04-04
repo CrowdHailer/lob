@@ -10,6 +10,10 @@ class LobApp < Sinatra::Base
   helpers Sinatra::Cookies
   helpers Sinatra::ContentFor
 
+  # Avoid ambiguous characters and letters
+  # 31 characters ** 5 = 28m options, never goint to have a clash in reality
+  LOB_CODE_PERMITTED_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'.split("")
+
   set :public_folder, 'public'
   set(:cookie_options) do
     { :expires => Time.now + 3600*24 }
@@ -116,6 +120,8 @@ class LobApp < Sinatra::Base
   end
 
   def create_channel_name
-    ((36 ** 3)...(36 ** 4 - 1)).to_a.sample.to_s(36).upcase
+    5.times.map do
+      LOB_CODE_PERMITTED_CHARS.sample
+    end.join()
   end
 end
