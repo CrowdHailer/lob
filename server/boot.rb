@@ -22,6 +22,9 @@ DB = Sequel.connect(DATABASE_URL)
 require 'rollbar'
 Rollbar.configure do |config|
   config.access_token = ENV['ROLLBAR_ACCESS_TOKEN']
+  config.exception_level_filters.merge!({
+    'Sinatra::NotFound' => 'warning'
+  })
 end
 
 require 'newrelic_rpm'
