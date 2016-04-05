@@ -65,7 +65,6 @@ class LobApp < Sinatra::Base
   get '/flyer/:channel_name' do
     channel_name = params[:channel_name].strip.upcase
     channel_sha = (request.GET['cs'] || cookies['channel_sha']).to_s.strip
-    puts channel_name, channel_sha, channel_sha(channel_name)
     if channel_sha(channel_name) != channel_sha
       status 403
       erb :oops, locals: { error_message: 'This channel name you are using is not permitted as our security checks have failed.' }
