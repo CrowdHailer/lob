@@ -15,7 +15,7 @@ function altitudeForFreefallDuration(durationInSeconds){
 
     Makes an assumption that magnitude is 10 (stationery) at
     the top of the throw and bottom of the throw starts when magnitude
-    starts increasing again indicatin deceleration. Our flight data
+    starts increasing again indicating deceleration. Our flight data
     is trimmed before it arrives here so that it only contains freefall
     information.
 

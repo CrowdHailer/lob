@@ -11,7 +11,8 @@ var Thresholds = {
   stagnantMovementTime: 1000,
   stagnantMovementAmount: 7, /* expect at least this much movement in magnitude over stagnantMovementTime */
   flightPause: 2000, /* period we stop detecting throws after a throw has been made */
-  peakTroughMinTime: 400 /* Min time we expect from the throw peak to the drop trough to consider this a valid throw */
+  peakTroughMinTime: 400, /* Min time we expect from the throw peak to the drop trough to consider this a valid throw */
+  crossZeroPointBuffer: 40 /* Ignore some noise when falling / climbing for a few milliseconds that could cause it jump above & below zero point briefly */
 }
 
 var DebugThrows = false; /* Will output debugging info when false */
@@ -44,6 +45,10 @@ PeakOrTrough.prototype.exceedThreshold = function() {
 
 PeakOrTrough.prototype.isPeak = function() {
   return this.magnitude > 10;
+}
+
+PeakOrTrough.prototype.type = function() {
+  return this.isPeak() ? 'peak' : 'trough';
 }
 
 /* If we sample the last X seconds of the readings,
@@ -88,8 +93,18 @@ PeakOrTrough.prototype.updateReading = function(reading) {
   this.magnitude = reading.magnitude;
   if (!this.timestampStart) { this.timestampStart = reading.timestamp; }
   this.timestampEnd = reading.timestamp;
-  this.historicalReadings.push(reading)
-}
+  this.historicalReadings.push(reading);
+};
+
+/* If this peak or trough has crossed the zero point (technically 10)
+   i.e. it is now going in the opposite direction */
+PeakOrTrough.prototype.crossedZeroPoint = function() {
+  this.crossedZeroPointTimestamp = Date.now();
+};
+
+PeakOrTrough.prototype.hasRecentlyCossedZeroPoint = function() {
+  return this.crossedZeroPointTimestamp && (this.crossedZeroPointTimestamp < Date.now() - Thresholds.crossZeroPointBuffer);
+};
 
 PeakOrTrough.prototype.asJson = function() {
   return {
@@ -97,8 +112,8 @@ PeakOrTrough.prototype.asJson = function() {
     readings: this.historicalReadings.map(function(reading) { return [reading.timestamp, reading.magnitude]; }),
     timestampStart: this.timestampStart,
     timestampEnd: this.timestampEnd
-  }
-}
+  };
+};
 
 export default function Flyer(state) {
   if ( !(this instanceof Flyer) ) { return new Flyer(state); }
@@ -215,12 +230,12 @@ export default function Flyer(state) {
       } else {
         if (currentPeakOrTrough.isPeak() === lastPeakOrTrough.isPeak()) {
           if (lastPeakOrTrough.isLessThan(currentPeakOrTrough)) {
-            debug('In play peak is greater than old peak', reading.asJson());
+            debug('In play ' + currentPeakOrTrough.type() + ' is greater than old peak', reading.asJson());
             lastPeakOrTrough.updateReading(reading);
           }
         } else {
           peakOrTroughHistory.push(currentPeakOrTrough);
-          debug('New peak detected. Now', peakOrTroughHistory.length, 'peaks or troughs.', reading.asJson());
+          debug('New ' + currentPeakOrTrough.type() + ' detected. Now', peakOrTroughHistory.length, 'peaks or troughs.', reading.asJson());
           while (peakOrTroughHistory.length > 3) {
             debug('Truncating first peak and trough as new peaks and troughs detected');
             dropFirstPeakAndTrough();
@@ -228,6 +243,24 @@ export default function Flyer(state) {
         }
       }
     } else {
+      if (lastPeakOrTrough) {
+        /* Current movement is up or down from last peak or trough i.e. crossed the 10 position */
+        if (currentPeakOrTrough.isPeak() !== lastPeakOrTrough.isPeak()) {
+          /* Record that the last peak has now crossed the zero point */
+          lastPeakOrTrough.crossedZeroPoint();
+        } else {
+          /* The current position is of the same type as the previous peak/trough yet it has crozzed the zero point
+             and has now come back without crossing a threshold. This is just noise or someone waving it up and down */
+          if (lastPeakOrTrough.hasRecentlyCossedZeroPoint()) {
+            debug('Last peak or trough has recently crossed zero point and has come back the other way now. Discarding everything', currentPeakOrTrough, lastPeakOrTrough, peakOrTroughHistory);
+            /* This is not a valid throw, clear all history */
+            peakOrTroughHistory = [];
+            currentFlightReadings = [];
+            return;
+          }
+        }
+      }
+
       /* We are no longer exceeding a peak or trough
          and we have satisfied the requirements of three peaks */
       if (peakOrTroughHistory.length === 3) {
@@ -259,7 +292,7 @@ export default function Flyer(state) {
 
     if (lastPeakOrTrough) {
       if (lastPeakOrTrough.isStagnant()) {
-        debug('Last peak or trough stagnant, discarding everything', lastPeakOrTrough, peakOrTroughHistory);
+        debug('Last peak or trough stagnant. Discarding everything', lastPeakOrTrough, peakOrTroughHistory);
         /* This is not a valid throw, clear all history */
         peakOrTroughHistory = [];
         currentFlightReadings = [];
@@ -293,7 +326,8 @@ export default function Flyer(state) {
   function filterFreefallData(flightData) {
     var freefallData = [],
         reading,
-        lowestMagnitude;
+        lowestMagnitude,
+        inFreefall;
 
     /* First get all data that is below stationery i.e. in freefall
        but only keep the points that are increasingly lower in magnitude.
@@ -305,6 +339,13 @@ export default function Flyer(state) {
       if (!lowestMagnitude || (reading.magnitude < lowestMagnitude)) {
         lowestMagnitude = reading.magnitude;
         freefallData.push(reading);
+      }
+
+      if (lowestMagnitude < Thresholds.trough) {
+        inFreefall = true;
+      } else if (inFreefall && (reading.magnitude > Thresholds.trough)) {
+        /* This throw is over */
+        return freefallData;
       }
     }
 
