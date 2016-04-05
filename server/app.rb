@@ -145,7 +145,7 @@ class LobApp < Sinatra::Base
   helpers do
     # Cloudflare Cache is never invalidated because the URL to the assets remains the same
     def cache_invalidator_param
-      "?ver=#{ENV['SOURCE_VERSION']}" if ENV['SOURCE_VERSION']
+      "?ver=#{ENV['HEROKU_SLUG_COMMIT']}" if ENV['HEROKU_SLUG_COMMIT']
     end
   end
 
