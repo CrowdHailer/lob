@@ -70,10 +70,11 @@ function fmtChartJSPerso(config, value, fmt) {
       break;
     case "FMTTIME":
       spltdt = fmt.split(/[\s,]+/)[1].toUpperCase();
-      return_value = spltdt.replaceArray(["HH", "MM", "SS"], [
+      return_value = spltdt.replaceArray(["HH", "MM", "SS", "Q"], [
         value.getHours() < 10 ? '0' + value.getHours() : value.getHours(),
         value.getMinutes() < 10 ? '0' + value.getMinutes() : value.getMinutes(),
-        value.getSeconds() < 10 ? '0' + value.getSeconds() : value.getSeconds()
+        value.getSeconds() < 10 ? '0' + value.getSeconds() : value.getSeconds(),
+        Math.round(value.getMilliseconds() / 100)
       ]);
       break;
     case "FMTDATETIME":
