@@ -50,6 +50,11 @@ class LobApp < Sinatra::Base
     erb :leaderboard, locals: { leaderboard: Leaderboard.best_this_month, past: '30 days' }
   end
 
+  get '/new-flight/force' do
+    cookies['channel_sha'] = 'invalidate'
+    redirect '/new-flight'
+  end
+
   get '/new-flight' do
     query_params = ''
     channel_name = if cookies['channel_name'] && (channel_sha(cookies['channel_name']) == cookies['channel_sha'])
