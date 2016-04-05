@@ -1,4 +1,0 @@
-[submodule "client/carbide"]
-	path = client/carbide
-	url = git://github.com/CrowdHailer/carbide.js
-	branch = master

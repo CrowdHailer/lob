@@ -1,6 +1,6 @@
 /* jshint esnext: true */
 
-import Struct from "../carbide/struct";
+import Struct from "../../node_modules/carbide/struct";
 
 var STATE_DEFAULTS = {
   uplinkStatus: "UNKNOWN",

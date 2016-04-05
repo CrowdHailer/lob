@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "bourbon": "~4.2.6",
+    "carbide": "git://github.com/CrowdHailer/carbide.js#e0776a8cc0da658886b4da6955ad65c4f567ce6c",
     "chokidar-cli": "~1.1.1",
     "jasmine": "^2.3.2",
     "karma": "~0.13.15",

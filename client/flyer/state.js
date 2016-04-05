@@ -1,4 +1,4 @@
-import Struct from "../carbide/struct";
+import Struct from "../../node_modules/carbide/struct";
 
 var FLYER_STATE_DEFAULTS = {
   uplinkStatus: "CONNECTING",
