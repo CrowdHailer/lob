@@ -24,28 +24,6 @@ var Lob = (function () { 'use strict';
     });
   }
 
-  function throttle(fn, threshhold, scope) {
-    threshhold = threshhold;
-    var last,
-    deferTimer;
-    return function () {
-      var context = scope || this;
-      var now = Date.now(), args = arguments;
-
-      if (last && now < last + threshhold) {
-        // hold on to it
-        clearTimeout(deferTimer);
-        deferTimer = setTimeout(function () {
-          last = now;
-          fn.apply(context, args);
-        }, threshhold);
-      } else {
-        last = now;
-        fn.apply(context, args);
-      }
-    };
-  }
-
   var Config = {
     readingPublishLimit: 200, // ms
     flightPublishLimit: 1000, // ms
@@ -106,12 +84,48 @@ var Lob = (function () { 'use strict';
 
     var noop = function() {};
 
-    function transmitReadingAndOrientation(reading, orientation){
-      channel.publish("reading", { reading: reading, orientation: orientation }, function(err) {
+    var intervalTransmissionSetup,
+        lastTransmissionTargetTimestamp,
+        lastReading,
+        lastOrientation;
+
+    function startTransmissionTimer() {
+      var timestamp = Date.now(),
+          nextFireDelay
+
+      if (lastTransmissionTargetTimestamp) {
+        lastReading.timestamp = lastTransmissionTargetTimestamp;
+        lastOrientation.timestamp = lastTransmissionTargetTimestamp;
+      }
+
+      if (lastTransmissionTargetTimestamp) {
+        /* Adjust next transmission based on the delay of this transmission */
+        nextFireDelay = lastTransmissionTargetTimestamp - timestamp + Config.readingPublishLimit;
+        lastTransmissionTargetTimestamp = timestamp + nextFireDelay;
+      } else {
+        /* Fire exatly on the interval intended i.e. 0.0, 0.2, 0.4 if 200ms intervals */
+        nextFireDelay = Config.readingPublishLimit - (timestamp % Config.readingPublishLimit);
+        lastTransmissionTargetTimestamp = timestamp + nextFireDelay;
+        setTimeout(startTransmissionTimer, nextFireDelay);
+        return;
+      }
+
+      channel.publish("reading", { reading: lastReading, orientation: lastOrientation }, function(err) {
         if (err) {
           logger.warn("Unable to send new reading; err = " + err.message);
         }
-      })
+      });
+
+      setTimeout(startTransmissionTimer, nextFireDelay);
+    }
+
+    function transmitReadingAndOrientation(reading, orientation) {
+      lastReading = reading;
+      lastOrientation = orientation;
+      if (!intervalTransmissionSetup) {
+        startTransmissionTimer();
+        intervalTransmissionSetup = true;
+      }
     }
 
     function transmitFlightData(flightData){
@@ -172,8 +186,8 @@ var Lob = (function () { 'use strict';
     this.onconnectionFailed = noop;
     this.onconnectionDisconnected = noop;
 
-    this.transmitReadingAndOrientation = throttle(transmitReadingAndOrientation, Config.readingPublishLimit);
-    this.transmitFlightData = throttle(transmitFlightData, Config.flightPublishLimit); /* never send more than one lob per second, it shouldn't happen, but just in case */
+    this.transmitReadingAndOrientation = transmitReadingAndOrientation;
+    this.transmitFlightData = transmitFlightData;
   }
 
   /* jshint esnext: true */
@@ -269,7 +283,7 @@ var Lob = (function () { 'use strict';
 
       Makes an assumption that magnitude is 10 (stationery) at
       the top of the throw and bottom of the throw starts when magnitude
-      starts increasing again indicatin deceleration. Our flight data
+      starts increasing again indicating deceleration. Our flight data
       is trimmed before it arrives here so that it only contains freefall
       information.
 
@@ -443,7 +457,8 @@ var Lob = (function () { 'use strict';
     stagnantMovementTime: 1000,
     stagnantMovementAmount: 7, /* expect at least this much movement in magnitude over stagnantMovementTime */
     flightPause: 2000, /* period we stop detecting throws after a throw has been made */
-    peakTroughMinTime: 400 /* Min time we expect from the throw peak to the drop trough to consider this a valid throw */
+    peakTroughMinTime: 400, /* Min time we expect from the throw peak to the drop trough to consider this a valid throw */
+    crossZeroPointBuffer: 40 /* Ignore some noise when falling / climbing for a few milliseconds that could cause it jump above & below zero point briefly */
   }
 
   var DebugThrows = false; /* Will output debugging info when false */
@@ -476,6 +491,10 @@ var Lob = (function () { 'use strict';
 
   PeakOrTrough.prototype.isPeak = function() {
     return this.magnitude > 10;
+  }
+
+  PeakOrTrough.prototype.type = function() {
+    return this.isPeak() ? 'peak' : 'trough';
   }
 
   /* If we sample the last X seconds of the readings,
@@ -520,8 +539,18 @@ var Lob = (function () { 'use strict';
     this.magnitude = reading.magnitude;
     if (!this.timestampStart) { this.timestampStart = reading.timestamp; }
     this.timestampEnd = reading.timestamp;
-    this.historicalReadings.push(reading)
-  }
+    this.historicalReadings.push(reading);
+  };
+
+  /* If this peak or trough has crossed the zero point (technically 10)
+     i.e. it is now going in the opposite direction */
+  PeakOrTrough.prototype.crossedZeroPoint = function() {
+    this.crossedZeroPointTimestamp = Date.now();
+  };
+
+  PeakOrTrough.prototype.hasRecentlyCossedZeroPoint = function() {
+    return this.crossedZeroPointTimestamp && (this.crossedZeroPointTimestamp < Date.now() - Thresholds.crossZeroPointBuffer);
+  };
 
   PeakOrTrough.prototype.asJson = function() {
     return {
@@ -529,8 +558,8 @@ var Lob = (function () { 'use strict';
       readings: this.historicalReadings.map(function(reading) { return [reading.timestamp, reading.magnitude]; }),
       timestampStart: this.timestampStart,
       timestampEnd: this.timestampEnd
-    }
-  }
+    };
+  };
 
   function Flyer(state) {
     if ( !(this instanceof Flyer) ) { return new Flyer(state); }
@@ -647,12 +676,12 @@ var Lob = (function () { 'use strict';
         } else {
           if (currentPeakOrTrough.isPeak() === lastPeakOrTrough.isPeak()) {
             if (lastPeakOrTrough.isLessThan(currentPeakOrTrough)) {
-              debug('In play peak is greater than old peak', reading.asJson());
+              debug('In play ' + currentPeakOrTrough.type() + ' is greater than old peak', reading.asJson());
               lastPeakOrTrough.updateReading(reading);
             }
           } else {
             peakOrTroughHistory.push(currentPeakOrTrough);
-            debug('New peak detected. Now', peakOrTroughHistory.length, 'peaks or troughs.', reading.asJson());
+            debug('New ' + currentPeakOrTrough.type() + ' detected. Now', peakOrTroughHistory.length, 'peaks or troughs.', reading.asJson());
             while (peakOrTroughHistory.length > 3) {
               debug('Truncating first peak and trough as new peaks and troughs detected');
               dropFirstPeakAndTrough();
@@ -660,6 +689,24 @@ var Lob = (function () { 'use strict';
           }
         }
       } else {
+        if (lastPeakOrTrough) {
+          /* Current movement is up or down from last peak or trough i.e. crossed the 10 position */
+          if (currentPeakOrTrough.isPeak() !== lastPeakOrTrough.isPeak()) {
+            /* Record that the last peak has now crossed the zero point */
+            lastPeakOrTrough.crossedZeroPoint();
+          } else {
+            /* The current position is of the same type as the previous peak/trough yet it has crozzed the zero point
+               and has now come back without crossing a threshold. This is just noise or someone waving it up and down */
+            if (lastPeakOrTrough.hasRecentlyCossedZeroPoint()) {
+              debug('Last peak or trough has recently crossed zero point and has come back the other way now. Discarding everything', currentPeakOrTrough, lastPeakOrTrough, peakOrTroughHistory);
+              /* This is not a valid throw, clear all history */
+              peakOrTroughHistory = [];
+              currentFlightReadings = [];
+              return;
+            }
+          }
+        }
+
         /* We are no longer exceeding a peak or trough
            and we have satisfied the requirements of three peaks */
         if (peakOrTroughHistory.length === 3) {
@@ -691,7 +738,7 @@ var Lob = (function () { 'use strict';
 
       if (lastPeakOrTrough) {
         if (lastPeakOrTrough.isStagnant()) {
-          debug('Last peak or trough stagnant, discarding everything', lastPeakOrTrough, peakOrTroughHistory);
+          debug('Last peak or trough stagnant. Discarding everything', lastPeakOrTrough, peakOrTroughHistory);
           /* This is not a valid throw, clear all history */
           peakOrTroughHistory = [];
           currentFlightReadings = [];
@@ -725,7 +772,8 @@ var Lob = (function () { 'use strict';
     function filterFreefallData(flightData) {
       var freefallData = [],
           reading,
-          lowestMagnitude;
+          lowestMagnitude,
+          inFreefall;
 
       /* First get all data that is below stationery i.e. in freefall
          but only keep the points that are increasingly lower in magnitude.
@@ -737,6 +785,13 @@ var Lob = (function () { 'use strict';
         if (!lowestMagnitude || (reading.magnitude < lowestMagnitude)) {
           lowestMagnitude = reading.magnitude;
           freefallData.push(reading);
+        }
+
+        if (lowestMagnitude < Thresholds.trough) {
+          inFreefall = true;
+        } else if (inFreefall && (reading.magnitude > Thresholds.trough)) {
+          /* This throw is over */
+          return freefallData;
         }
       }
 
@@ -1075,6 +1130,28 @@ var Lob = (function () { 'use strict';
 
       $guage.style.cssText = cssText;
     }
+  }
+
+  function throttle(fn, threshhold, scope) {
+    threshhold = threshhold;
+    var last,
+    deferTimer;
+    return function () {
+      var context = scope || this;
+      var now = Date.now(), args = arguments;
+
+      if (last && now < last + threshhold) {
+        // hold on to it
+        clearTimeout(deferTimer);
+        deferTimer = setTimeout(function () {
+          last = now;
+          fn.apply(context, args);
+        }, threshhold);
+      } else {
+        last = now;
+        fn.apply(context, args);
+      }
+    };
   }
 
   function FlyerView() {
