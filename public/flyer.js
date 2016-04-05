@@ -458,7 +458,8 @@ var Lob = (function () { 'use strict';
     stagnantMovementAmount: 7, /* expect at least this much movement in magnitude over stagnantMovementTime */
     flightPause: 2000, /* period we stop detecting throws after a throw has been made */
     peakTroughMinTime: 400, /* Min time we expect from the throw peak to the drop trough to consider this a valid throw */
-    crossZeroPointBuffer: 40 /* Ignore some noise when falling / climbing for a few milliseconds that could cause it jump above & below zero point briefly */
+    crossZeroPointBuffer: 40, /* Ignore some noise when falling / climbing for a few milliseconds that could cause it jump above & below zero point briefly */
+    minFlightTime: 150 /* min flight time to be a viable throw */
   }
 
   var DebugThrows = false; /* Will output debugging info when false */
@@ -728,7 +729,13 @@ var Lob = (function () { 'use strict';
             freefallData = filterFreefallData(currentFlightReadings);
             debug("Free fall data", freefallData);
 
-            callback(freefallData, peakOrTroughHistory);
+            var flightTime = freefallData[freefallData.length - 1].timestamp - freefallData[0].timestamp;
+            if (flightTime < Thresholds.minFlightTime) {
+              debug("Flight too short", flightTime, "discarding");
+            } else {
+              callback(freefallData, peakOrTroughHistory);
+            }
+
             peakOrTroughHistory = [];
             currentFlightReadings = [];
             return;
