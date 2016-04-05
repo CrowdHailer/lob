@@ -97,7 +97,8 @@ export default function GraphDisplay(trackDivId) {
   */
   function prepareAndTruncateData() {
     var minDateOnGraph = maxTimestampFromData() - Config.trackingGraphTimePeriod,
-        lineData = lineDataTemplate();
+        lineData = lineDataTemplate(),
+        minDate, maxDate, labels = [];
 
     data = data.filter(function(point) {
       return point.date > minDateOnGraph;
@@ -105,9 +106,12 @@ export default function GraphDisplay(trackDivId) {
       return a.date - b.date;
     });
 
-    lineData.labels = data.map(function(point) {
-      return point.date;
-    });
+    minDate = data[0].date.getTime();
+    maxDate = data[data.length - 1].date.getTime();
+    for (var dtLabel = minDate; dtLabel <= maxDate; dtLabel += Config.readingPublishLimit) {
+      labels.push(new Date(dtLabel));
+    }
+    lineData.labels = labels;
 
     var magnitudeData = data.filter(function(point) { return !isNaN(parseInt(point.value)) });
     lineData.datasets[0].data = magnitudeData.map(function(point) {

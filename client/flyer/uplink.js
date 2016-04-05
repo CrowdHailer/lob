@@ -1,4 +1,3 @@
-import { throttle } from "../utils/fn";
 import { Config } from '../config';
 import Device from "../lib/device";
 
@@ -25,12 +24,48 @@ export default function FlyerUplink(options, logger) {
 
   var noop = function() {};
 
-  function transmitReadingAndOrientation(reading, orientation){
-    channel.publish("reading", { reading: reading, orientation: orientation }, function(err) {
+  var intervalTransmissionSetup,
+      lastTransmissionTargetTimestamp,
+      lastReading,
+      lastOrientation;
+
+  function startTransmissionTimer() {
+    var timestamp = Date.now(),
+        nextFireDelay
+
+    if (lastTransmissionTargetTimestamp) {
+      lastReading.timestamp = lastTransmissionTargetTimestamp;
+      lastOrientation.timestamp = lastTransmissionTargetTimestamp;
+    }
+
+    if (lastTransmissionTargetTimestamp) {
+      /* Adjust next transmission based on the delay of this transmission */
+      nextFireDelay = lastTransmissionTargetTimestamp - timestamp + Config.readingPublishLimit;
+      lastTransmissionTargetTimestamp = timestamp + nextFireDelay;
+    } else {
+      /* Fire exatly on the interval intended i.e. 0.0, 0.2, 0.4 if 200ms intervals */
+      nextFireDelay = Config.readingPublishLimit - (timestamp % Config.readingPublishLimit);
+      lastTransmissionTargetTimestamp = timestamp + nextFireDelay;
+      setTimeout(startTransmissionTimer, nextFireDelay);
+      return;
+    }
+
+    channel.publish("reading", { reading: lastReading, orientation: lastOrientation }, function(err) {
       if (err) {
         logger.warn("Unable to send new reading; err = " + err.message);
       }
-    })
+    });
+
+    setTimeout(startTransmissionTimer, nextFireDelay);
+  }
+
+  function transmitReadingAndOrientation(reading, orientation) {
+    lastReading = reading;
+    lastOrientation = orientation;
+    if (!intervalTransmissionSetup) {
+      startTransmissionTimer();
+      intervalTransmissionSetup = true;
+    }
   }
 
   function transmitFlightData(flightData){
@@ -91,6 +126,6 @@ export default function FlyerUplink(options, logger) {
   this.onconnectionFailed = noop;
   this.onconnectionDisconnected = noop;
 
-  this.transmitReadingAndOrientation = throttle(transmitReadingAndOrientation, Config.readingPublishLimit);
-  this.transmitFlightData = throttle(transmitFlightData, Config.flightPublishLimit); /* never send more than one lob per second, it shouldn't happen, but just in case */
+  this.transmitReadingAndOrientation = transmitReadingAndOrientation;
+  this.transmitFlightData = transmitFlightData;
 }
