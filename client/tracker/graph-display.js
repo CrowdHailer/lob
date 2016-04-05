@@ -11,22 +11,16 @@ export default function GraphDisplay(trackDivId) {
         datasets: [
           {
             title: "Magnitude",
-            fillColor: "rgba(151,187,205,0)",
             strokeColor: "rgba(151,187,205,1)",
-            pointColor : "rgba(220,220,220,1)",
-            pointstrokeColor : "yellow",
+            fillColor: "rgba(255,255,255,0)",
             data: [],
             xPos: [],
             axis: 1
           },
           {
             title: "Throw",
-            type: "Line",
-            fill: true,
-            fillColor: "rgba(220,0,0,0.6)",
+            fillColor: "rgba(220,0,0,0.4)",
             strokeColor: "rgba(220,0,0,1)",
-            pointColor : "rgba(220,220,220,1)",
-            pointstrokeColor : "yellow",
             data: [],
             xPos: [],
             axis: 2
@@ -37,7 +31,6 @@ export default function GraphDisplay(trackDivId) {
         datasetFill: true,
         animation: false,
         pointDot : false,
-        datasetFill: false,
         showToolTips: false,
         scaleOverride: true,
         scaleStartValue: -10,
@@ -64,6 +57,8 @@ export default function GraphDisplay(trackDivId) {
   var $trackerGraph = $('#tracker-graph'),
       $canvas = $trackerGraph.find('canvas'),
       listenerAdded = false;
+
+  var lineData;
 
   function initialize(lineData) {
     setDimensions();
@@ -92,13 +87,31 @@ export default function GraphDisplay(trackDivId) {
     return Math.max.apply(null, data.map(function(elem) { return elem.date; }));
   }
 
+  /* Ensuring that each data point falls cleanly on a label entry the charts
+     no longer present weird curves that match the data entry points.  This is a ChartNew.js
+     bug, but this works around that problem */
+  function clipToDateLabel(date, labels) {
+    var closestTime,
+        dateTime = date.getTime();
+
+    labels.forEach(function(label) {
+      var labelTime = label.getTime();
+      if ((!closestTime) || (Math.abs(dateTime - labelTime) < Math.abs(dateTime - closestTime))) {
+        closestTime = labelTime;
+      }
+    });
+
+    return closestTime;
+  }
+
   /*
     Sort data, then delete old data, cut off point of Config.trackingGraphTimePeriod
   */
   function prepareAndTruncateData() {
     var minDateOnGraph = maxTimestampFromData() - Config.trackingGraphTimePeriod,
-        lineData = lineDataTemplate(),
         minDate, maxDate, labels = [];
+
+    lineData = lineDataTemplate(),
 
     data = data.filter(function(point) {
       return point.date > minDateOnGraph;
@@ -118,7 +131,7 @@ export default function GraphDisplay(trackDivId) {
       return point.value;
     });
     lineData.datasets[0].xPos = magnitudeData.map(function(point) {
-      return point.date;
+      return clipToDateLabel(point.date, labels);
     });
 
     var flightData = data.filter(function(point) { return isNaN(parseInt(point.value)) });
@@ -126,7 +139,7 @@ export default function GraphDisplay(trackDivId) {
       return point.altitude;
     });
     lineData.datasets[1].xPos = flightData.map(function(point) {
-      return point.date;
+      return clipToDateLabel(point.date, labels);
     });
     if (!lineData.datasets[1].xPos.length) {
       delete lineData.datasets[1].xPos;
@@ -155,11 +168,11 @@ export default function GraphDisplay(trackDivId) {
     var midpointDate = (start + end) / 2;
 
     data.push({
-      date: new Date(start - 10),
+      date: new Date(start),
       altitude: undefined
     });
     data.push({
-      date: new Date(start),
+      date: new Date(start+1),
       altitude: 0
     });
     data.push({
@@ -167,11 +180,11 @@ export default function GraphDisplay(trackDivId) {
       altitude: altitude
     });
     data.push({
-      date: new Date(end),
+      date: new Date(end-1),
       altitude: 0
     });
     data.push({
-      date: new Date(end + 10),
+      date: new Date(end),
       altitude: undefined
     });
 
