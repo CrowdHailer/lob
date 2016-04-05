@@ -1,6 +1,3 @@
-[submodule "assets/scripts/gator"]
-	path = assets/scripts/gator
-	url = git://github.com/CrowdHailer/gator
 [submodule "client/carbide"]
 	path = client/carbide
 	url = git://github.com/CrowdHailer/carbide.js
