@@ -1,10 +1,10 @@
 <% content_for :body_class do %>small-header<% end %>
 
 <% content_for :head do %>
-  <link rel="stylesheet" href="/phone-model.css" media="screen" title="Phone styling" charset="utf-8">
-  <script type="text/javascript" src="/vendor-chart.js"></script>
-  <script type="text/javascript" src="/vendor.js"></script>
-  <script type="text/javascript" src="/tracker.js"></script>
+  <link rel="stylesheet" href="/phone-model.css<%=cache_invalidator_param%>" media="screen" title="Phone styling" charset="utf-8">
+  <script type="text/javascript" src="/vendor-chart.js<%=cache_invalidator_param%>"></script>
+  <script type="text/javascript" src="/vendor.js<%=cache_invalidator_param%>"></script>
+  <script type="text/javascript" src="/tracker.js<%=cache_invalidator_param%>"></script>
 <% end %>
 
 <main class="tracker">

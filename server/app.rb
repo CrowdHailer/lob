@@ -142,6 +142,13 @@ class LobApp < Sinatra::Base
     erb :oops, locals: { error_message: 'Sorry, this page does not exist' }
   end
 
+  helpers do
+    # Cloudflare Cache is never invalidated because the URL to the assets remains the same
+    def cache_invalidator_param
+      "?ver=#{ENV['SOURCE_VERSION']}" if ENV['SOURCE_VERSION']
+    end
+  end
+
   def client
     @client ||= Ably::Rest.new(key: ENV.fetch("ABLY_API_KEY"))
   end

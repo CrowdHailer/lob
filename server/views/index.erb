@@ -1,6 +1,6 @@
 <% content_for :head do %>
-  <script type="text/javascript" src="/vendor.js"></script>
-  <script type="text/javascript" src="/home.js"></script>
+  <script type="text/javascript" src="/vendor.js<%=cache_invalidator_param%>"></script>
+  <script type="text/javascript" src="/home.js<%=cache_invalidator_param%>"></script>
 <% end %>
 
 <main class="home width-limited">

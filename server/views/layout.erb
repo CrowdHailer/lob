@@ -47,7 +47,7 @@
   <meta name="msapplication-config" content="/images/favicon/browserconfig.xml">
   <!-- ****** faviconit.com favicons ****** -->
 
-  <link rel="stylesheet" href="/lob.css" media="screen" charset="utf-8">
+  <link rel="stylesheet" href="/lob.css<%=cache_invalidator_param%>" media="screen" charset="utf-8">
   <script lang="text/javascript" src="//cdn.ably.io/lib/ably.min.js" ></script>
 
   <%= yield_content :head %>
@@ -67,8 +67,8 @@
     <a href="/">
       <h1>Give it a Lob</h1>
       <h2>How high can you throw your phone?</h2>
-      <img src="/images/heading.png" alt="Give it a lob" class="heading">
-      <img src="/images/phone-rocket.png" alt="Phone rocketing" class="phone-rocket">
+      <img src="/images/heading.png<%=cache_invalidator_param%>" alt="Give it a lob" class="heading">
+      <img src="/images/phone-rocket.png<%=cache_invalidator_param%>" alt="Phone rocketing" class="phone-rocket">
     </a>
   </header>
 
